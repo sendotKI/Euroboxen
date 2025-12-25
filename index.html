@@ -34,30 +34,59 @@
 </div>
 
 <script>
+<script>
   const qs = new URLSearchParams(location.search);
   const boxId = (qs.get("box") || "").toUpperCase().trim();
   const key   = (qs.get("k") || "").trim();
 
-  // 🔐 DEIN GEHEIMER SCHLÜSSEL (HIER ÄNDERN)
+  // 🔐 DEIN GEHEIMER SCHLÜSSEL
   const SECRET_KEY = "q7X9";
 
   const titleEl = document.getElementById("title");
   const subEl   = document.getElementById("sub");
   const contEl  = document.getElementById("content");
 
-  if (key !== SECRET_KEY) {
-    titleEl.textContent = "📦 Box";
-    subEl.textContent   = "Kein Zugriff";
-    contEl.textContent  = "";
-  } else if (!boxId) {
-    titleEl.textContent = "📦 Box";
-    subEl.textContent   = "Keine Box-ID angegeben";
-    contEl.textContent  = "";
-  } else {
-    titleEl.textContent = "📦 Box " + boxId;
-    subEl.textContent   = "Inhalt:";
-    contEl.textContent  = "Beispielinhalt für " + boxId + "\n(kommt später aus boxes.json)";
+  async function main() {
+    if (key !== SECRET_KEY) {
+      titleEl.textContent = "📦 Box";
+      subEl.textContent = "Kein Zugriff";
+      contEl.textContent = "";
+      return;
+    }
+
+    if (!boxId) {
+      titleEl.textContent = "📦 Box";
+      subEl.textContent = "Keine Box-ID angegeben";
+      contEl.textContent = "";
+      return;
+    }
+
+    try {
+      const res = await fetch("./boxes.json", { cache: "no-store" });
+      if (!res.ok) throw new Error("boxes.json nicht gefunden");
+      const data = await res.json();
+
+      const box = data[boxId];
+      if (!box) {
+        titleEl.textContent = "📦 Box " + boxId;
+        subEl.textContent = "Unbekannte Box";
+        contEl.textContent = "";
+        return;
+      }
+
+      titleEl.textContent = "📦 Box " + boxId;
+      subEl.textContent = "Raum: " + (box.raum || "—");
+      contEl.textContent = box.inhalt || "";
+    } catch (e) {
+      titleEl.textContent = "📦 Box";
+      subEl.textContent = "Fehler beim Laden";
+      contEl.textContent = e.message;
+    }
   }
+
+  main();
+</script>
+
 </script>
 
 </body>
