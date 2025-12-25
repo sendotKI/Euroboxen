@@ -1,4 +1,42 @@
 {
-  "E001": { "key": "q7X9", "content": "Küche – Besteck, Töpfe, Pfannen" },
-  "E002": { "key": "A9K2", "content": "Bad – Handtücher, Kosmetik" }
+  "E001": {
+    "key": "q7X9",
+    "content": "Küche – Besteck, Töpfe, Pfannen"
+  },
+  "E002": {
+    "key": "A9K2",
+    "content": "Bad – Handtücher, Kosmetik, Föhn"
+  },
+  "E003": {
+    "key": "M4L8",
+    "content": "Büro – Ordner, Kabel, Drucker"
+  },
+  "E004": {
+    "key": "Z3P1",
+    "content": "Wohnzimmer – Bücher, Deko"
+  },
+  "E005": {
+    "key": "R8D6",
+    "content": "Schlafzimmer – Bettwäsche, Kissen"
+  },
+  "E006": {
+    "key": "K2W7",
+    "content": "Werkzeug – Schrauben, Zange, Hammer"
+  },
+  "E007": {
+    "key": "F9C4",
+    "content": "Elektronik – Router, Ladegeräte"
+  },
+  "E008": {
+    "key": "H5N2",
+    "content": "Winterkleidung – Jacken, Schals"
+  },
+  "E009": {
+    "key": "B6Q9",
+    "content": "Keller – Verlängerungskabel, Lampen"
+  },
+  "E010": {
+    "key": "S1J8",
+    "content": "Sonstiges – gemischt"
+  }
 }
