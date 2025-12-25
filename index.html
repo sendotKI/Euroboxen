@@ -1,94 +1,121 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <title>Euroboxen – Umzug</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Euroboxen</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f4f4f4;
-      padding: 20px;
-    }
-    .box {
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      max-width: 600px;
-      margin: auto;
-    }
-    textarea {
-      width: 100%;
-      height: 200px;
-      margin-top: 10px;
-      font-size: 16px;
-    }
+    body { font-family: Arial, sans-serif; background:#f4f4f4; padding:20px; }
+    .card { background:#fff; max-width:720px; margin:0 auto; border-radius:14px; padding:22px; box-shadow:0 6px 18px rgba(0,0,0,.06); }
+    h1 { margin:0 0 8px 0; font-size:26px; }
+    .muted { color:#666; }
+    .pill { display:inline-block; padding:6px 10px; border-radius:999px; font-size:12px; background:#eee; margin:6px 0 14px 0; }
+    .ok { background:#e7f7ee; color:#146c2e; }
+    .bad { background:#fdecec; color:#8a1f1f; }
+    .row { margin:14px 0; }
+    .label { font-weight:bold; margin-bottom:6px; display:block; }
+    textarea { width:100%; min-height:180px; font-size:16px; padding:12px; border-radius:10px; border:1px solid #ddd; resize:vertical; }
+    .actions { display:flex; gap:10px; flex-wrap:wrap; margin-top:10px; }
+    button { padding:10px 14px; border-radius:10px; border:1px solid #ddd; background:#fff; cursor:pointer; }
+    button:hover { background:#fafafa; }
+    .small { font-size:12px; color:#777; margin-top:10px; }
+    code { background:#f0f0f0; padding:2px 6px; border-radius:6px; }
   </style>
 </head>
 <body>
+  <div class="card">
+    <h1>📦 Eurobox</h1>
+    <div id="status" class="pill">Lade…</div>
+    <div class="row">
+      <span class="label">Box-ID:</span>
+      <div id="boxId" class="muted">–</div>
+    </div>
 
-<div class="box">
-  <h1 id="title">📦 Eurobox</h1>
-  <p id="sub">Inhalt:</p>
-  <pre id="content"></pre>
-</div>
+    <div class="row">
+      <span class="label">Inhalt:</span>
+      <textarea id="content" placeholder="Kein Zugriff / kein Inhalt" readonly></textarea>
+      <div class="actions">
+        <button id="copyBtn" type="button">Inhalt kopieren</button>
+        <button id="reloadBtn" type="button">Neu laden</button>
+      </div>
+      <div class="small">
+        Aufruf-Format: <code>?box=E001&k=SCHLUESSEL</code>
+      </div>
+    </div>
+  </div>
 
-<script>
-<script>
-  const qs = new URLSearchParams(location.search);
-  const boxId = (qs.get("box") || "").toUpperCase().trim();
-  const key   = (qs.get("k") || "").trim();
+  <script>
+    const $ = (id) => document.getElementById(id);
 
-  // 🔐 DEIN GEHEIMER SCHLÜSSEL
-  const SECRET_KEY = "q7X9";
-
-  const titleEl = document.getElementById("title");
-  const subEl   = document.getElementById("sub");
-  const contEl  = document.getElementById("content");
-
-  async function main() {
-    if (key !== SECRET_KEY) {
-      titleEl.textContent = "📦 Box";
-      subEl.textContent = "Kein Zugriff";
-      contEl.textContent = "";
-      return;
+    function qp(name) {
+      const url = new URL(window.location.href);
+      return url.searchParams.get(name) || "";
     }
 
-    if (!boxId) {
-      titleEl.textContent = "📦 Box";
-      subEl.textContent = "Keine Box-ID angegeben";
-      contEl.textContent = "";
-      return;
+    function setStatus(ok, text) {
+      const el = $("status");
+      el.textContent = text;
+      el.className = "pill " + (ok ? "ok" : "bad");
     }
 
-    try {
-      const res = await fetch("./boxes.json", { cache: "no-store" });
-      if (!res.ok) throw new Error("boxes.json nicht gefunden");
-      const data = await res.json();
+    async function load() {
+      const box = qp("box").trim();
+      const key = qp("k").trim();
 
-      const box = data[boxId];
+      $("boxId").textContent = box || "–";
+      $("content").value = "";
+      setStatus(false, "Lade…");
+
       if (!box) {
-        titleEl.textContent = "📦 Box " + boxId;
-        subEl.textContent = "Unbekannte Box";
-        contEl.textContent = "";
+        setStatus(false, "Kein Zugriff (Box fehlt)");
+        $("content").value = "❌ Bitte QR-Link mit Box-ID öffnen, z.B. ?box=E001&k=…";
+        return;
+      }
+      if (!key) {
+        setStatus(false, "Kein Zugriff (Schlüssel fehlt)");
+        $("content").value = "❌ Schlüssel fehlt.\n\nDer QR-Code muss so aussehen:\n?box=" + box + "&k=DEINSCHLUESSEL";
         return;
       }
 
-      titleEl.textContent = "📦 Box " + boxId;
-      subEl.textContent = "Raum: " + (box.raum || "—");
-      contEl.textContent = box.inhalt || "";
-    } catch (e) {
-      titleEl.textContent = "📦 Box";
-      subEl.textContent = "Fehler beim Laden";
-      contEl.textContent = e.message;
+      try {
+        // Cache-Buster, damit Updates an boxes.json sofort sichtbar sind
+        const res = await fetch("boxes.json?v=" + Date.now(), { cache: "no-store" });
+        if (!res.ok) throw new Error("boxes.json nicht gefunden (HTTP " + res.status + ")");
+        const data = await res.json();
+
+        if (!data[box]) {
+          setStatus(false, "Kein Zugriff (unbekannte Box)");
+          $("content").value = "❌ Diese Box-ID existiert nicht in boxes.json:\n" + box;
+          return;
+        }
+
+        const expected = (data[box].key || "").trim();
+        if (key !== expected) {
+          setStatus(false, "Kein Zugriff (falscher Schlüssel)");
+          $("content").value = "❌ Falscher Schlüssel.\n\nHinweis: Ohne korrekten Schlüssel wird der Inhalt NICHT angezeigt.";
+          return;
+        }
+
+        setStatus(true, "Zugriff OK");
+        $("content").value = (data[box].content || "").trim() || "— (kein Inhalt hinterlegt) —";
+      } catch (e) {
+        setStatus(false, "Fehler");
+        $("content").value = "❌ Fehler beim Laden:\n" + e.message + "\n\nPrüfe:\n- Liegt boxes.json im selben Ordner wie index.html?\n- Ist es gültiges JSON?";
+      }
     }
-  }
 
-  main();
-</script>
+    $("copyBtn").addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText($("content").value);
+        alert("✅ Inhalt kopiert");
+      } catch {
+        alert("❌ Kopieren nicht möglich (Browser-Berechtigung). Markiere den Text manuell.");
+      }
+    });
 
-</script>
+    $("reloadBtn").addEventListener("click", load);
 
+    load();
+  </script>
 </body>
 </html>
-
