@@ -1,121 +1,67 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Euroboxen</title>
+  <meta charset="UTF-8">
+  <title>Eurobox</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
-    body { font-family: Arial, sans-serif; background:#f4f4f4; padding:20px; }
-    .card { background:#fff; max-width:720px; margin:0 auto; border-radius:14px; padding:22px; box-shadow:0 6px 18px rgba(0,0,0,.06); }
-    h1 { margin:0 0 8px 0; font-size:26px; }
-    .muted { color:#666; }
-    .pill { display:inline-block; padding:6px 10px; border-radius:999px; font-size:12px; background:#eee; margin:6px 0 14px 0; }
-    .ok { background:#e7f7ee; color:#146c2e; }
-    .bad { background:#fdecec; color:#8a1f1f; }
-    .row { margin:14px 0; }
-    .label { font-weight:bold; margin-bottom:6px; display:block; }
-    textarea { width:100%; min-height:180px; font-size:16px; padding:12px; border-radius:10px; border:1px solid #ddd; resize:vertical; }
-    .actions { display:flex; gap:10px; flex-wrap:wrap; margin-top:10px; }
-    button { padding:10px 14px; border-radius:10px; border:1px solid #ddd; background:#fff; cursor:pointer; }
-    button:hover { background:#fafafa; }
-    .small { font-size:12px; color:#777; margin-top:10px; }
-    code { background:#f0f0f0; padding:2px 6px; border-radius:6px; }
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      padding: 20px;
+    }
+    .box {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      max-width: 600px;
+      margin: auto;
+    }
+    textarea {
+      width: 100%;
+      height: 220px;
+      font-size: 16px;
+      margin-top: 10px;
+    }
+    .hint {
+      color: #666;
+      font-size: 14px;
+      margin-top: 8px;
+    }
   </style>
 </head>
 <body>
-  <div class="card">
-    <h1>📦 Eurobox</h1>
-    <div id="status" class="pill">Lade…</div>
-    <div class="row">
-      <span class="label">Box-ID:</span>
-      <div id="boxId" class="muted">–</div>
-    </div>
 
-    <div class="row">
-      <span class="label">Inhalt:</span>
-      <textarea id="content" placeholder="Kein Zugriff / kein Inhalt" readonly></textarea>
-      <div class="actions">
-        <button id="copyBtn" type="button">Inhalt kopieren</button>
-        <button id="reloadBtn" type="button">Neu laden</button>
-      </div>
-      <div class="small">
-        Aufruf-Format: <code>?box=E001&k=SCHLUESSEL</code>
-      </div>
-    </div>
-  </div>
+<div class="box">
+  <h1>📦 Eurobox <span id="boxId"></span></h1>
+  <p>Inhalt:</p>
+  <textarea id="content" placeholder="Inhalt hier eintragen…"></textarea>
+  <div class="hint">Änderungen werden automatisch gespeichert.</div>
+</div>
 
-  <script>
-    const $ = (id) => document.getElementById(id);
+<script>
+  const params = new URLSearchParams(window.location.search);
+  const box = params.get("box");
+  const key = params.get("k");
 
-    function qp(name) {
-      const url = new URL(window.location.href);
-      return url.searchParams.get(name) || "";
-    }
+  if (!box || !key) {
+    document.body.innerHTML = "<p>❌ Kein Zugriff</p>";
+    throw new Error("Kein Zugriff");
+  }
 
-    function setStatus(ok, text) {
-      const el = $("status");
-      el.textContent = text;
-      el.className = "pill " + (ok ? "ok" : "bad");
-    }
+  document.getElementById("boxId").textContent = box;
 
-    async function load() {
-      const box = qp("box").trim();
-      const key = qp("k").trim();
+  const storageKey = "eurobox_" + box + "_" + key;
+  const textarea = document.getElementById("content");
 
-      $("boxId").textContent = box || "–";
-      $("content").value = "";
-      setStatus(false, "Lade…");
+  // Laden
+  textarea.value = localStorage.getItem(storageKey) || "";
 
-      if (!box) {
-        setStatus(false, "Kein Zugriff (Box fehlt)");
-        $("content").value = "❌ Bitte QR-Link mit Box-ID öffnen, z.B. ?box=E001&k=…";
-        return;
-      }
-      if (!key) {
-        setStatus(false, "Kein Zugriff (Schlüssel fehlt)");
-        $("content").value = "❌ Schlüssel fehlt.\n\nDer QR-Code muss so aussehen:\n?box=" + box + "&k=DEINSCHLUESSEL";
-        return;
-      }
+  // Automatisch speichern
+  textarea.addEventListener("input", () => {
+    localStorage.setItem(storageKey, textarea.value);
+  });
+</script>
 
-      try {
-        // Cache-Buster, damit Updates an boxes.json sofort sichtbar sind
-        const res = await fetch("boxes.json?v=" + Date.now(), { cache: "no-store" });
-        if (!res.ok) throw new Error("boxes.json nicht gefunden (HTTP " + res.status + ")");
-        const data = await res.json();
-
-        if (!data[box]) {
-          setStatus(false, "Kein Zugriff (unbekannte Box)");
-          $("content").value = "❌ Diese Box-ID existiert nicht in boxes.json:\n" + box;
-          return;
-        }
-
-        const expected = (data[box].key || "").trim();
-        if (key !== expected) {
-          setStatus(false, "Kein Zugriff (falscher Schlüssel)");
-          $("content").value = "❌ Falscher Schlüssel.\n\nHinweis: Ohne korrekten Schlüssel wird der Inhalt NICHT angezeigt.";
-          return;
-        }
-
-        setStatus(true, "Zugriff OK");
-        $("content").value = (data[box].content || "").trim() || "— (kein Inhalt hinterlegt) —";
-      } catch (e) {
-        setStatus(false, "Fehler");
-        $("content").value = "❌ Fehler beim Laden:\n" + e.message + "\n\nPrüfe:\n- Liegt boxes.json im selben Ordner wie index.html?\n- Ist es gültiges JSON?";
-      }
-    }
-
-    $("copyBtn").addEventListener("click", async () => {
-      try {
-        await navigator.clipboard.writeText($("content").value);
-        alert("✅ Inhalt kopiert");
-      } catch {
-        alert("❌ Kopieren nicht möglich (Browser-Berechtigung). Markiere den Text manuell.");
-      }
-    });
-
-    $("reloadBtn").addEventListener("click", load);
-
-    load();
-  </script>
 </body>
 </html>
