@@ -1,0 +1,14 @@
+{
+  "E001": {
+    "raum": "Küche",
+    "inhalt": "Besteck, Töpfe, Pfannen"
+  },
+  "E002": {
+    "raum": "Bad",
+    "inhalt": "Handtücher, Kosmetik, Föhn"
+  },
+  "E003": {
+    "raum": "Büro",
+    "inhalt": "Kabel, Ordner, Laptop-Zubehör"
+  }
+}
