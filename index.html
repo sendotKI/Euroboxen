@@ -23,20 +23,43 @@
       margin-top: 10px;
       font-size: 16px;
     }
-    button {
-      margin-top: 10px;
-      padding: 10px 15px;
-      font-size: 16px;
-    }
   </style>
 </head>
 <body>
 
 <div class="box">
-  <h1>📦 Eurobox</h1>
-  <p>Inhalt:</p>
-  <textarea placeholder="Inhalt hier eintragen oder ändern…"></textarea>
+  <h1 id="title">📦 Eurobox</h1>
+  <p id="sub">Inhalt:</p>
+  <pre id="content"></pre>
 </div>
+
+<script>
+  const qs = new URLSearchParams(location.search);
+  const boxId = (qs.get("box") || "").toUpperCase().trim();
+  const key   = (qs.get("k") || "").trim();
+
+  // 🔐 DEIN GEHEIMER SCHLÜSSEL (HIER ÄNDERN)
+  const SECRET_KEY = "q7X9";
+
+  const titleEl = document.getElementById("title");
+  const subEl   = document.getElementById("sub");
+  const contEl  = document.getElementById("content");
+
+  if (key !== SECRET_KEY) {
+    titleEl.textContent = "📦 Box";
+    subEl.textContent   = "Kein Zugriff";
+    contEl.textContent  = "";
+  } else if (!boxId) {
+    titleEl.textContent = "📦 Box";
+    subEl.textContent   = "Keine Box-ID angegeben";
+    contEl.textContent  = "";
+  } else {
+    titleEl.textContent = "📦 Box " + boxId;
+    subEl.textContent   = "Inhalt:";
+    contEl.textContent  = "Beispielinhalt für " + boxId + "\n(kommt später aus boxes.json)";
+  }
+</script>
 
 </body>
 </html>
+
