@@ -1,14 +1,10 @@
 {
   "E001": {
-    "raum": "Küche",
-    "inhalt": "Besteck, Töpfe, Pfannen"
+    "key": "q7X9",
+    "content": "Küche – Besteck, Töpfe, Pfannen"
   },
   "E002": {
-    "raum": "Bad",
-    "inhalt": "Handtücher, Kosmetik, Föhn"
-  },
-  "E003": {
-    "raum": "Büro",
-    "inhalt": "Kabel, Ordner, Laptop-Zubehör"
+    "key": "A9K2",
+    "content": "Bad – Handtücher, Kosmetik"
   }
 }
