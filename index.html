@@ -1,116 +1,127 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Eurobox</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Eurobox</title>
 
-  <style>
-    body {
-      margin: 0;
-      padding: 18px;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
-      background: #0b0f17;
-      color: #e5e7eb;
-    }
+<style>
+  body {
+    margin: 0;
+    padding: 18px;
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
+    background: #0b0f17;
+    color: #e5e7eb;
+  }
 
-    .card {
-      max-width: 700px;
-      margin: auto;
-      background: #111827;
-      border-radius: 18px;
-      padding: 18px;
-      box-shadow: 0 20px 50px rgba(0,0,0,.4);
-    }
+  .card {
+    max-width: 720px;
+    margin: auto;
+    background: #111827;
+    border-radius: 22px;
+    padding: 20px;
+    box-shadow: 0 20px 60px rgba(0,0,0,.45);
+  }
 
-    /* === Überschrift nebeneinander === */
+  /* === OBERE BOX-ID (E002) === */
+  .box-id {
+    text-align: center;
+    font-size: 42px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    margin-bottom: 6px;
+  }
+
+  .status {
+    text-align: center;
+    font-size: 13px;
+    color: #22c55e;
+    margin-bottom: 14px;
+  }
+
+  /* === Überschrift nebeneinander === */
+  .headline {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 14px;
+    align-items: center;
+    margin-bottom: 18px;
+  }
+
+  .code {
+    font-size: 34px;
+    font-weight: 900;
+    font-family: ui-monospace, Menlo, Consolas, monospace;
+  }
+
+  .title {
+    font-size: 34px;
+    font-weight: 900;
+  }
+
+  input, textarea {
+    width: 100%;
+    box-sizing: border-box;
+    border-radius: 16px;
+    border: 1px solid rgba(255,255,255,.15);
+    background: rgba(0,0,0,.35);
+    color: #e5e7eb;
+    padding: 14px;
+    font-size: 18px;
+    outline: none;
+  }
+
+  .row {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  textarea {
+    min-height: 340px;
+    resize: vertical;
+    margin-top: 12px;
+    font-size: 17px;
+  }
+
+  @media (max-width: 520px) {
     .headline {
-      display: grid;
-      grid-template-columns: auto 1fr;
-      gap: 12px;
-      align-items: center;
-      margin-bottom: 16px;
+      grid-template-columns: 1fr 2fr;
     }
-
-    .code {
+    .code, .title {
+      font-size: 28px;
+    }
+    .box-id {
       font-size: 36px;
-      font-weight: 900;
-      letter-spacing: 1px;
-      font-family: ui-monospace, Menlo, Consolas, monospace;
     }
-
-    .title {
-      font-size: 36px;
-      font-weight: 900;
-    }
-
-    .status {
-      margin-top: 6px;
-      font-size: 13px;
-      color: #22c55e;
-    }
-
-    input, textarea {
-      width: 100%;
-      box-sizing: border-box;
-      border-radius: 14px;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.35);
-      color: #e5e7eb;
-      padding: 12px 14px;
-      font-size: 18px;
-      outline: none;
-    }
-
-    input:focus, textarea:focus {
-      border-color: #6366f1;
-    }
-
-    textarea {
-      min-height: 320px;
-      resize: vertical;
-      margin-top: 14px;
-    }
-
     .row {
-      display: grid;
-      grid-template-columns: 120px 1fr;
-      gap: 12px;
-      margin-bottom: 10px;
+      grid-template-columns: 1fr;
     }
-
-    @media (max-width: 520px) {
-      .headline {
-        grid-template-columns: 1fr 2fr;
-      }
-      .code, .title {
-        font-size: 30px;
-      }
-      .row {
-        grid-template-columns: 1fr;
-      }
-    }
-  </style>
+  }
+</style>
 </head>
 
 <body>
-  <div class="card" id="app">
-    <div class="headline">
-      <div class="code" id="hCode">E00</div>
-      <div class="title" id="hTitle">Eurobox</div>
-    </div>
+<div class="card">
 
-    <div class="status" id="status">Zugriff OK – wird automatisch gespeichert</div>
+  <!-- BOX-ID OBEN -->
+  <div class="box-id" id="boxId">E000</div>
+  <div class="status">Zugriff OK – wird automatisch gespeichert</div>
 
-    <!-- Eingabe Überschrift -->
-    <div class="row">
-      <input id="inCode" maxlength="3" placeholder="E00" />
-      <input id="inTitle" placeholder="Eurobox" />
-    </div>
-
-    <!-- Inhalt -->
-    <textarea id="content" placeholder="Inhalt hier eintragen…"></textarea>
+  <div class="headline">
+    <div class="code" id="hCode">KG</div>
+    <div class="title" id="hTitle">Eurobox</div>
   </div>
+
+  <div class="row">
+    <input id="inCode" maxlength="3" placeholder="KG" />
+    <input id="inTitle" placeholder="Bezeichnung" />
+  </div>
+
+  <textarea id="content" placeholder="Inhalt hier eintragen…"></textarea>
+
+</div>
 
 <script>
   const params = new URLSearchParams(location.search);
@@ -122,26 +133,22 @@
     throw new Error("Kein Zugriff");
   }
 
+  // 🔥 Box-ID oben setzen (E001, E002, …)
+  document.getElementById("boxId").textContent = box;
+
   const storageKey = "eurobox_" + box + "_" + key;
+
+  const state = JSON.parse(localStorage.getItem(storageKey)) || {
+    code: box.slice(0,3),
+    title: "Eurobox",
+    content: ""
+  };
 
   const hCode = document.getElementById("hCode");
   const hTitle = document.getElementById("hTitle");
   const inCode = document.getElementById("inCode");
   const inTitle = document.getElementById("inTitle");
   const content = document.getElementById("content");
-
-  const defaults = {
-    code: box.slice(0,3),
-    title: "Eurobox",
-    content: ""
-  };
-
-  let state;
-  try {
-    state = JSON.parse(localStorage.getItem(storageKey)) || defaults;
-  } catch {
-    state = defaults;
-  }
 
   function render() {
     hCode.textContent = state.code;
