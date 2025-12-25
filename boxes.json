@@ -1,10 +1,4 @@
 {
-  "E001": {
-    "key": "q7X9",
-    "content": "Küche – Besteck, Töpfe, Pfannen"
-  },
-  "E002": {
-    "key": "A9K2",
-    "content": "Bad – Handtücher, Kosmetik"
-  }
+  "E001": { "key": "q7X9", "content": "Küche – Besteck, Töpfe, Pfannen" },
+  "E002": { "key": "A9K2", "content": "Bad – Handtücher, Kosmetik" }
 }
