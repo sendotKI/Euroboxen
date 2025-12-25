@@ -11,10 +11,8 @@
       --text:#e5e7eb;
       --muted:#9ca3af;
       --line:#243042;
-      --good:#22c55e;
+      --ok:#22c55e;
       --bad:#ef4444;
-      --btn:#1f2937;
-      --btn2:#111827;
     }
     body{
       margin:0;
@@ -23,10 +21,7 @@
       color:var(--text);
       padding:18px;
     }
-    .wrap{
-      max-width: 720px;
-      margin: 0 auto;
-    }
+    .wrap{ max-width: 760px; margin: 0 auto; }
     .card{
       background: linear-gradient(180deg, #101a2b 0%, var(--card) 60%);
       border: 1px solid rgba(255,255,255,.08);
@@ -41,18 +36,34 @@
       gap:12px;
       margin-bottom: 12px;
     }
-    .title{
-      font-size: 26px;
-      font-weight: 800;
-      letter-spacing: .2px;
+
+    /* große, fette, zweigeteilte Überschrift */
+    .headline{
+      display:flex;
+      gap:10px;
+      align-items:baseline;
+      flex-wrap:wrap;
       margin:0;
-      line-height:1.1;
+      line-height:1.05;
+    }
+    .h-code{
+      font-weight:900;
+      font-size:34px;
+      letter-spacing:.5px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      opacity:.95;
+    }
+    .h-title{
+      font-weight:900;
+      font-size:34px;
+      letter-spacing:.2px;
     }
     .subtitle{
       margin:6px 0 0 0;
       color:var(--muted);
       font-size:14px;
     }
+
     .pill{
       padding:7px 10px;
       border-radius: 999px;
@@ -71,34 +82,56 @@
       background: rgba(239,68,68,.14);
       color:#fecaca;
     }
+
     .hr{
       height:1px;
       background: linear-gradient(90deg, transparent, rgba(255,255,255,.12), transparent);
       margin: 14px 0;
     }
-    .label{
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:10px;
+    }
+    .rowlabel{
       font-size: 13px;
       color: var(--muted);
-      margin: 0 0 8px 0;
+      margin: 0 0 6px 0;
     }
-    textarea{
+
+    input, textarea{
       width: 100%;
-      min-height: 260px;
-      padding: 14px;
       border-radius: 14px;
       border: 1px solid rgba(255,255,255,.12);
       background: rgba(0,0,0,.25);
       color: var(--text);
       font-size: 18px;
       line-height: 1.35;
-      resize: vertical;
+      padding: 12px 14px;
       outline: none;
+      box-sizing: border-box;
     }
-    textarea::placeholder{ color: rgba(229,231,235,.45); }
-    textarea:focus{
+    input::placeholder, textarea::placeholder{ color: rgba(229,231,235,.45); }
+    input:focus, textarea:focus{
       border-color: rgba(99,102,241,.5);
       box-shadow: 0 0 0 4px rgba(99,102,241,.12);
     }
+    textarea{
+      min-height: 260px;
+      resize: vertical;
+    }
+
+    .two{
+      display:grid;
+      grid-template-columns: 140px 1fr;
+      gap:10px;
+    }
+    @media (max-width: 520px){
+      .two{ grid-template-columns: 1fr; }
+      .h-code,.h-title{ font-size:30px; }
+    }
+
     .buttons{
       display:flex;
       gap:10px;
@@ -122,6 +155,7 @@
       background: linear-gradient(180deg, rgba(99,102,241,.35), rgba(99,102,241,.18));
       border-color: rgba(99,102,241,.45);
     }
+
     .small{
       margin-top: 10px;
       color: var(--muted);
@@ -131,30 +165,54 @@
     .mono{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; }
   </style>
 </head>
+
 <body>
   <div class="wrap">
     <div class="card" id="card">
       <div class="top">
         <div>
-          <h1 class="title">📦 Box <span id="boxId" class="mono"></span></h1>
-          <p class="subtitle" id="subtitle">Notiz wird automatisch gespeichert.</p>
+          <h1 class="headline">
+            <span class="h-code" id="hCode">E01</span>
+            <span class="h-title" id="hTitle">Eurobox</span>
+          </h1>
+          <p class="subtitle" id="subtitle">Wird automatisch gespeichert – pro Box/QR.</p>
         </div>
         <div id="status" class="pill">Lade…</div>
       </div>
 
       <div class="hr"></div>
 
-      <p class="label">Inhalt / Hinweise</p>
-      <textarea id="content" placeholder="z.B. Küche: Besteck, Töpfe, Pfannen …"></textarea>
+      <!-- Editierbare Meta-Felder -->
+      <div class="grid">
+        <div class="two">
+          <div>
+            <div class="rowlabel">Überschrift Teil 1 (max. 3)</div>
+            <input id="inCode" maxlength="3" placeholder="E01" />
+          </div>
+          <div>
+            <div class="rowlabel">Überschrift Teil 2</div>
+            <input id="inTitle" placeholder="z.B. Küche" />
+          </div>
+        </div>
 
-      <div class="buttons">
-        <button class="btn-primary" id="copyBtn" type="button">📋 Kopieren</button>
-        <button id="clearBtn" type="button">🧹 Leeren</button>
-      </div>
+        <div>
+          <div class="rowlabel" id="labelText">Inhalt / Hinweise</div>
+          <input id="inLabel" placeholder="Zeile oben benennen (z.B. Küche / Fragil / Inhalt)" />
+        </div>
 
-      <div class="small">
-        Zugriff nur mit gültigem Link: <span class="mono">?box=E001&amp;k=…</span><br/>
-        Gespeichert lokal auf diesem iPhone (offline-tauglich).
+        <div>
+          <textarea id="content" placeholder="Inhalt hier eintragen…"></textarea>
+        </div>
+
+        <div class="buttons">
+          <button class="btn-primary" id="copyBtn" type="button">📋 Kopieren</button>
+          <button id="clearBtn" type="button">🧹 Leeren</button>
+        </div>
+
+        <div class="small">
+          Zugriff nur mit gültigem Link: <span class="mono">?box=E001&amp;k=…</span><br/>
+          Speicherung lokal auf diesem iPhone (offline-tauglich).
+        </div>
       </div>
     </div>
   </div>
@@ -164,47 +222,111 @@
     const box = (params.get("box") || "").toUpperCase().trim();
     const key = (params.get("k") || "").trim();
 
-    const boxEl = document.getElementById("boxId");
     const statusEl = document.getElementById("status");
-    const textarea = document.getElementById("content");
 
     function setStatus(ok, text){
       statusEl.textContent = text;
       statusEl.className = "pill " + (ok ? "ok" : "bad");
     }
 
-    // Zugriff prüfen
+    // Zugriff prüfen (Stufe 2: nur mit QR-Link)
     if (!box || !key) {
       document.getElementById("card").innerHTML = `
-        <h1 class="title">❌ Kein Zugriff</h1>
+        <h1 class="headline"><span class="h-title">❌ Kein Zugriff</span></h1>
         <p class="subtitle">Der QR-Link muss <span class="mono">?box=E001&k=…</span> enthalten.</p>
       `;
       throw new Error("Kein Zugriff");
     }
 
-    boxEl.textContent = box;
+    // DOM
+    const hCode  = document.getElementById("hCode");
+    const hTitle = document.getElementById("hTitle");
+
+    const inCode  = document.getElementById("inCode");
+    const inTitle = document.getElementById("inTitle");
+    const inLabel = document.getElementById("inLabel");
+
+    const labelText = document.getElementById("labelText");
+    const content = document.getElementById("content");
 
     // Speicher-Schlüssel: pro Box + pro Schlüssel eindeutig
     const storageKey = "eurobox_" + box + "_" + key;
 
+    // Defaultwerte (wenn noch nie gespeichert)
+    const defaults = {
+      code: box.slice(0, 3) || "E01",     // max 3 Zeichen
+      title: "Eurobox",
+      label: "Inhalt / Hinweise",
+      content: ""
+    };
+
     // Laden
-    textarea.value = localStorage.getItem(storageKey) || "";
+    let state;
+    try {
+      state = JSON.parse(localStorage.getItem(storageKey) || "null") || defaults;
+    } catch {
+      state = defaults;
+    }
+
+    // Helper: max 3 Zeichen erzwingen + nur sichtbare Zeichen
+    function normalizeCode(v){
+      v = (v || "").toUpperCase().trim();
+      return v.slice(0, 3);
+    }
+
+    function render(){
+      hCode.textContent = normalizeCode(state.code) || "—";
+      hTitle.textContent = (state.title || "").trim() || "—";
+      labelText.textContent = (state.label || "").trim() || "Inhalt / Hinweise";
+
+      inCode.value = normalizeCode(state.code);
+      inTitle.value = (state.title || "");
+      inLabel.value = (state.label || "");
+      content.value = (state.content || "");
+    }
+
+    function save(silent = false){
+      localStorage.setItem(storageKey, JSON.stringify(state));
+      if (!silent) setStatus(true, "Gespeichert ✓");
+    }
+
+    render();
     setStatus(true, "Zugriff OK");
 
-    // Auto-Save
+    // Auto-Save (debounced)
     let t;
-    textarea.addEventListener("input", () => {
+    function scheduleSave(){
       clearTimeout(t);
-      t = setTimeout(() => {
-        localStorage.setItem(storageKey, textarea.value);
-        setStatus(true, "Gespeichert ✓");
-      }, 200);
+      t = setTimeout(() => save(false), 200);
+    }
+
+    inCode.addEventListener("input", () => {
+      state.code = normalizeCode(inCode.value);
+      hCode.textContent = state.code || "—";
+      scheduleSave();
+    });
+
+    inTitle.addEventListener("input", () => {
+      state.title = inTitle.value;
+      hTitle.textContent = (state.title || "").trim() || "—";
+      scheduleSave();
+    });
+
+    inLabel.addEventListener("input", () => {
+      state.label = inLabel.value;
+      labelText.textContent = (state.label || "").trim() || "Inhalt / Hinweise";
+      scheduleSave();
+    });
+
+    content.addEventListener("input", () => {
+      state.content = content.value;
+      scheduleSave();
     });
 
     // Buttons
     document.getElementById("copyBtn").addEventListener("click", async () => {
       try {
-        await navigator.clipboard.writeText(textarea.value);
+        await navigator.clipboard.writeText(content.value);
         setStatus(true, "Kopiert ✓");
       } catch {
         setStatus(false, "Kopieren nicht möglich");
@@ -212,9 +334,10 @@
     });
 
     document.getElementById("clearBtn").addEventListener("click", () => {
-      if (!confirm("Inhalt wirklich löschen?")) return;
-      textarea.value = "";
-      localStorage.setItem(storageKey, "");
+      if (!confirm("Alles leeren (Überschrift, Label und Inhalt)?")) return;
+      state = { ...defaults, code: normalizeCode(state.code) || defaults.code };
+      save(true);
+      render();
       setStatus(true, "Geleert ✓");
     });
   </script>
