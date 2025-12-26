@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>Euroboxen – Suche</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+  body {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #0b1220;
+    color: #fff;
+    padding: 20px;
+  }
+  h1 {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  input {
+    width: 100%;
+    padding: 14px;
+    font-size: 18px;
+    border-radius: 12px;
+    border: none;
+    margin-bottom: 20px;
+  }
+  .result {
+    background: #111a2e;
+    border-radius: 12px;
+    padding: 12px;
+    margin-bottom: 10px;
+  }
+  .box {
+    font-weight: bold;
+    font-size: 20px;
+  }
+  .content {
+    opacity: 0.85;
+  }
+</style>
+</head>
+
+<body>
+
+<h1>🔍 Eurobox-Suche</h1>
+
+<input
+  type="text"
+  id="search"
+  placeholder="z. B. Handschuhe, Kabel, Halloween…"
+  oninput="searchBoxes()"
+/>
+
+<div id="results"></div>
+
+<script>
+const boxes = [
+  { box: "E001", content: "Kabel, Mehrfachsteckdosen, Router" },
+  { box: "E002", content: "Halloween, Kostüme, Schminke" },
+  { box: "E003", content: "Werkzeug, Schraubenzieher, Zange" },
+  { box: "E023", content: "Handschuhe, Schals, Mützen, Winter" },
+  { box: "E041", content: "Küche, Pfannen, Töpfe" }
+  // ← hier einfach erweitern
+];
+
+function searchBoxes() {
+  const q = document.getElementById("search").value.toLowerCase();
+  const res = document.getElementById("results");
+  res.innerHTML = "";
+
+  if (!q) return;
+
+  boxes.forEach(b => {
+    if (b.content.toLowerCase().includes(q)) {
+      res.innerHTML += `
+        <div class="result">
+          <div class="box">📦 ${b.box}</div>
+          <div class="content">${b.content}</div>
+        </div>
+      `;
+    }
+  });
+}
+</script>
+
+</body>
+</html>
