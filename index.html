@@ -55,14 +55,17 @@
     }
 
     .saved{
-      margin-top:6px;
-      font-size:14px;
-      color:var(--ok);
-      opacity:0;
-      transition:opacity .25s ease;
-      user-select:none;
-    }
-    .saved.show{opacity:1}
+  margin-top:6px;
+  font-size:14px;
+  color:#29d06b;
+  opacity:.65;                 /* dauerhaft sichtbar */
+  transition:opacity .25s ease;
+  user-select:none;
+}
+.saved.show{
+  opacity:1;                   /* bei Änderung stärker sichtbar */
+}
+
 
     .row{
       display:flex;
