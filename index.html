@@ -26,7 +26,7 @@
   /* === OBERE BOX-ID (E002) === */
   .box-id {
     text-align: center;
-    font-size: 42px;
+    font-size: 44px;
     font-weight: 900;
     letter-spacing: 2px;
     margin-bottom: 6px;
@@ -71,6 +71,10 @@
     outline: none;
   }
 
+  input:focus, textarea:focus {
+    border-color: #6366f1;
+  }
+
   .row {
     display: grid;
     grid-template-columns: 120px 1fr;
@@ -86,36 +90,28 @@
   }
 
   @media (max-width: 520px) {
-    .headline {
-      grid-template-columns: 1fr 2fr;
-    }
-    .code, .title {
-      font-size: 28px;
-    }
-    .box-id {
-      font-size: 36px;
-    }
-    .row {
-      grid-template-columns: 1fr;
-    }
+    .headline { grid-template-columns: 1fr 2fr; }
+    .code, .title { font-size: 28px; }
+    .box-id { font-size: 38px; }
+    .row { grid-template-columns: 1fr; }
   }
 </style>
 </head>
 
 <body>
-<div class="card">
+<div class="card" id="card">
 
   <!-- BOX-ID OBEN -->
   <div class="box-id" id="boxId">E000</div>
-  <div class="status">Zugriff OK – wird automatisch gespeichert</div>
+  <div class="status" id="status">Wird automatisch gespeichert</div>
 
   <div class="headline">
-    <div class="code" id="hCode">ORT</div>
+    <div class="code" id="hCode">KG</div>
     <div class="title" id="hTitle">Eurobox</div>
   </div>
 
   <div class="row">
-    <input id="inCode" maxlength="20" placeholder="ORT" />
+    <input id="inCode" maxlength="3" placeholder="KG" />
     <input id="inTitle" placeholder="Bezeichnung" />
   </div>
 
@@ -125,47 +121,63 @@
 
 <script>
   const params = new URLSearchParams(location.search);
-  const box = params.get("box");
-  const key = params.get("k");
+  const box = (params.get("box") || "").toUpperCase().trim();
 
-  if (!box || !key) {
-    document.body.innerHTML = "<h2 style='color:red'>Kein Zugriff</h2>";
+  // ✅ Kein Schlüssel mehr – QR-Code muss nur ?box=E002 enthalten
+  if (!box) {
+    document.getElementById("card").innerHTML = `
+      <h2 style="color:#ef4444;margin:0 0 8px 0;">❌ Kein Zugriff</h2>
+      <p style="margin:0;color:#9ca3af;">
+        Bitte über einen QR-Code öffnen, der <code>?box=E001</code> enthält.
+      </p>
+    `;
     throw new Error("Kein Zugriff");
   }
 
-  // 🔥 Box-ID oben setzen (E001, E002, …)
+  // Box-ID oben setzen
   document.getElementById("boxId").textContent = box;
 
-  const storageKey = "eurobox_" + box + "_" + key;
-
-  const state = JSON.parse(localStorage.getItem(storageKey)) || {
-    code: box.slice(0,3),
-    title: "Eurobox",
-    content: ""
-  };
+  // ✅ Speicher pro Box (auf deinem iPhone)
+  const storageKey = "eurobox_" + box;
 
   const hCode = document.getElementById("hCode");
   const hTitle = document.getElementById("hTitle");
   const inCode = document.getElementById("inCode");
   const inTitle = document.getElementById("inTitle");
   const content = document.getElementById("content");
+  const status = document.getElementById("status");
 
-  function render() {
-    hCode.textContent = state.code;
-    hTitle.textContent = state.title;
-    inCode.value = state.code;
-    inTitle.value = state.title;
-    content.value = state.content;
+  const defaults = {
+    code: box.slice(0,3),
+    title: "Eurobox",
+    content: ""
+  };
+
+  let state;
+  try {
+    state = JSON.parse(localStorage.getItem(storageKey)) || defaults;
+  } catch {
+    state = defaults;
   }
 
-  function save() {
+  function render() {
+    hCode.textContent = state.code || "—";
+    hTitle.textContent = state.title || "—";
+    inCode.value = state.code || "";
+    inTitle.value = state.title || "";
+    content.value = state.content || "";
+  }
+
+  function saveNow() {
     localStorage.setItem(storageKey, JSON.stringify(state));
+    status.textContent = "Gespeichert ✓";
+    status.style.color = "#22c55e";
   }
 
   let t;
   function autoSave() {
     clearTimeout(t);
-    t = setTimeout(save, 200);
+    t = setTimeout(saveNow, 200);
   }
 
   inCode.addEventListener("input", () => {
@@ -186,6 +198,8 @@
   });
 
   render();
+  status.textContent = "Zugriff OK – wird automatisch gespeichert";
+  status.style.color = "#22c55e";
 </script>
 </body>
 </html>
