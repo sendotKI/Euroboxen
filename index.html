@@ -15,6 +15,7 @@
   --ok:#35d07f;
   --red:#ff4d4d;
   --grey:#C0C0C0;
+  --black:#000000;
 }
 
 body{
@@ -51,17 +52,14 @@ h1{
   margin-top:6px;
 }
 
-.hint{
-  text-align:center;
-  color:var(--muted);
-  margin-top:6px;
-  font-size:12px;
-}
-
 .row{
   display:flex;
   gap:10px;
   margin-top:16px;
+}
+
+.row.colors{
+  margin-bottom:24px; /* 👈 zusätzlicher Abstand zum Inhaltsfeld */
 }
 
 input,textarea{
@@ -90,7 +88,6 @@ textarea{
   border:2px solid var(--border);
   cursor:pointer;
   transition:.15s;
-  user-select:none;
 }
 
 .icon.active{
@@ -103,21 +100,21 @@ textarea{
   box-shadow:0 0 14px rgba(255,77,77,.7);
 }
 
-.weightBox{
-  width:96px;
-  text-align:center;
-  font-weight:700;
-}
-
-.color{
-  width:28px; /* 50% kleiner */
+/* 🎨 Farbauswahl – 50 % kleiner */
+.icon.color{
+  width:28px;
   height:28px;
   border-radius:8px;
-  border:2px solid #444;
-  cursor:pointer;
 }
-.color.active{
+
+.icon.color.active{
   outline:2px solid var(--ok);
+}
+
+.weightBox{
+  width:90px;
+  text-align:center;
+  font-weight:700;
 }
 
 .buttons{
@@ -134,26 +131,6 @@ button{
   background:#1f2a4d;
   color:#fff;
   font-size:14px;
-  cursor:pointer;
-}
-
-button:active{ transform:scale(.99); }
-
-.toast{
-  margin-top:10px;
-  font-size:13px;
-  color:var(--muted);
-  text-align:center;
-}
-
-/* Fallback Input (nur falls showOpenFilePicker nicht verfügbar) */
-.fileOffscreen{
-  position:absolute;
-  left:-10000px;
-  top:auto;
-  width:1px;
-  height:1px;
-  opacity:0;
 }
 </style>
 </head>
@@ -163,8 +140,7 @@ button:active{ transform:scale(.99); }
   <div class="card" id="card">
 
     <h1 id="boxId">E000</h1>
-    <div class="status" id="saveStatus">Gespeichert ✓</div>
-    <div class="hint" id="platformHint"></div>
+    <div class="status">Gespeichert ✓</div>
 
     <div class="row">
       <input id="ort" maxlength="6" placeholder="ORT">
@@ -173,195 +149,80 @@ button:active{ transform:scale(.99); }
 
     <div class="row">
       <div class="icon" id="fragile" title="Zerbrechlich">🍷</div>
-      <div class="icon heavy" id="heavy" title="Schwer (ab 16 kg)">🏋️</div>
+      <div class="icon heavy" id="heavy" title="Schwer">🏋️</div>
       <input id="kg" class="weightBox" type="number" min="0" max="99" placeholder="00 kg">
     </div>
 
-    <div class="row">
-      <div class="color active" id="grey" title="Grau" style="background:#C0C0C0"></div>
-      <div class="color" id="black" title="Schwarz" style="background:#000"></div>
+    <div class="row colors">
+      <div class="icon color" id="black" title="Schwarze Box" style="background:#000"></div>
+      <div class="icon color active" id="grey" title="Graue Box" style="background:#C0C0C0"></div>
     </div>
 
     <textarea id="content" placeholder="• Inhalt hier eintragen…"></textarea>
 
     <div class="buttons">
-      <button id="btnExport" type="button">Backup nach iCloud</button>
-      <button id="btnImport" type="button">Backup importieren</button>
-      <button id="btnLoad" type="button">JSON laden</button>
+      <button>Backup nach iCloud</button>
+      <button>Backup importieren</button>
+      <button>JSON laden</button>
     </div>
-
-    <div class="toast" id="toast"></div>
 
   </div>
 </div>
 
-<input type="file" id="fileInput" class="fileOffscreen" accept=".json,application/json">
-
 <script>
 const $ = id => document.getElementById(id);
-
-const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-$("platformHint").textContent = isIOS
-  ? "iPhone: Backup → Teilen → In Dateien sichern → iCloud Drive"
-  : "Windows: Backup lädt Euroboxen.json herunter. Import/JSON laden liest sie wieder ein.";
 
 const box = new URLSearchParams(location.search).get("box") || "E000";
 $("boxId").textContent = box;
 
-let data = JSON.parse(localStorage.getItem("Euroboxen")||"{}");
-let state = data[box] || { ort:"", bez:"", content:"", fragile:false, heavy:false, kg:0, color:"grey" };
-
-function showToast(msg){
-  $("toast").textContent = msg;
-  setTimeout(()=>{ if($("toast").textContent===msg) $("toast").textContent=""; }, 3500);
-}
-
-function save(){
-  state.ort = $("ort").value;
-  state.bez = $("bez").value;
-  state.content = $("content").value;
-
-  data[box] = state;
-  localStorage.setItem("Euroboxen", JSON.stringify(data));
-}
-
-function applyStateToUI(){
-  $("ort").value = state.ort || "";
-  $("bez").value = state.bez || "";
-  $("content").value = state.content || "• ";
-  $("kg").value = (state.kg ?? "");
-
-  $("fragile").classList.toggle("active", !!state.fragile);
-
-  const kg = parseInt(state.kg || "0", 10) || 0;
-  state.heavy = kg >= 16 ? true : !!state.heavy;
-  $("heavy").classList.toggle("active", !!state.heavy);
-
-  setColor(state.color || "grey");
-}
-
-$("ort").addEventListener("input", save);
-$("bez").addEventListener("input", save);
-$("content").addEventListener("input", save);
-
-$("fragile").onclick = ()=>{
-  state.fragile=!state.fragile;
-  $("fragile").classList.toggle("active",state.fragile);
-  save();
+let state = {
+  fragile:false,
+  heavy:false,
+  color:"grey",
+  kg:0
 };
 
-$("kg").addEventListener("input", ()=>{
-  const v = parseInt(($("kg").value||"0"),10);
-  state.kg = isNaN(v) ? 0 : v;
-  state.heavy = state.kg >= 16;                 // <-- ab 16 kg
-  $("heavy").classList.toggle("active", state.heavy);
-  save();
-});
+// 🍷 Zerbrechlich
+$("fragile").onclick = () => {
+  state.fragile = !state.fragile;
+  $("fragile").classList.toggle("active", state.fragile);
+};
+
+// ⚫️ / ⚪️ Farbe
+$("black").onclick = () => setColor("black");
+$("grey").onclick  = () => setColor("grey");
 
 function setColor(c){
-  state.color=c;
-  $("grey").classList.toggle("active",c==="grey");
-  $("black").classList.toggle("active",c==="black");
-  $("card").style.background = (c==="grey") ? "#C0C0C0" : "#000";
-  save();
+  state.color = c;
+  $("black").classList.toggle("active", c==="black");
+  $("grey").classList.toggle("active", c==="grey");
+  $("card").style.background = c==="black" ? "#000000" : "#C0C0C0";
 }
-$("grey").onclick=()=>setColor("grey");
-$("black").onclick=()=>setColor("black");
 
+// 🏋️ Heavy automatisch ab 16 kg
+$("kg").addEventListener("input",()=>{
+  state.kg = parseInt($("kg").value||0);
+  state.heavy = state.kg >= 16;
+  $("heavy").classList.toggle("active", state.heavy);
+});
+
+// 📝 Aufzählung erzwingen
 $("content").addEventListener("keydown",e=>{
   if(e.key==="Enter"){
     e.preventDefault();
     $("content").value += "\n• ";
-    save();
   }
-  if(e.key==="Backspace" && $("content").value.endsWith("\n• ")){
-    $("content").value = $("content").value.slice(0,-3);
-    save();
+  if(e.key==="Backspace"){
+    const v = $("content").value;
+    if(v.endsWith("\n• ")){
+      $("content").value = v.slice(0,-3);
+    }
   }
 });
 
-function exportBackup(){
-  try{
-    const json = JSON.stringify(data, null, 2);
-    const blob = new Blob([json], {type:"application/json"});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "Euroboxen.json";
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    setTimeout(()=>URL.revokeObjectURL(url), 1000);
-    showToast("Backup exportiert: Euroboxen.json");
-  }catch(err){
-    showToast("Fehler beim Export: " + err.message);
-  }
-}
-$("btnExport").addEventListener("click", exportBackup);
-
-// -------- Import (stabiler): showOpenFilePicker (Chrome/Edge) --------
-async function pickAndImportJSON(){
-  // 1) bevorzugt: showOpenFilePicker (oft stabiler als Input-Dialog)
-  if (window.showOpenFilePicker) {
-    try{
-      const [handle] = await window.showOpenFilePicker({
-        multiple: false,
-        types: [{
-          description: "Euroboxen JSON",
-          accept: { "application/json": [".json"] }
-        }]
-      });
-      const file = await handle.getFile();
-      const text = await file.text();
-      importFromText(text);
-      return;
-    }catch(err){
-      if (err && err.name === "AbortError") return; // user cancelled
-      // falls irgendwas schiefgeht, wir versuchen den alten Picker:
-      console.warn("showOpenFilePicker fehlgeschlagen, fallback:", err);
-    }
-  }
-
-  // 2) Fallback: klassischer Picker (kann bei dir crashen)
-  $("fileInput").value = "";
-  $("fileInput").click();
-}
-
-function importFromText(text){
-  const obj = JSON.parse(text);
-  if(typeof obj !== "object" || obj === null) throw new Error("Ungültige JSON-Struktur");
-
-  data = obj;
-  localStorage.setItem("Euroboxen", JSON.stringify(data));
-  state = data[box] || state;
-  applyStateToUI();
-
-  showToast("Import OK: " + Object.keys(data).length + " Box(en) geladen.");
-}
-
-$("fileInput").addEventListener("change", (e)=>{
-  const file = e.target.files && e.target.files[0];
-  if(!file) return;
-
-  const r = new FileReader();
-  r.onload = ()=>{
-    try{
-      importFromText(r.result);
-    }catch(err){
-      showToast("Import fehlgeschlagen: " + err.message);
-    }finally{
-      $("fileInput").value = "";
-    }
-  };
-  r.readAsText(file);
-});
-
-$("btnImport").addEventListener("click", pickAndImportJSON);
-$("btnLoad").addEventListener("click", pickAndImportJSON);
-
-// Start
-applyStateToUI();
+// Init
+$("content").value = "• ";
+$("kg").dispatchEvent(new Event("input"));
 </script>
-
 </body>
 </html>
