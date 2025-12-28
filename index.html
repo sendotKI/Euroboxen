@@ -15,7 +15,6 @@
   --ok:#35d07f;
   --red:#ff4d4d;
   --grey:#C0C0C0;
-  --black:#000000;
 }
 
 body{
@@ -96,8 +95,16 @@ textarea{
   box-shadow:0 0 14px rgba(255,77,77,.7);
 }
 
-.icon.color.active{
-  outline:3px solid var(--ok);
+/* 🎨 Farbauswahl kleiner (50%) */
+.color{
+  width:28px;
+  height:28px;
+  border-radius:8px;
+  border:2px solid #444;
+}
+
+.color.active{
+  outline:2px solid var(--ok);
 }
 
 .weightBox{
@@ -143,20 +150,22 @@ button{
     </div>
 
     <div class="row">
-      <div class="icon color" id="black" title="Schwarze Box" style="background:#000"></div>
-      <div class="icon color active" id="grey" title="Graue Box" style="background:#C0C0C0"></div>
+      <div class="color active" id="grey" style="background:#C0C0C0"></div>
+      <div class="color" id="black" style="background:#000"></div>
     </div>
 
     <textarea id="content" placeholder="• Inhalt hier eintragen…"></textarea>
 
     <div class="buttons">
-      <button>Backup nach iCloud</button>
-      <button>Backup importieren</button>
-      <button>JSON laden</button>
+      <button onclick="exportBackup()">Backup nach iCloud</button>
+      <button onclick="importBackup()">Backup importieren</button>
+      <button onclick="loadJSON()">JSON laden</button>
     </div>
 
   </div>
 </div>
+
+<input type="file" id="fileInput" accept=".json" hidden>
 
 <script>
 const $ = id => document.getElementById(id);
@@ -164,54 +173,101 @@ const $ = id => document.getElementById(id);
 const box = new URLSearchParams(location.search).get("box") || "E000";
 $("boxId").textContent = box;
 
-let state = {
+let data = JSON.parse(localStorage.getItem("Euroboxen")||"{}");
+
+let state = data[box] || {
+  ort:"",
+  bez:"",
+  content:"",
   fragile:false,
   heavy:false,
-  color:"grey",
-  kg:0
+  kg:0,
+  color:"grey"
 };
 
-// 🍷 Zerbrechlich
-$("fragile").onclick = () => {
-  state.fragile = !state.fragile;
-  $("fragile").classList.toggle("active", state.fragile);
-};
+// ---------- UI ----------
+$("ort").value = state.ort;
+$("bez").value = state.bez;
+$("content").value = state.content || "• ";
+$("kg").value = state.kg || "";
 
-// ⚫️ / ⚪️ Farbe
-$("black").onclick = () => setColor("black");
-$("grey").onclick  = () => setColor("grey");
-
-function setColor(c){
-  state.color = c;
-  $("black").classList.toggle("active", c==="black");
-  $("grey").classList.toggle("active", c==="grey");
-  $("card").style.background = c==="black" ? "#000000" : "#C0C0C0";
+function save(){
+  state.ort = $("ort").value;
+  state.bez = $("bez").value;
+  state.content = $("content").value;
+  data[box] = state;
+  localStorage.setItem("Euroboxen", JSON.stringify(data));
 }
 
-// 🏋️ Heavy automatisch ab 16 kg
-$("kg").addEventListener("input",()=>{
-  state.kg = parseInt($("kg").value||0);
-  state.heavy = state.kg >= 16;
-  $("heavy").classList.toggle("active", state.heavy);
-});
+$("fragile").onclick = ()=>{
+  state.fragile=!state.fragile;
+  $("fragile").classList.toggle("active",state.fragile);
+  save();
+};
 
-// 📝 Aufzählung erzwingen
+$("kg").oninput=()=>{
+  state.kg=parseInt($("kg").value||0);
+  state.heavy=state.kg>=16;
+  $("heavy").classList.toggle("active",state.heavy);
+  save();
+};
+
+$("grey").onclick=()=>setColor("grey");
+$("black").onclick=()=>setColor("black");
+
+function setColor(c){
+  state.color=c;
+  $("grey").classList.toggle("active",c==="grey");
+  $("black").classList.toggle("active",c==="black");
+  $("card").style.background=c==="grey"?"#C0C0C0":"#000";
+  save();
+}
+
 $("content").addEventListener("keydown",e=>{
   if(e.key==="Enter"){
     e.preventDefault();
-    $("content").value += "\n• ";
+    $("content").value+="\n• ";
   }
-  if(e.key==="Backspace"){
-    const v = $("content").value;
-    if(v.endsWith("\n• ")){
-      $("content").value = v.slice(0,-3);
-    }
+  if(e.key==="Backspace" && $("content").value.endsWith("\n• ")){
+    $("content").value=$("content").value.slice(0,-3);
   }
 });
 
+document.querySelectorAll("input,textarea").forEach(el=>el.oninput=save);
+
+// ---------- Backup ----------
+function exportBackup(){
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download="Euroboxen.json";
+  a.click();
+}
+
+function importBackup(){
+  $("fileInput").click();
+}
+
+function loadJSON(){
+  importBackup();
+}
+
+$("fileInput").onchange=e=>{
+  const file=e.target.files[0];
+  if(!file)return;
+  const r=new FileReader();
+  r.onload=()=>{
+    data=JSON.parse(r.result);
+    localStorage.setItem("Euroboxen",JSON.stringify(data));
+    location.reload();
+  };
+  r.readAsText(file);
+};
+
 // Init
-$("content").value = "• ";
-$("kg").dispatchEvent(new Event("input"));
+$("fragile").classList.toggle("active",state.fragile);
+$("heavy").classList.toggle("active",state.heavy);
+setColor(state.color);
 </script>
 </body>
 </html>
