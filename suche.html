@@ -1,527 +1,412 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Suche – Euroboxen</title>
-  <style>
-    :root{
-      --bg: #05070d;
-      --text: rgba(255,255,255,.92);
-      --muted: rgba(255,255,255,.62);
-      --line: rgba(255,255,255,.12);
-      --panel: rgba(255,255,255,.06);
-      --panel2: rgba(0,0,0,.22);
-      --shadow: 0 18px 70px rgba(0,0,0,.55);
-      --radius: 18px;
+<meta charset="UTF-8">
+<title>Suche</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+:root{
+  --bg:#0b1220;
+  --card:#151c2f;
+  --border:#2a3555;
+  --text:#ffffff;
+  --muted:#9aa3b2;
+  --ok:#35d07f;
+  --red:#ff4d4d;
+}
 
-      --ok: #22c55e;
+body{
+  margin:0;
+  background:linear-gradient(180deg,#050810,#0b1220);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;
+  color:var(--text);
+}
 
-      --grey: #C0C0C0;
-      --black: #111;
-    }
+.container{
+  max-width:520px;
+  margin:20px auto;
+  padding:20px;
+}
 
-    *{ box-sizing:border-box; }
-    html,body{ height:100%; }
-    body{
-      margin:0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-      background: radial-gradient(1200px 800px at 30% 10%, #0d1b3a 0%, #05070d 55%, #02030a 100%);
-      color: var(--text);
-    }
+h1{
+  margin:0 0 14px 0;
+  font-size:38px;
+  font-weight:800;
+}
 
-    .wrap{ max-width: 980px; margin: 0 auto; padding: 18px 14px 40px; }
+.searchBox{
+  width:100%;
+  background:#0f172a;
+  border:1px solid var(--border);
+  border-radius:16px;
+  color:#fff;
+  padding:14px 14px;
+  font-size:16px;
+  outline:none;
+}
 
-    .card{
-      background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.04));
-      border: 1px solid rgba(255,255,255,.10);
-      border-radius: 22px;
-      box-shadow: var(--shadow);
-      padding: 18px;
-    }
+.row{
+  display:flex;
+  gap:10px;
+  margin-top:12px;
+  flex-wrap:wrap;
+}
 
-    h1{
-      margin: 0 0 12px;
-      font-size: 40px;
-      letter-spacing: .3px;
-    }
+button{
+  padding:12px 14px;
+  border-radius:16px;
+  border:none;
+  background:#1f2a4d;
+  color:#fff;
+  font-size:14px;
+  cursor:pointer;
+}
+button:active{ transform:scale(0.99); }
 
-    .searchBox{
-      display:flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      align-items:center;
-      margin-top: 10px;
-    }
+.pills{
+  display:flex;
+  gap:10px;
+  margin-top:14px;
+  align-items:center;
+}
 
-    .searchInput{
-      flex: 1 1 420px;
-      min-width: 260px;
-      display:flex;
-      align-items:center;
-      gap:10px;
-      border: 1px solid var(--line);
-      background: var(--panel2);
-      border-radius: 16px;
-      padding: 12px 14px;
-    }
-    .searchInput input{
-      width:100%;
-      background: transparent;
-      border:0;
-      outline:0;
-      color: var(--text);
-      font-size: 16px;
-      font-weight: 850;
-    }
-    .searchInput input::placeholder{ color: rgba(255,255,255,.35); }
+.pill{
+  width:50px;
+  height:50px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:999px;
+  border:2px solid var(--border);
+  background:rgba(255,255,255,0.03);
+  cursor:pointer;
+  user-select:none;
+  font-size:22px;
+  transition:.15s;
+}
+.pill.active{
+  border-color:var(--ok);
+  box-shadow:0 0 12px rgba(53,208,127,.6);
+}
 
-    .btnRow{
-      display:flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-top: 10px;
-    }
-    .btn{
-      padding: 12px 14px;
-      border-radius: 14px;
-      border: 1px solid var(--line);
-      background: rgba(0,0,0,.20);
-      color: var(--text);
-      font-weight: 1000;
-      cursor: pointer;
-      user-select:none;
-      white-space: nowrap;
-    }
+.count{
+  margin-top:10px;
+  color:var(--muted);
+}
 
-    .chipRow{
-      display:flex;
-      gap: 10px;
-      align-items:center;
-      flex-wrap: wrap;
-      margin-top: 14px;
-    }
-    .chip{
-      width: 54px;
-      height: 54px;
-      border-radius: 18px;
-      border: 1px solid var(--line);
-      background: rgba(0,0,0,.22);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size: 22px;
-      cursor:pointer;
-      user-select:none;
-    }
-    .chip.active{
-      outline: 2px solid rgba(34,197,94,.55);
-      border-color: rgba(34,197,94,.55);
-    }
+.list{
+  margin-top:14px;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
 
-    .chip.color{
-      font-size: 0;
-      position: relative;
-    }
-    .chip.color::after{
-      content:"";
-      width: 22px;
-      height: 22px;
-      border-radius: 7px;
-      border: 1px solid rgba(255,255,255,.15);
-      display:block;
-    }
-    .chip.black::after{ background: var(--black); }
-    .chip.grey::after{ background: var(--grey); }
+.item{
+  background:rgba(255,255,255,0.04);
+  border:1px solid rgba(255,255,255,0.07);
+  border-radius:18px;
+  padding:14px;
+  display:flex;
+  gap:12px;
+  align-items:center;
+}
 
-    .meta{
-      margin-top: 10px;
-      color: var(--muted);
-      font-weight: 900;
-    }
+.badges{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  min-width:60px;
+  align-items:flex-start;
+}
 
-    .list{
-      margin-top: 14px;
-      display:flex;
-      flex-direction: column;
-      gap: 12px;
-    }
+.badgeColor{
+  width:26px;
+  height:18px;
+  border-radius:8px;
+  border:1px solid rgba(255,255,255,0.18);
+}
 
-    .item{
-      border: 1px solid rgba(255,255,255,.10);
-      border-radius: 18px;
-      background:
-        linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
-      padding: 12px;
-      display:flex;
-      gap: 12px;
-      align-items: stretch;
-    }
+.badgeTiny{
+  width:42px;
+  height:34px;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,0.12);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:18px;
+}
 
-    .leftBadge{
-      width: 44px;
-      min-width: 44px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      border-radius: 14px;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(0,0,0,.25);
-    }
-    .badgeDot{
-      width: 18px;
-      height: 18px;
-      border-radius: 7px;
-      border: 1px solid rgba(255,255,255,.15);
-    }
-    .badgeDot.black{ background: var(--black); }
-    .badgeDot.grey{ background: var(--grey); }
+.main{
+  flex:1;
+  min-width:0;
+}
 
-    .content{
-      flex: 1 1 auto;
-      min-width: 0;
-    }
+.titleLine{
+  display:flex;
+  gap:10px;
+  align-items:baseline;
+}
+.code{
+  font-size:28px;
+  font-weight:900;
+  letter-spacing:1px;
+}
+.name{
+  font-size:22px;
+  font-weight:700;
+  opacity:.95;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
 
-    .row1{
-      display:flex;
-      align-items: baseline;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-    .code{
-      font-weight: 1000;
-      font-size: 28px;
-      letter-spacing: .6px;
-    }
-    .title{
-      font-weight: 1000;
-      font-size: 22px;
-      color: rgba(255,255,255,.92);
-    }
-    .title.muted{ color: rgba(255,255,255,.65); }
+.sub{
+  margin-top:4px;
+  color:var(--muted);
+  font-size:13px;
+}
 
-    .row2{
-      margin-top: 2px;
-      display:flex;
-      gap: 10px;
-      align-items:center;
-      flex-wrap: wrap;
-      color: rgba(255,255,255,.70);
-      font-weight: 900;
-      font-size: 14px;
-    }
+.preview{
+  margin-top:8px;
+  font-size:15px;
+  opacity:.95;
+  line-height:1.25;
+  max-height:3.9em;
+  overflow:hidden;
+}
 
-    .iconsInline{
-      display:flex;
-      gap: 8px;
-      align-items:center;
-    }
-    .mini{
-      width: 34px;
-      height: 34px;
-      border-radius: 13px;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(0,0,0,.25);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size: 18px;
-    }
-    .kgPill{
-      padding: 6px 10px;
-      border-radius: 13px;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(0,0,0,.25);
-      font-weight: 1000;
-      white-space: nowrap;
-    }
-
-    .preview{
-      margin-top: 8px;
-      color: rgba(255,255,255,.86);
-      font-weight: 850;
-      line-height: 1.25;
-      overflow: hidden;
-      display: -webkit-box;
-      -webkit-line-clamp: 3;
-      -webkit-box-orient: vertical;
-    }
-
-    /* WICHTIG: Öffnen-Button nicht abschneiden */
-    .openWrap{
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      min-width: 120px;     /* fix */
-      flex: 0 0 120px;      /* fix */
-    }
-    .openBtn{
-      width: 100%;
-      padding: 12px 10px;
-      border-radius: 16px;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.22);
-      color: var(--text);
-      font-weight: 1000;
-      font-size: 16px;
-      cursor:pointer;
-    }
-
-    @media (max-width: 420px){
-      .openWrap{ min-width: 110px; flex-basis: 110px; }
-      .code{ font-size: 24px; }
-      .title{ font-size: 20px; }
-    }
-  </style>
+.openBtn{
+  flex:0 0 auto;
+  padding:12px 14px;
+  border-radius:16px;
+  background:#1f2a4d;
+  border:1px solid rgba(255,255,255,0.12);
+  font-weight:700;
+  min-width:92px;      /* <-- verhindert "Öffn…" */
+  text-align:center;
+}
+</style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="card">
-      <h1>Suche</h1>
 
-      <div class="searchBox">
-        <div class="searchInput">
-          <input id="q" placeholder="Suche nach Ort, Bezeichnung, Inhalt, kg… (z. B. E022)" autocomplete="off" />
-        </div>
-      </div>
+<div class="container">
+  <h1>Suche</h1>
 
-      <div class="btnRow">
-        <button class="btn" id="reloadBtn">Neu einlesen</button>
-        <button class="btn" id="clearBtn">Leeren</button>
-      </div>
+  <input id="q" class="searchBox" placeholder="Suche nach Ort, Bezeichnung, Inhalt, kg… (z. B. E022, Küche, 16, Hobby)">
 
-      <div class="chipRow" title="Filter">
-        <div class="chip" id="fFragile" title="Zerbrechlich">🍷</div>
-        <div class="chip" id="fHeavy" title="Heavy">🏋️</div>
-        <div class="chip color black" id="fBlack" title="Schwarz"></div>
-        <div class="chip color grey" id="fGrey" title="Grau"></div>
-      </div>
+  <div class="row">
+    <button id="reload">Neu einlesen</button>
+    <button id="clear">Leeren</button>
+  </div>
 
-      <div class="meta" id="meta">Gefunden: 0 / 0 (nur dieses Gerät)</div>
-
-      <div class="list" id="list"></div>
+  <div class="pills">
+    <div class="pill" id="fFragile" title="Zerbrechlich">🍷</div>
+    <div class="pill" id="fHeavy" title="Schwer">🏋️</div>
+    <div class="pill" id="fBlack" title="Schwarz" style="font-size:0;">
+      <span class="badgeColor" style="background:#000; width:26px; height:26px; border-radius:8px;"></span>
+    </div>
+    <div class="pill" id="fGrey" title="Grau" style="font-size:0;">
+      <span class="badgeColor" style="background:#C0C0C0; width:26px; height:26px; border-radius:8px;"></span>
     </div>
   </div>
 
-  <script>
-    const $ = (id)=>document.getElementById(id);
+  <div class="count" id="count">Gefunden: 0</div>
 
-    // ---- Config: Pfad zu deiner Box-Seite (index.html) ----
-    function openUrlFor(code){
-      // gleiche Domain, gleicher Ordner:
-      // /Euroboxen/?box=E012
-      const base = location.origin + location.pathname.replace(/\/suche\.html?$/i, "/");
-      return base + "?box=" + encodeURIComponent(code);
+  <div class="list" id="list"></div>
+</div>
+
+<script>
+const STORAGE_KEY = "euroboxen_v1"; // muss zu index.html passen!
+
+const $ = id => document.getElementById(id);
+
+let all = {};
+let filters = { fragile:false, heavy:false, black:false, grey:false };
+
+function loadAll(){
+  try{
+    return JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}") || {};
+  }catch(e){
+    return {};
+  }
+}
+
+function saveAll(obj){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(obj));
+}
+
+function normalize(s){
+  return (s||"").toString().toLowerCase().trim();
+}
+
+function boxMatches(id, b, query){
+  const q = normalize(query);
+
+  // Filterchips
+  if(filters.fragile && !b.fragile) return false;
+  if(filters.heavy && !b.heavy) return false;
+  if(filters.black && (b.color !== "black")) return false;
+  if(filters.grey && (b.color !== "grey")) return false;
+
+  if(!q) return true;
+
+  const hay = [
+    id,
+    b.ort || "",
+    b.bez || "",
+    (b.content || "").replace(/\n/g," "),
+    (b.kg ?? "").toString()
+  ].join(" | ").toLowerCase();
+
+  return hay.includes(q);
+}
+
+function formatLocal(ts){
+  if(!ts) return "";
+  try{
+    const d = new Date(ts);
+    // deutsches Format ohne Sekunden reicht
+    return d.toLocaleString("de-DE");
+  }catch(e){
+    return "";
+  }
+}
+
+function contentPreview(text){
+  const t = (text || "").trim();
+  if(!t) return "•";
+  // zeige max 3 Zeilen
+  const lines = t.split("\n").slice(0,3).map(x=>x.trim()).filter(Boolean);
+  return lines.join("\n");
+}
+
+function render(){
+  const q = $("q").value;
+  const list = $("list");
+  list.innerHTML = "";
+
+  const ids = Object.keys(all).sort(); // Reihenfolge E001..E200
+  const results = [];
+
+  for(const id of ids){
+    const b = all[id] || {};
+    if(boxMatches(id,b,q)) results.push([id,b]);
+  }
+
+  $("count").textContent = `Gefunden: ${results.length} / ${ids.length} (nur dieses Gerät)`;
+
+  for(const [id,b] of results){
+    const item = document.createElement("div");
+    item.className = "item";
+
+    const badges = document.createElement("div");
+    badges.className = "badges";
+
+    const color = document.createElement("div");
+    color.className = "badgeColor";
+    color.style.background = (b.color === "black") ? "#000" : "#C0C0C0";
+    badges.appendChild(color);
+
+    const rowIcons = document.createElement("div");
+    rowIcons.style.display = "flex";
+    rowIcons.style.gap = "8px";
+
+    const kgBadge = document.createElement("div");
+    kgBadge.className = "badgeTiny";
+    kgBadge.textContent = (b.ort && b.ort.trim()) ? b.ort.trim().toUpperCase() : "—";
+    rowIcons.appendChild(kgBadge);
+
+    if(b.fragile){
+      const fr = document.createElement("div");
+      fr.className = "badgeTiny";
+      fr.textContent = "🍷";
+      rowIcons.appendChild(fr);
     }
 
-    // ---- State ----
-    const state = {
-      boxes: [],
-      filters: { fragile:false, heavy:false, black:false, grey:false },
-      query: ""
-    };
-
-    // ---- Utils ----
-    function parseBoxFromStorage(key, raw){
-      try{
-        const obj = JSON.parse(raw);
-        const code = (obj.code || "").toUpperCase().match(/E\d{3}/);
-        if(!code) return null;
-
-        // normalize
-        return {
-          code: code[0],
-          ort: (obj.ort || "").toString().toUpperCase().trim(),
-          title: (obj.title || "").toString().trim(),
-          text: (obj.text || "").toString(),
-          fragile: !!obj.fragile,
-          heavy: !!obj.heavy,
-          kg: (obj.kg || "").toString().replace(/\D/g,"").slice(0,2),
-          color: (obj.color || "").toString().toLowerCase(), // "black"|"grey"|""
-          updated: Number(obj.updated || 0) || 0
-        };
-      }catch(e){
-        return null;
-      }
+    if(b.heavy){
+      const hv = document.createElement("div");
+      hv.className = "badgeTiny";
+      hv.textContent = "🏋️";
+      rowIcons.appendChild(hv);
     }
 
-    function loadAllBoxes(){
-      const out = [];
-      for(let i=0; i<localStorage.length; i++){
-        const k = localStorage.key(i);
-        if(!k) continue;
-        if(!k.startsWith("box:E")) continue;
-        const raw = localStorage.getItem(k);
-        if(!raw) continue;
-        const b = parseBoxFromStorage(k, raw);
-        if(b) out.push(b);
-      }
-      // sort: neueste oben
-      out.sort((a,b)=> (b.updated||0) - (a.updated||0));
-      state.boxes = out;
-    }
+    badges.appendChild(rowIcons);
 
-    function fmtDate(ts){
-      if(!ts) return "";
-      const d = new Date(ts);
-      const pad = (n)=> String(n).padStart(2,"0");
-      return `${pad(d.getDate())}.${pad(d.getMonth()+1)}.${d.getFullYear()}, ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
-    }
+    const main = document.createElement("div");
+    main.className = "main";
 
-    function textPreview(t){
-      const lines = (t||"").split("\n").map(s=>s.trim()).filter(Boolean);
-      if(!lines.length) return "•";
-      return lines.slice(0,3).join("\n");
-    }
+    const title = document.createElement("div");
+    title.className = "titleLine";
 
-    function haystack(b){
-      return [
-        b.code,
-        b.ort,
-        b.title,
-        b.text,
-        b.kg ? (b.kg + "kg") : ""
-      ].join(" ").toLowerCase();
-    }
+    const code = document.createElement("div");
+    code.className = "code";
+    code.textContent = id;
 
-    function applyFilters(){
-      const q = (state.query||"").trim().toLowerCase();
-      const f = state.filters;
+    const name = document.createElement("div");
+    name.className = "name";
+    name.textContent = (b.bez && b.bez.trim()) ? b.bez.trim() : "(ohne Bezeichnung)";
 
-      return state.boxes.filter(b=>{
-        if(f.fragile && !b.fragile) return false;
-        if(f.heavy && !b.heavy) return false;
-        if(f.black && b.color !== "black") return false;
-        if(f.grey && b.color !== "grey") return false;
+    title.appendChild(code);
+    title.appendChild(name);
 
-        if(q){
-          return haystack(b).includes(q);
-        }
-        return true;
-      });
-    }
+    const sub = document.createElement("div");
+    sub.className = "sub";
+    const kg = (b.kg ?? 0) ? `${b.kg} kg` : "";
+    const updated = formatLocal(b.updatedAt);
+    sub.textContent = `Zuletzt: ${updated || "—"}${kg ? "  ·  " + kg : ""}`;
 
-    function render(){
-      const all = state.boxes.length;
-      const res = applyFilters();
-      $("meta").textContent = `Gefunden: ${res.length} / ${all} (nur dieses Gerät)`;
+    const prev = document.createElement("div");
+    prev.className = "preview";
+    prev.textContent = contentPreview(b.content);
 
-      const list = $("list");
-      list.innerHTML = "";
+    main.appendChild(title);
+    main.appendChild(sub);
+    main.appendChild(prev);
 
-      for(const b of res){
-        const item = document.createElement("div");
-        item.className = "item";
+    const open = document.createElement("a");
+    open.className = "openBtn";
+    open.textContent = "Öffnen";
+    open.href = `./?box=${encodeURIComponent(id)}`;
+    open.style.color = "#fff";
+    open.style.textDecoration = "none";
 
-        const left = document.createElement("div");
-        left.className = "leftBadge";
-        const dot = document.createElement("div");
-        dot.className = "badgeDot " + (b.color === "grey" ? "grey" : (b.color === "black" ? "black" : ""));
-        left.appendChild(dot);
+    item.appendChild(badges);
+    item.appendChild(main);
+    item.appendChild(open);
 
-        const content = document.createElement("div");
-        content.className = "content";
+    list.appendChild(item);
+  }
+}
 
-        const row1 = document.createElement("div");
-        row1.className = "row1";
-        const code = document.createElement("div");
-        code.className = "code";
-        code.textContent = b.code;
+function togglePill(key, elId){
+  filters[key] = !filters[key];
+  $(elId).classList.toggle("active", filters[key]);
+  render();
+}
 
-        const title = document.createElement("div");
-        title.className = "title" + (b.title ? "" : " muted");
-        title.textContent = b.title ? b.title : "(ohne Bezeichnung)";
+$("fFragile").addEventListener("click", ()=>togglePill("fragile","fFragile"));
+$("fHeavy").addEventListener("click", ()=>togglePill("heavy","fHeavy"));
+$("fBlack").addEventListener("click", ()=>togglePill("black","fBlack"));
+$("fGrey").addEventListener("click", ()=>togglePill("grey","fGrey"));
 
-        row1.appendChild(code);
-        row1.appendChild(title);
+$("q").addEventListener("input", render);
 
-        const row2 = document.createElement("div");
-        row2.className = "row2";
-        const last = document.createElement("div");
-        last.textContent = b.updated ? `Zuletzt: ${fmtDate(b.updated)}` : "";
+$("reload").addEventListener("click", ()=>{
+  all = loadAll();
+  render();
+});
 
-        const icons = document.createElement("div");
-        icons.className = "iconsInline";
-        if(b.kg && b.kg !== "0"){
-          const kg = document.createElement("div");
-          kg.className = "kgPill";
-          kg.textContent = `${b.kg} kg`;
-          icons.appendChild(kg);
-        }
-        if(b.fragile){
-          const m = document.createElement("div");
-          m.className = "mini";
-          m.textContent = "🍷";
-          icons.appendChild(m);
-        }
-        if(b.heavy){
-          const m = document.createElement("div");
-          m.className = "mini";
-          m.textContent = "🏋️";
-          icons.appendChild(m);
-        }
+$("clear").addEventListener("click", ()=>{
+  $("q").value = "";
+  filters = { fragile:false, heavy:false, black:false, grey:false };
+  ["fFragile","fHeavy","fBlack","fGrey"].forEach(id=>$(id).classList.remove("active"));
+  render();
+});
 
-        row2.appendChild(last);
-        if(icons.childNodes.length) row2.appendChild(icons);
-
-        const prev = document.createElement("div");
-        prev.className = "preview";
-        prev.textContent = textPreview(b.text);
-
-        content.appendChild(row1);
-        content.appendChild(row2);
-        content.appendChild(prev);
-
-        const openWrap = document.createElement("div");
-        openWrap.className = "openWrap";
-        const openBtn = document.createElement("button");
-        openBtn.className = "openBtn";
-        openBtn.textContent = "Öffnen";
-        openBtn.addEventListener("click", ()=>{
-          location.href = openUrlFor(b.code);
-        });
-        openWrap.appendChild(openBtn);
-
-        item.appendChild(left);
-        item.appendChild(content);
-        item.appendChild(openWrap);
-        list.appendChild(item);
-      }
-    }
-
-    // ---- UI Events ----
-    function toggleChip(name, el){
-      state.filters[name] = !state.filters[name];
-      el.classList.toggle("active", state.filters[name]);
-      render();
-    }
-
-    $("q").addEventListener("input", ()=>{
-      state.query = $("q").value || "";
-      render();
-    });
-
-    $("reloadBtn").addEventListener("click", ()=>{
-      loadAllBoxes();
-      render();
-    });
-
-    $("clearBtn").addEventListener("click", ()=>{
-      $("q").value = "";
-      state.query = "";
-      state.filters = { fragile:false, heavy:false, black:false, grey:false };
-      ["fFragile","fHeavy","fBlack","fGrey"].forEach(id=>$(id).classList.remove("active"));
-      render();
-    });
-
-    $("fFragile").addEventListener("click", ()=>toggleChip("fragile", $("fFragile")));
-    $("fHeavy").addEventListener("click", ()=>toggleChip("heavy", $("fHeavy")));
-    $("fBlack").addEventListener("click", ()=>toggleChip("black", $("fBlack")));
-    $("fGrey").addEventListener("click", ()=>toggleChip("grey", $("fGrey")));
-
-    // ---- Start ----
-    loadAllBoxes();
-    render();
-  </script>
+// init
+all = loadAll();
+render();
+</script>
 </body>
 </html>
