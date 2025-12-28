@@ -7,16 +7,13 @@
   <style>
     :root{
       --bg:#0b1020;
-      --card:#0f172a;
-      --card2:#0b1224;
       --line:rgba(255,255,255,.10);
       --text:rgba(255,255,255,.92);
-      --muted:rgba(255,255,255,.65);
       --green:#29d06b;
 
       /* Box colors */
       --box-black:#0b0f14;
-      --box-gray:#C0C0C0;
+      --box-gray:#C0C0C0; /* ✅ wie gewünscht */
     }
 
     *{box-sizing:border-box}
@@ -70,22 +67,24 @@
     }
 
     .boxno{
-      font-weight:800;
+      font-weight:900;
       letter-spacing:.08em;
       font-size:42px;
       line-height:1.1;
+      color: rgba(255,255,255,.92);
+      text-shadow: 0 4px 18px rgba(0,0,0,.35);
     }
 
     .saved{
       margin-top:6px;
       font-size:14px;
       color:var(--green);
-      opacity:.65;
+      opacity:.65;                 /* dauerhaft sichtbar */
       transition:opacity .25s ease, filter .25s ease;
       user-select:none;
     }
     .saved.show{
-      opacity:1;
+      opacity:1;                   /* bei Änderung stärker sichtbar */
       filter: drop-shadow(0 0 8px rgba(41,208,107,.35));
     }
 
@@ -94,10 +93,10 @@
       gap:12px;
       align-items:center;
       margin:14px 0 10px;
+      flex-wrap:wrap;
     }
 
     input[type="text"]{
-      width:100%;
       height:48px;
       border-radius:14px;
       border:1px solid var(--line);
@@ -106,16 +105,22 @@
       background: rgba(0,0,0,.18);
       color:var(--text);
       font-size:18px;
+      width: 100%;
     }
     input[type="text"]::placeholder{ color:rgba(255,255,255,.35) }
 
     /* ORT field: 6 chars */
     .ort{
-      width:120px;
+      width:140px;
+      max-width: 140px;
       text-transform:uppercase;
-      font-weight:700;
+      font-weight:800;
       letter-spacing:.08em;
-      text-align:left;
+    }
+
+    .title{
+      flex: 1 1 220px;
+      min-width: 220px;
     }
 
     /* Icon toggles */
@@ -131,7 +136,7 @@
       font-size:22px;
       cursor:pointer;
       user-select:none;
-      transition: transform .08s ease, background .2s ease, border-color .2s ease, filter .2s ease;
+      transition: transform .08s ease, background .2s ease, border-color .2s ease, filter .2s ease, box-shadow .2s ease;
     }
     .iconToggle:active{ transform:scale(.98); }
 
@@ -139,6 +144,16 @@
       border-color: rgba(41,208,107,.55);
       background: rgba(41,208,107,.10);
       filter: drop-shadow(0 0 10px rgba(41,208,107,.20));
+    }
+
+    /* Heavy: deutlich stärker (rot) */
+    .iconToggle.heavy.on{
+      border-color: rgba(255, 80, 80, 0.95) !important;
+      background: rgba(255, 80, 80, 0.10) !important;
+      box-shadow:
+        0 0 0 2px rgba(255, 80, 80, 0.35),
+        0 0 22px rgba(255, 80, 80, 0.55) !important;
+      filter: none !important;
     }
 
     /* Color selector */
@@ -162,9 +177,10 @@
       align-items:center;
       justify-content:center;
       user-select:none;
-      transition: transform .08s ease, border-color .2s ease;
+      transition: transform .08s ease, border-color .2s ease, box-shadow .2s ease;
     }
     .colorBtn:active{ transform:scale(.98); }
+
     .swatch{
       width:26px;
       height:18px;
@@ -176,6 +192,38 @@
 
     .colorBtn.on{
       border-color: rgba(41,208,107,.55);
+      box-shadow: 0 0 0 2px rgba(41,208,107,.18);
+    }
+
+    /* KG field (max 2 digits + fixed kg) */
+    .kgWrap{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      height:48px;
+      padding:0 14px;
+      border-radius:14px;
+      border:1px solid var(--line);
+      background: rgba(0,0,0,.18);
+      min-width: 120px;
+    }
+    .kgWrap input{
+      width: 40px;
+      font-size: 18px;
+      font-weight: 900;
+      color: #fff;
+      background: transparent;
+      border: none;
+      outline: none;
+      text-align: right;
+      padding:0;
+      margin:0;
+    }
+    .kgUnit{
+      font-size: 16px;
+      font-weight: 800;
+      color: rgba(255,255,255,.85);
+      letter-spacing:.02em;
     }
 
     textarea{
@@ -196,8 +244,9 @@
     @media (max-width:520px){
       .boxno{ font-size:38px; }
       .row{ gap:10px; }
-      .ort{ width:110px; }
+      .ort{ width:130px; max-width:130px; }
       .iconToggle{ width:52px; }
+      .kgWrap{ min-width: 110px; }
     }
   </style>
 </head>
@@ -210,17 +259,25 @@
         <div class="saved" id="savedState">Gespeichert ✓</div>
       </div>
 
-      <!-- ORT + Bezeichnung + toggles -->
+      <!-- ORT + Bezeichnung + Icons + KG -->
       <div class="row">
         <input class="ort" id="ort" type="text" maxlength="6" placeholder="ORT" />
-        <input id="title" type="text" placeholder="Bezeichnung" />
+        <input class="title" id="title" type="text" placeholder="Bezeichnung" />
 
-        <!-- icons only -->
+        <!-- Zerbrechlich (🍷 bleibt) -->
         <div class="iconToggle" id="fragile" title="Zerbrechlich">🍷</div>
-        <div class="iconToggle" id="heavy" title="Schwer">🏋️</div>
+
+        <!-- Heavy (stark rot) -->
+        <div class="iconToggle heavy" id="heavy" title="Heavy">🏋️</div>
+
+        <!-- Gewicht: max 2 Ziffern + kg -->
+        <div class="kgWrap" title="Gewicht">
+          <input id="kg" inputmode="numeric" pattern="[0-9]*" maxlength="2" placeholder="00">
+          <span class="kgUnit">kg</span>
+        </div>
       </div>
 
-      <!-- color selection -->
+      <!-- Box-Farbe -->
       <div class="colorWrap">
         <div class="colorBtn" id="cBlack" title="Schwarze Box"><div class="swatch black"></div></div>
         <div class="colorBtn on" id="cGray" title="Graue Box"><div class="swatch gray"></div></div>
@@ -233,7 +290,7 @@
 <script>
 (function(){
   const params = new URLSearchParams(location.search);
-  const box = (params.get("box") || "E000").toUpperCase();
+  const box = (params.get("box") || "E000").toUpperCase().trim();
 
   const boxNoEl = document.getElementById("boxNo");
   const savedEl = document.getElementById("savedState");
@@ -243,6 +300,7 @@
 
   const fragileEl = document.getElementById("fragile");
   const heavyEl = document.getElementById("heavy");
+  const kgEl = document.getElementById("kg");
 
   const cardEl = document.getElementById("card");
   const cBlackEl = document.getElementById("cBlack");
@@ -250,65 +308,63 @@
 
   boxNoEl.textContent = box;
 
-  const key = "eurobox:" + box;
+  const storageKey = "eurobox:" + box;
 
   function showSaved(){
     savedEl.classList.add("show");
     setTimeout(()=> savedEl.classList.remove("show"), 1200);
   }
 
-  function clampUpper(el){
-    el.value = (el.value || "").toUpperCase();
-  }
-
-  function load(){
-    const raw = localStorage.getItem(key);
-    if(!raw) return;
-
-    try{
-      const d = JSON.parse(raw);
-      ortEl.value = d.ort || "";
-      titleEl.value = d.title || "";
-      contentEl.value = d.content || "";
-
-      setToggle(fragileEl, !!d.fragile);
-      setToggle(heavyEl, !!d.heavy);
-
-      setColor(d.color || "gray");
-    }catch(e){}
-  }
-
-  function save(){
-    const data = {
-      ort: (ortEl.value || "").toUpperCase(),
-      title: titleEl.value || "",
-      content: contentEl.value || "",
-      fragile: fragileEl.classList.contains("on"),
-      heavy: heavyEl.classList.contains("on"),
-      color: cardEl.getAttribute("data-color") || "gray"
-    };
-    localStorage.setItem(key, JSON.stringify(data));
-    showSaved();
+  function cleanKg(v){
+    return (v || "").replace(/\D/g, "").slice(0, 2);
   }
 
   function setToggle(el, on){
     el.classList.toggle("on", !!on);
   }
 
-  function toggle(el){
-    setToggle(el, !el.classList.contains("on"));
-    save();
-  }
-
   function setColor(color){
     const c = (color === "black") ? "black" : "gray";
     cardEl.setAttribute("data-color", c);
-
     cBlackEl.classList.toggle("on", c === "black");
     cGrayEl.classList.toggle("on", c === "gray");
   }
 
-  // autosave with debounce
+  function load(){
+    const raw = localStorage.getItem(storageKey);
+    if(!raw) return;
+
+    try{
+      const d = JSON.parse(raw);
+      ortEl.value = (d.ort || "").toUpperCase().slice(0,6);
+      titleEl.value = d.title || "";
+      contentEl.value = d.content || "";
+      kgEl.value = cleanKg(d.kg || "");
+
+      setToggle(fragileEl, !!d.fragile);
+      setToggle(heavyEl, !!d.heavy);
+      setColor(d.color || "gray");
+    }catch(e){}
+  }
+
+  function save(){
+    const data = {
+      ort: (ortEl.value || "").toUpperCase().slice(0,6),
+      title: titleEl.value || "",
+      content: contentEl.value || "",
+      kg: cleanKg(kgEl.value),
+
+      fragile: fragileEl.classList.contains("on"),
+      heavy: heavyEl.classList.contains("on"),
+      color: cardEl.getAttribute("data-color") || "gray",
+
+      updatedAt: Date.now()
+    };
+    localStorage.setItem(storageKey, JSON.stringify(data));
+    showSaved();
+  }
+
+  // autosave (debounced)
   let t = null;
   function queueSave(){
     clearTimeout(t);
@@ -316,16 +372,19 @@
   }
 
   // events
-  ortEl.addEventListener("input", ()=>{ clampUpper(ortEl); queueSave(); });
+  ortEl.addEventListener("input", ()=>{ ortEl.value = (ortEl.value || "").toUpperCase().slice(0,6); queueSave(); });
   titleEl.addEventListener("input", queueSave);
   contentEl.addEventListener("input", queueSave);
 
-  fragileEl.addEventListener("click", ()=> toggle(fragileEl));
-  heavyEl.addEventListener("click", ()=> toggle(heavyEl));
+  fragileEl.addEventListener("click", ()=>{ setToggle(fragileEl, !fragileEl.classList.contains("on")); save(); });
+  heavyEl.addEventListener("click", ()=>{ setToggle(heavyEl, !heavyEl.classList.contains("on")); save(); });
+
+  kgEl.addEventListener("input", ()=>{ kgEl.value = cleanKg(kgEl.value); queueSave(); });
 
   cBlackEl.addEventListener("click", ()=>{ setColor("black"); save(); });
   cGrayEl.addEventListener("click", ()=>{ setColor("gray"); save(); });
 
+  // initial
   load();
 })();
 </script>
