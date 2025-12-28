@@ -14,6 +14,9 @@
       /* Box colors */
       --box-black:#0b0f14;
       --box-gray:#C0C0C0; /* ✅ wie gewünscht */
+
+      /* Heavy tint */
+      --heavy-tint: rgba(255, 80, 80, 0.16);
     }
 
     *{box-sizing:border-box}
@@ -47,17 +50,30 @@
       overflow:hidden;
     }
 
-    /* color overlay (depends on selection) */
+    /* base color overlay */
     .card::before{
       content:"";
       position:absolute;
       inset:0;
       background: var(--box-gray);
-      opacity:.22; /* default */
+      opacity:.22;
       pointer-events:none;
     }
     .card[data-color="black"]::before{ background: var(--box-black); opacity:.28; }
     .card[data-color="gray"]::before{ background: var(--box-gray); opacity:.22; }
+
+    /* heavy warning overlay */
+    .card::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      background: transparent;
+      pointer-events:none;
+      transition: background .25s ease;
+    }
+    .card[data-heavy="1"]::after{
+      background: var(--heavy-tint);
+    }
 
     .card > *{ position:relative; z-index:1; }
 
@@ -79,12 +95,12 @@
       margin-top:6px;
       font-size:14px;
       color:var(--green);
-      opacity:.65;                 /* dauerhaft sichtbar */
+      opacity:.65;
       transition:opacity .25s ease, filter .25s ease;
       user-select:none;
     }
     .saved.show{
-      opacity:1;                   /* bei Änderung stärker sichtbar */
+      opacity:1;
       filter: drop-shadow(0 0 8px rgba(41,208,107,.35));
     }
 
@@ -253,7 +269,7 @@
 
 <body>
   <div class="wrap">
-    <div class="card" id="card" data-color="gray">
+    <div class="card" id="card" data-color="gray" data-heavy="0">
       <div class="top">
         <div class="boxno" id="boxNo">E000</div>
         <div class="saved" id="savedState">Gespeichert ✓</div>
@@ -264,13 +280,13 @@
         <input class="ort" id="ort" type="text" maxlength="6" placeholder="ORT" />
         <input class="title" id="title" type="text" placeholder="Bezeichnung" />
 
-        <!-- Zerbrechlich (🍷 bleibt) -->
+        <!-- Zerbrechlich -->
         <div class="iconToggle" id="fragile" title="Zerbrechlich">🍷</div>
 
-        <!-- Heavy (stark rot) -->
+        <!-- Heavy -->
         <div class="iconToggle heavy" id="heavy" title="Heavy">🏋️</div>
 
-        <!-- Gewicht: max 2 Ziffern + kg -->
+        <!-- Gewicht -->
         <div class="kgWrap" title="Gewicht">
           <input id="kg" inputmode="numeric" pattern="[0-9]*" maxlength="2" placeholder="00">
           <span class="kgUnit">kg</span>
@@ -291,6 +307,8 @@
 (function(){
   const params = new URLSearchParams(location.search);
   const box = (params.get("box") || "E000").toUpperCase().trim();
+
+  const HEAVY_THRESHOLD = 15; // ✅ ab 15kg automatisch Heavy
 
   const boxNoEl = document.getElementById("boxNo");
   const savedEl = document.getElementById("savedState");
@@ -330,6 +348,28 @@
     cGrayEl.classList.toggle("on", c === "gray");
   }
 
+  function applyHeavyVisual(on){
+    cardEl.setAttribute("data-heavy", on ? "1" : "0");
+  }
+
+  function parseKg(){
+    const v = cleanKg(kgEl.value);
+    if (!v) return 0;
+    return parseInt(v, 10) || 0;
+  }
+
+  // ✅ Heavy automatisch anhand kg setzen (ohne „Flackern“)
+  function autoHeavyFromKg(){
+    const kg = parseKg();
+    const shouldBeHeavy = kg >= HEAVY_THRESHOLD;
+    const isHeavy = heavyEl.classList.contains("on");
+
+    if (shouldBeHeavy !== isHeavy){
+      setToggle(heavyEl, shouldBeHeavy);
+    }
+    applyHeavyVisual(heavyEl.classList.contains("on"));
+  }
+
   function load(){
     const raw = localStorage.getItem(storageKey);
     if(!raw) return;
@@ -343,11 +383,18 @@
 
       setToggle(fragileEl, !!d.fragile);
       setToggle(heavyEl, !!d.heavy);
+
       setColor(d.color || "gray");
+
+      // nach load kg -> heavy-sync + tint
+      autoHeavyFromKg();
     }catch(e){}
   }
 
   function save(){
+    // vor dem Speichern: kg -> heavy-sync + tint
+    autoHeavyFromKg();
+
     const data = {
       ort: (ortEl.value || "").toUpperCase().slice(0,6),
       title: titleEl.value || "",
@@ -377,15 +424,28 @@
   contentEl.addEventListener("input", queueSave);
 
   fragileEl.addEventListener("click", ()=>{ setToggle(fragileEl, !fragileEl.classList.contains("on")); save(); });
-  heavyEl.addEventListener("click", ()=>{ setToggle(heavyEl, !heavyEl.classList.contains("on")); save(); });
 
-  kgEl.addEventListener("input", ()=>{ kgEl.value = cleanKg(kgEl.value); queueSave(); });
+  // Heavy manuell toggeln (und tint setzen)
+  heavyEl.addEventListener("click", ()=>{
+    setToggle(heavyEl, !heavyEl.classList.contains("on"));
+    applyHeavyVisual(heavyEl.classList.contains("on"));
+    save();
+  });
+
+  // kg -> heavy automatisch
+  kgEl.addEventListener("input", ()=>{
+    kgEl.value = cleanKg(kgEl.value);
+    autoHeavyFromKg();  // sofort visuell
+    queueSave();
+  });
 
   cBlackEl.addEventListener("click", ()=>{ setColor("black"); save(); });
   cGrayEl.addEventListener("click", ()=>{ setColor("gray"); save(); });
 
   // initial
   load();
+  // falls noch nix gespeichert war:
+  applyHeavyVisual(heavyEl.classList.contains("on"));
 })();
 </script>
 </body>
