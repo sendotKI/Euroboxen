@@ -51,6 +51,13 @@ h1{
   margin-top:6px;
 }
 
+.hint{
+  text-align:center;
+  color:var(--muted);
+  margin-top:6px;
+  font-size:12px;
+}
+
 .row{
   display:flex;
   gap:10px;
@@ -83,6 +90,7 @@ textarea{
   border:2px solid var(--border);
   cursor:pointer;
   transition:.15s;
+  user-select:none;
 }
 
 .icon.active{
@@ -101,14 +109,14 @@ textarea{
   height:28px;
   border-radius:8px;
   border:2px solid #444;
+  cursor:pointer;
 }
-
 .color.active{
   outline:2px solid var(--ok);
 }
 
 .weightBox{
-  width:90px;
+  width:96px;
   text-align:center;
   font-weight:700;
 }
@@ -127,6 +135,18 @@ button{
   background:#1f2a4d;
   color:#fff;
   font-size:14px;
+  cursor:pointer;
+}
+
+button:active{
+  transform:scale(.99);
+}
+
+.toast{
+  margin-top:10px;
+  font-size:13px;
+  color:var(--muted);
+  text-align:center;
 }
 </style>
 </head>
@@ -136,7 +156,8 @@ button{
   <div class="card" id="card">
 
     <h1 id="boxId">E000</h1>
-    <div class="status">Gespeichert ✓</div>
+    <div class="status" id="saveStatus">Gespeichert ✓</div>
+    <div class="hint" id="platformHint"></div>
 
     <div class="row">
       <input id="ort" maxlength="6" placeholder="ORT">
@@ -145,31 +166,40 @@ button{
 
     <div class="row">
       <div class="icon" id="fragile" title="Zerbrechlich">🍷</div>
-      <div class="icon heavy" id="heavy" title="Schwer">🏋️</div>
+      <div class="icon heavy" id="heavy" title="Schwer (ab 16 kg)">🏋️</div>
       <input id="kg" class="weightBox" type="number" min="0" max="99" placeholder="00 kg">
     </div>
 
     <div class="row">
-      <div class="color active" id="grey" style="background:#C0C0C0"></div>
-      <div class="color" id="black" style="background:#000"></div>
+      <div class="color active" id="grey" title="Grau" style="background:#C0C0C0"></div>
+      <div class="color" id="black" title="Schwarz" style="background:#000"></div>
     </div>
 
     <textarea id="content" placeholder="• Inhalt hier eintragen…"></textarea>
 
     <div class="buttons">
-      <button onclick="exportBackup()">Backup nach iCloud</button>
-      <button onclick="importBackup()">Backup importieren</button>
-      <button onclick="loadJSON()">JSON laden</button>
+      <button id="btnExport">Backup nach iCloud</button>
+      <button id="btnImport">Backup importieren</button>
+      <button id="btnLoad">Euroboxen.json einlesen</button>
     </div>
+
+    <div class="toast" id="toast"></div>
 
   </div>
 </div>
 
-<input type="file" id="fileInput" accept=".json" hidden>
+<input type="file" id="fileInput" accept=".json,application/json" hidden>
 
 <script>
 const $ = id => document.getElementById(id);
 
+// ---------- Platform hint ----------
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+$("platformHint").textContent = isIOS
+  ? "iPhone: Backup → Teilen → In Dateien sichern → iCloud Drive"
+  : "Windows: Backup lädt eine Datei herunter (Downloads). Import liest die Datei wieder ein.";
+
+// ---------- Load box ----------
 const box = new URLSearchParams(location.search).get("box") || "E000";
 $("boxId").textContent = box;
 
@@ -179,95 +209,140 @@ let state = data[box] || {
   ort:"",
   bez:"",
   content:"",
+
+
   fragile:false,
   heavy:false,
   kg:0,
   color:"grey"
 };
 
-// ---------- UI ----------
-$("ort").value = state.ort;
-$("bez").value = state.bez;
-$("content").value = state.content || "• ";
-$("kg").value = state.kg || "";
+// ---------- Helpers ----------
+function showToast(msg){
+  $("toast").textContent = msg;
+  setTimeout(()=>{ if($("toast").textContent===msg) $("toast").textContent=""; }, 3500);
+}
 
 function save(){
   state.ort = $("ort").value;
   state.bez = $("bez").value;
   state.content = $("content").value;
+
   data[box] = state;
   localStorage.setItem("Euroboxen", JSON.stringify(data));
 }
 
+// ---------- UI init ----------
+$("ort").value = state.ort;
+$("bez").value = state.bez;
+$("content").value = state.content || "• ";
+$("kg").value = (state.kg ?? "");
+
+$("fragile").classList.toggle("active", !!state.fragile);
+$("heavy").classList.toggle("active", !!state.heavy);
+
+// Color
+function setColor(c){
+  state.color=c;
+  $("grey").classList.toggle("active",c==="grey");
+  $("black").classList.toggle("active",c==="black");
+  $("card").style.background = (c==="grey") ? "#C0C0C0" : "#000";
+  save();
+}
+$("grey").onclick=()=>setColor("grey");
+$("black").onclick=()=>setColor("black");
+setColor(state.color || "grey");
+
+// Fragile toggle (click & glow)
 $("fragile").onclick = ()=>{
   state.fragile=!state.fragile;
   $("fragile").classList.toggle("active",state.fragile);
   save();
 };
 
-$("kg").oninput=()=>{
-  state.kg=parseInt($("kg").value||0);
-  state.heavy=state.kg>=16;
-  $("heavy").classList.toggle("active",state.heavy);
+// Heavy: auto by weight (>=16)
+$("kg").addEventListener("input", ()=>{
+  const v = parseInt(($("kg").value||"0"),10);
+  state.kg = isNaN(v) ? 0 : v;
+  state.heavy = state.kg >= 16;
+  $("heavy").classList.toggle("active", state.heavy);
   save();
-};
+});
 
-$("grey").onclick=()=>setColor("grey");
-$("black").onclick=()=>setColor("black");
+// Inputs save
+document.querySelectorAll("input,textarea").forEach(el=>el.addEventListener("input", save));
 
-function setColor(c){
-  state.color=c;
-  $("grey").classList.toggle("active",c==="grey");
-  $("black").classList.toggle("active",c==="black");
-  $("card").style.background=c==="grey"?"#C0C0C0":"#000";
-  save();
-}
-
+// Bullet behavior
 $("content").addEventListener("keydown",e=>{
   if(e.key==="Enter"){
     e.preventDefault();
-    $("content").value+="\n• ";
+    $("content").value += "\n• ";
+    save();
   }
   if(e.key==="Backspace" && $("content").value.endsWith("\n• ")){
-    $("content").value=$("content").value.slice(0,-3);
+    $("content").value = $("content").value.slice(0,-3);
+    save();
   }
 });
 
-document.querySelectorAll("input,textarea").forEach(el=>el.oninput=save);
-
-// ---------- Backup ----------
+// ---------- Backup: Export (Windows-safe) ----------
 function exportBackup(){
-  const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
-  const a=document.createElement("a");
-  a.href=URL.createObjectURL(blob);
-  a.download="Euroboxen.json";
-  a.click();
+  try{
+    const json = JSON.stringify(data, null, 2);
+    const blob = new Blob([json], {type:"application/json"});
+    const url = URL.createObjectURL(blob);
+
+    // Must be directly in click handler for some browsers
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "Euroboxen.json";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+
+    setTimeout(()=>URL.revokeObjectURL(url), 1000);
+    showToast("Backup exportiert: Euroboxen.json");
+  }catch(err){
+    showToast("Fehler beim Export: " + err.message);
+  }
 }
 
-function importBackup(){
+// ---------- Import ----------
+function openFilePicker(){
+  $("fileInput").value = "";
   $("fileInput").click();
 }
 
-function loadJSON(){
-  importBackup();
-}
-
-$("fileInput").onchange=e=>{
-  const file=e.target.files[0];
-  if(!file)return;
-  const r=new FileReader();
-  r.onload=()=>{
-    data=JSON.parse(r.result);
-    localStorage.setItem("Euroboxen",JSON.stringify(data));
-    location.reload();
+function handleFile(file){
+  if(!file){ return; }
+  const r = new FileReader();
+  r.onload = ()=>{
+    try{
+      const obj = JSON.parse(r.result);
+      if(typeof obj !== "object" || obj === null){
+        throw new Error("Ungültige JSON-Struktur");
+      }
+      data = obj;
+      localStorage.setItem("Euroboxen", JSON.stringify(data));
+      const count = Object.keys(data).length;
+      showToast("Import OK: " + count + " Box(en) geladen.");
+      location.reload();
+    }catch(e){
+      showToast("Import fehlgeschlagen: " + e.message);
+    }
   };
   r.readAsText(file);
-};
+}
 
-// Init
-$("fragile").classList.toggle("active",state.fragile);
-$("heavy").classList.toggle("active",state.heavy);
-setColor(state.color);
+$("fileInput").addEventListener("change", (e)=>{
+  handleFile(e.target.files[0]);
+});
+
+// Buttons
+$("btnExport").addEventListener("click", exportBackup);
+$("btnImport").addEventListener("click", openFilePicker);
+$("btnLoad").addEventListener("click", openFilePicker);
 </script>
+
 </body>
 </html>
