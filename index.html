@@ -50,6 +50,7 @@ h1{
   text-align:center;
   color:var(--ok);
   margin-top:6px;
+  min-height:20px;
 }
 
 .row{
@@ -59,7 +60,7 @@ h1{
 }
 
 .row.colors{
-  margin-bottom:24px; /* 👈 zusätzlicher Abstand zum Inhaltsfeld */
+  margin-bottom:24px; /* Abstand zum Inhaltsfeld */
 }
 
 input,textarea{
@@ -88,6 +89,7 @@ textarea{
   border:2px solid var(--border);
   cursor:pointer;
   transition:.15s;
+  user-select:none;
 }
 
 .icon.active{
@@ -100,7 +102,7 @@ textarea{
   box-shadow:0 0 14px rgba(255,77,77,.7);
 }
 
-/* 🎨 Farbauswahl – 50 % kleiner */
+/* Farbauswahl – 50% kleiner */
 .icon.color{
   width:28px;
   height:28px;
@@ -131,6 +133,11 @@ button{
   background:#1f2a4d;
   color:#fff;
   font-size:14px;
+  cursor:pointer;
+}
+
+button:active{
+  transform:scale(0.99);
 }
 </style>
 </head>
@@ -140,7 +147,7 @@ button{
   <div class="card" id="card">
 
     <h1 id="boxId">E000</h1>
-    <div class="status">Gespeichert ✓</div>
+    <div class="status" id="status">Gespeichert ✓</div>
 
     <div class="row">
       <input id="ort" maxlength="6" placeholder="ORT">
@@ -149,7 +156,7 @@ button{
 
     <div class="row">
       <div class="icon" id="fragile" title="Zerbrechlich">🍷</div>
-      <div class="icon heavy" id="heavy" title="Schwer">🏋️</div>
+      <div class="icon heavy" id="heavy" title="Schwer (ab 16 kg)">🏋️</div>
       <input id="kg" class="weightBox" type="number" min="0" max="99" placeholder="00 kg">
     </div>
 
@@ -161,10 +168,12 @@ button{
     <textarea id="content" placeholder="• Inhalt hier eintragen…"></textarea>
 
     <div class="buttons">
-      <button>Backup nach iCloud</button>
-      <button>Backup importieren</button>
-      <button>JSON laden</button>
+      <button id="btnBackup">Backup nach iCloud</button>
+      <button id="btnImport">Backup importieren</button>
     </div>
+
+    <!-- unsichtbare Dateiauswahl -->
+    <input id="filePicker" type="file" accept="application/json" style="display:none" />
 
   </div>
 </div>
@@ -172,57 +181,276 @@ button{
 <script>
 const $ = id => document.getElementById(id);
 
-const box = new URLSearchParams(location.search).get("box") || "E000";
-$("boxId").textContent = box;
+const boxId = new URLSearchParams(location.search).get("box") || "E000";
+$("boxId").textContent = boxId;
 
-let state = {
-  fragile:false,
-  heavy:false,
-  color:"grey",
-  kg:0
-};
+/* =========================
+   Speicherformat (localStorage)
+   key: euroboxen_v1  (Objekt mit E001..)
+   value:
+   {
+     "E001": { ort, bez, content, fragile, heavy, kg, color, updatedAt },
+     ...
+   }
+========================= */
+const STORAGE_KEY = "euroboxen_v1";
 
-// 🍷 Zerbrechlich
-$("fragile").onclick = () => {
-  state.fragile = !state.fragile;
-  $("fragile").classList.toggle("active", state.fragile);
-};
+function nowIso(){
+  return new Date().toISOString();
+}
 
-// ⚫️ / ⚪️ Farbe
-$("black").onclick = () => setColor("black");
-$("grey").onclick  = () => setColor("grey");
+function loadAll(){
+  try{
+    return JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}") || {};
+  }catch(e){
+    return {};
+  }
+}
 
-function setColor(c){
+function saveAll(obj){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(obj));
+}
+
+function setStatus(text, ok=true){
+  const el = $("status");
+  el.style.color = ok ? "var(--ok)" : "var(--red)";
+  el.textContent = text;
+}
+
+function defaultBox(){
+  return {
+    ort:"",
+    bez:"",
+    content:"• ",
+    fragile:false,
+    heavy:false,
+    kg:0,
+    color:"grey",
+    updatedAt: nowIso()
+  };
+}
+
+function getBoxData(){
+  const all = loadAll();
+  return all[boxId] ? all[boxId] : defaultBox();
+}
+
+function putBoxData(data){
+  const all = loadAll();
+  all[boxId] = data;
+  saveAll(all);
+}
+
+/* =========================
+   UI + State
+========================= */
+let state = getBoxData();
+
+// Init UI
+$("ort").value = state.ort || "";
+$("bez").value = state.bez || "";
+$("content").value = (state.content && state.content.trim().length) ? state.content : "• ";
+$("kg").value = (state.kg ?? 0) ? String(state.kg) : "";
+
+$("fragile").classList.toggle("active", !!state.fragile);
+$("heavy").classList.toggle("active", !!state.heavy);
+setColor(state.color || "grey", false);
+
+function setColor(c, persist=true){
   state.color = c;
   $("black").classList.toggle("active", c==="black");
   $("grey").classList.toggle("active", c==="grey");
-  $("card").style.background = c==="black" ? "#000000" : "#C0C0C0";
+
+  // Hintergrund der Karte: schwarz = #000, grau = #C0C0C0
+  $("card").style.background = (c==="black") ? "#000000" : "#C0C0C0";
+
+  // Textkontrast bei grauer Karte bleibt gut, weil Inputs dunkel sind.
+  if(persist) saveAndStatus();
 }
 
-// 🏋️ Heavy automatisch ab 16 kg
+// Click-Icons
+$("fragile").onclick = () => {
+  state.fragile = !state.fragile;
+  $("fragile").classList.toggle("active", state.fragile);
+  saveAndStatus();
+};
+
+$("black").onclick = () => setColor("black");
+$("grey").onclick  = () => setColor("grey");
+
+// Gewicht: Heavy ab 16 kg
 $("kg").addEventListener("input",()=>{
-  state.kg = parseInt($("kg").value||0);
+  const v = parseInt($("kg").value || "0", 10);
+  state.kg = isNaN(v) ? 0 : Math.max(0, Math.min(99, v));
   state.heavy = state.kg >= 16;
   $("heavy").classList.toggle("active", state.heavy);
+  saveAndStatus();
 });
 
-// 📝 Aufzählung erzwingen
+// Heavy-Icon weiterhin anklickbar (override möglich)
+$("heavy").onclick = () => {
+  // Toggle manuell; wenn Gewicht >=16 bleibt standardmäßig an, aber du kannst es bewusst ausmachen.
+  state.heavy = !state.heavy;
+  $("heavy").classList.toggle("active", state.heavy);
+  saveAndStatus();
+};
+
+// Ort/Bezeichnung/Content speichern
+["ort","bez"].forEach(id=>{
+  $(id).addEventListener("input", ()=>{
+    state[id] = $(id).value;
+    saveAndStatus();
+  });
+});
+
+// Aufzählung: Enter => neue Zeile mit • ; Backspace am Zeilenanfang entfernt Bullet
 $("content").addEventListener("keydown",e=>{
-  if(e.key==="Enter"){
+  const ta = $("content");
+  const v = ta.value;
+
+  if(e.key === "Enter"){
     e.preventDefault();
-    $("content").value += "\n• ";
+    insertAtCursor(ta, "\n• ");
+    return;
   }
-  if(e.key==="Backspace"){
-    const v = $("content").value;
-    if(v.endsWith("\n• ")){
-      $("content").value = v.slice(0,-3);
+
+  if(e.key === "Backspace"){
+    // Wenn Cursor direkt nach "\n• " steht, entferne diese 3 Zeichen
+    const pos = ta.selectionStart;
+    if(pos >= 3 && v.slice(pos-3, pos) === "\n• "){
+      e.preventDefault();
+      ta.value = v.slice(0, pos-3) + v.slice(pos);
+      ta.selectionStart = ta.selectionEnd = pos-3;
+      state.content = ta.value;
+      saveAndStatus();
     }
   }
 });
 
-// Init
-$("content").value = "• ";
-$("kg").dispatchEvent(new Event("input"));
+$("content").addEventListener("input", ()=>{
+  state.content = $("content").value;
+  saveAndStatus();
+});
+
+function insertAtCursor(el, text){
+  const start = el.selectionStart;
+  const end = el.selectionEnd;
+  const v = el.value;
+  el.value = v.slice(0,start) + text + v.slice(end);
+  el.selectionStart = el.selectionEnd = start + text.length;
+  state.content = el.value;
+  saveAndStatus();
+}
+
+let saveTimer = null;
+function saveAndStatus(){
+  clearTimeout(saveTimer);
+  setStatus("Speichert…", true);
+
+  saveTimer = setTimeout(()=>{
+    state.updatedAt = nowIso();
+    putBoxData(state);
+    setStatus("Gespeichert ✓", true);
+  }, 300);
+}
+
+/* =========================
+   BACKUP EXPORT (Download)
+========================= */
+function downloadJson(filename, obj){
+  const blob = new Blob([JSON.stringify(obj, null, 2)], {type:"application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url), 5000);
+}
+
+$("btnBackup").addEventListener("click", ()=>{
+  // Alles sichern
+  const all = loadAll();
+  const payload = {
+    meta: {
+      app: "Euroboxen",
+      version: 1,
+      exportedAt: nowIso()
+    },
+    data: all
+  };
+  const d = new Date();
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth()+1).padStart(2,"0");
+  const dd = String(d.getDate()).padStart(2,"0");
+  const fn = `Euroboxen_Backup_${yyyy}-${mm}-${dd}.json`;
+
+  downloadJson(fn, payload);
+  setStatus("Backup erstellt ✓", true);
+});
+
+/* =========================
+   BACKUP IMPORT
+========================= */
+$("btnImport").addEventListener("click", ()=>{
+  $("filePicker").value = "";
+  $("filePicker").click();
+});
+
+$("filePicker").addEventListener("change", async ()=>{
+  const file = $("filePicker").files && $("filePicker").files[0];
+  if(!file) return;
+
+  try{
+    const txt = await file.text();
+    const parsed = JSON.parse(txt);
+
+    // Akzeptiere:
+    // (A) { meta, data }
+    // (B) direktes Objekt { "E001": {...}, ... }
+    let incoming = null;
+
+    if(parsed && typeof parsed === "object" && parsed.data && typeof parsed.data === "object"){
+      incoming = parsed.data;
+    }else if(parsed && typeof parsed === "object"){
+      incoming = parsed;
+    }
+
+    if(!incoming || typeof incoming !== "object"){
+      throw new Error("Ungültiges Format");
+    }
+
+    // Merge: vorhandene Daten überschreiben durch Import
+    const current = loadAll();
+    const merged = { ...current, ...incoming };
+    saveAll(merged);
+
+    // Aktuelle Box neu laden
+    state = merged[boxId] ? merged[boxId] : defaultBox();
+
+    $("ort").value = state.ort || "";
+    $("bez").value = state.bez || "";
+    $("content").value = (state.content && state.content.trim().length) ? state.content : "• ";
+    $("kg").value = (state.kg ?? 0) ? String(state.kg) : "";
+
+    $("fragile").classList.toggle("active", !!state.fragile);
+    $("heavy").classList.toggle("active", !!state.heavy);
+    setColor(state.color || "grey", false);
+
+    setStatus("Import OK ✓", true);
+
+  }catch(err){
+    setStatus("Import fehlgeschlagen ✗", false);
+  }
+});
+
+// initial speichern wenn leer
+if(!state.content || !state.content.trim().length){
+  state.content = "• ";
+  putBoxData(state);
+}
 </script>
+
 </body>
 </html>
