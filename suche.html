@@ -6,105 +6,125 @@
   <title>Suche – Euroboxen</title>
   <style>
     :root{
-      --bg:#0b1020;
-      --line:rgba(255,255,255,.10);
-      --text:rgba(255,255,255,.92);
-      --muted:rgba(255,255,255,.70);
-      --green:#29d06b;
-      --red:rgba(255,80,80,.95);
-      --card:rgba(0,0,0,.18);
-      --pill:rgba(255,255,255,.08);
+      --bg: #05070d;
+      --panel: rgba(255,255,255,.06);
+      --panel2: rgba(255,255,255,.04);
+      --line: rgba(255,255,255,.12);
+      --text: rgba(255,255,255,.92);
+      --muted: rgba(255,255,255,.62);
+      --accent: #22c55e;
+      --danger: #ef4444;
+      --shadow: 0 18px 70px rgba(0,0,0,.55);
+      --radius: 18px;
     }
-    *{box-sizing:border-box}
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
     body{
       margin:0;
-      min-height:100vh;
-      background: radial-gradient(1200px 600px at 50% 20%, #111a33 0%, var(--bg) 55%, #070b16 100%);
-      color:var(--text);
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Helvetica Neue", sans-serif;
-      padding:22px 14px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      background: radial-gradient(1200px 800px at 30% 10%, #0d1b3a 0%, #05070d 55%, #02030a 100%);
+      color: var(--text);
     }
 
-    .wrap{ max-width: 900px; margin: 0 auto; }
+    .wrap{
+      max-width: 820px;
+      margin: 0 auto;
+      padding: 18px 14px 40px;
+    }
+
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.04));
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 18px;
+    }
 
     h1{
-      margin:0 0 10px 0;
-      font-size:28px;
-      font-weight:900;
-      letter-spacing:.02em;
+      margin: 0 0 12px;
+      font-size: 44px;
+      letter-spacing: .2px;
+      font-weight: 900;
     }
 
-    .bar{
+    .row{
       display:flex;
       gap:10px;
-      flex-wrap:wrap;
-      margin: 10px 0 14px;
       align-items:center;
+      flex-wrap: wrap;
     }
 
     .search{
-      flex: 1 1 320px;
-      height:46px;
-      border-radius:14px;
-      border:1px solid var(--line);
-      background: var(--card);
-      color: var(--text);
-      padding: 0 14px;
-      font-size: 16px;
-      outline:none;
-    }
-    .search::placeholder{ color: rgba(255,255,255,.35); }
-
-    .btn{
-      height:46px;
-      padding: 0 14px;
-      border-radius:14px;
-      border:1px solid var(--line);
-      background: var(--card);
-      color: var(--text);
-      font-weight: 900;
-      letter-spacing:.02em;
-      cursor:pointer;
-      user-select:none;
-    }
-    .btn:active{ transform:scale(.99); }
-
-    .filters{
+      width:100%;
       display:flex;
       gap:10px;
-      flex-wrap:wrap;
-      margin-bottom: 10px;
+      align-items:center;
+      margin: 10px 0 12px;
+    }
+
+    input[type="search"]{
+      width:100%;
+      padding: 14px 14px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: rgba(0,0,0,.22);
+      color: var(--text);
+      outline: none;
+      font-size: 16px;
+    }
+    input[type="search"]::placeholder{ color: rgba(255,255,255,.45); }
+
+    .btn{
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: rgba(0,0,0,.20);
+      color: var(--text);
+      font-weight: 800;
+      cursor: pointer;
+      user-select:none;
+      white-space: nowrap;
+    }
+    .btn:active{ transform: translateY(1px); }
+
+    .chips{
+      display:flex;
+      gap:10px;
+      flex-wrap: wrap;
+      margin: 12px 0 10px;
     }
 
     .chip{
-      display:inline-flex;
+      width: 52px;
+      height: 52px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(0,0,0,.22);
+      display:flex;
       align-items:center;
-      gap:8px;
-      padding:10px 12px;
-      border-radius:999px;
-      border:1px solid var(--line);
-      background: var(--pill);
+      justify-content:center;
+      font-size: 22px;
       cursor:pointer;
       user-select:none;
-      font-weight:800;
-      color: var(--text);
+      box-shadow: 0 10px 30px rgba(0,0,0,.35) inset;
     }
-    .chip.on{
-      border-color: rgba(41,208,107,.55);
-      box-shadow: 0 0 0 2px rgba(41,208,107,.14);
-      background: rgba(41,208,107,.10);
+    .chip.active{
+      outline: 2px solid rgba(34,197,94,.55);
+      border-color: rgba(34,197,94,.55);
     }
 
     .meta{
+      margin: 8px 0 12px;
       color: var(--muted);
-      font-size: 13px;
-      margin: 6px 0 12px;
+      font-weight: 700;
     }
 
     .list{
       display:flex;
-      flex-direction:column;
-      gap:10px;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 10px;
     }
 
     .item{
@@ -115,75 +135,95 @@
       display:flex;
       gap:12px;
       align-items:flex-start;
+
+      /* FIX: verhindert, dass der Button gequetscht wird */
+      flex-wrap: nowrap;
     }
 
-    .left{
-      min-width:92px;
-    }
-    .box{
-      font-weight: 900;
-      letter-spacing:.08em;
-      font-size: 18px;
-      margin-bottom: 4px;
-    }
-    .pills{
+    .badgeCol{
       display:flex;
-      gap:6px;
-      flex-wrap:wrap;
+      flex-direction: column;
+      gap: 8px;
+      min-width: 54px;
+      align-items:flex-start;
+      padding-top: 2px;
     }
-    .pill{
-      font-size:12px;
-      padding:6px 8px;
-      border-radius:999px;
-      border:1px solid var(--line);
-      background: rgba(0,0,0,.20);
-      color: rgba(255,255,255,.86);
-      font-weight: 800;
-      white-space:nowrap;
+
+    .mini{
+      width: 26px;
+      height: 26px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: rgba(0,0,0,.22);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight: 900;
+      font-size: 12px;
+      color: rgba(255,255,255,.85);
     }
-    .pill.red{
-      border-color: rgba(255,80,80,.55);
-      box-shadow: 0 0 0 2px rgba(255,80,80,.12);
-    }
-    .pill.green{
-      border-color: rgba(41,208,107,.55);
-      box-shadow: 0 0 0 2px rgba(41,208,107,.12);
+
+    .square{
+      width: 20px;
+      height: 20px;
+      border-radius: 6px;
+      border: 1px solid var(--line);
+      background: rgba(0,0,0,.30);
     }
 
     .right{
       flex: 1 1 auto;
-      min-width: 200px;
+
+      /* FIX: iOS braucht das, damit Text kürzt statt Button zu zerdrücken */
+      min-width: 0;
+    }
+
+    .topline{
+      display:flex;
+      gap:10px;
+      align-items:baseline;
+      flex-wrap: wrap;
+    }
+
+    .code{
+      font-size: 28px;
+      font-weight: 1000;
+      letter-spacing: .6px;
     }
 
     .title{
-      font-size: 16px;
+      font-size: 26px;
       font-weight: 900;
-      margin: 0 0 2px;
+      color: rgba(255,255,255,.90);
     }
+
     .sub{
-      font-size: 13px;
+      margin-top: 2px;
       color: var(--muted);
-      margin: 0 0 6px;
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
+      font-weight: 700;
     }
 
     .preview{
-      font-size: 14px;
-      color: rgba(255,255,255,.86);
-      white-space: pre-wrap;
-      overflow:hidden;
-      display:-webkit-box;
-      -webkit-line-clamp: 3;
-      -webkit-box-orient: vertical;
+      margin-top: 8px;
+      color: rgba(255,255,255,.80);
+      font-weight: 750;
+      line-height: 1.25;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
+    /* FIX: Öffnen-Button immer breit genug, nicht abgeschnitten */
     a.open{
       margin-left:auto;
       align-self:center;
       text-decoration:none;
       font-weight:900;
+
+      min-width: 96px;     /* genug für „Öffnen“ */
+      text-align: center;
+      flex: 0 0 auto;
+
       padding:10px 12px;
       border-radius:12px;
       border:1px solid var(--line);
@@ -192,253 +232,268 @@
       white-space:nowrap;
     }
 
-    .empty{
-      border:1px dashed var(--line);
-      border-radius:16px;
-      padding:16px;
-      color: var(--muted);
-      background: rgba(0,0,0,.15);
+    a.open:active{ transform: translateY(1px); }
+
+    .hint{
+      margin-top: 14px;
+      color: rgba(255,255,255,.55);
+      font-weight: 700;
+      font-size: 13px;
+      line-height: 1.35;
     }
-    code{ color: rgba(255,255,255,.9); }
+
+    @media (max-width: 420px){
+      h1{ font-size: 40px; }
+      .code{ font-size: 26px; }
+      .title{ font-size: 22px; }
+      a.open{ min-width: 92px; }
+    }
   </style>
 </head>
 <body>
   <div class="wrap">
-    <h1>Suche</h1>
+    <div class="card">
+      <h1>Suche</h1>
 
-    <div class="bar">
-      <input id="q" class="search" placeholder="Suche nach Ort, Bezeichnung, Inhalt, kg… (z. B. Kabel, Küche, 12)" />
-      <button id="reload" class="btn" type="button">Neu einlesen</button>
-      <button id="clear" class="btn" type="button">Leeren</button>
+      <div class="search">
+        <input id="q" type="search" placeholder="Suche nach Ort, Bezeichnung, Inhalt, kg… (z. B. E022, Küche, 12kg)" autocomplete="off" />
+      </div>
+
+      <div class="row" style="gap:12px;">
+        <button class="btn" id="reloadBtn">Neu einlesen</button>
+        <button class="btn" id="clearBtn">Leeren</button>
+      </div>
+
+      <div class="chips" aria-label="Filter">
+        <div class="chip" id="fFragile" title="Zerbrechlich">🍷</div>
+        <div class="chip" id="fHeavy" title="Heavy">🏋️</div>
+        <div class="chip" id="fBlack" title="Schwarz">⬛</div>
+        <div class="chip" id="fGrey" title="Grau">⬜</div>
+      </div>
+
+      <div class="meta" id="meta">Gefunden: 0 / 0 (nur dieses Gerät)</div>
+
+      <div class="list" id="list"></div>
+
+      <div class="hint">
+        Hinweis: Die Suche zeigt nur Boxen, die auf <b>diesem Gerät</b> bereits gespeichert wurden (localStorage).
+        „Neu einlesen“ lädt neu aus dem Gerätespeicher.
+      </div>
     </div>
-
-    <div class="filters">
-      <div id="fFragile" class="chip" title="nur zerbrechlich">🍷</div>
-      <div id="fHeavy" class="chip" title="nur heavy">🏋️</div>
-      <div id="fBlack" class="chip" title="nur schwarze Box">⬛</div>
-      <div id="fGray" class="chip" title="nur graue Box">⬜</div>
-    </div>
-
-    <div id="meta" class="meta"></div>
-    <div id="list" class="list"></div>
   </div>
 
-<script>
-(() => {
-  const PREFIX = "eurobox:";
-  const BULLET = "• ";
+  <script>
+    // --- Speicher-Keys (müssen zu deiner index.html passen) ---
+    // Erwartet pro Box ein JSON unter key: "box:E012" o.ä.
+    // Struktur (Beispiel):
+    // { code:"E012", ort:"KUECHE", title:"Halloween", text:"• ...", fragile:true, heavy:true, kg:"12", color:"grey", updated: 1234567890 }
+    //
+    // Wenn du andere Keys nutzt, sag kurz welche – dann passe ich es an.
+    const BOX_PREFIX = "box:";
 
-  const elQ = document.getElementById("q");
-  const elReload = document.getElementById("reload");
-  const elClear = document.getElementById("clear");
-  const elList = document.getElementById("list");
-  const elMeta = document.getElementById("meta");
+    const $ = (id) => document.getElementById(id);
 
-  const fFragile = document.getElementById("fFragile");
-  const fHeavy = document.getElementById("fHeavy");
-  const fBlack = document.getElementById("fBlack");
-  const fGray = document.getElementById("fGray");
-
-  let all = [];
-
-  function safeParse(s){
-    try { return JSON.parse(s); } catch { return null; }
-  }
-
-  function normalize(text){
-    return (text || "").toString().toLowerCase();
-  }
-
-  function preview(text){
-    const t = (text || "").toString().trim();
-    if (!t) return "";
-    // optional: bullets hübsch lassen
-    return t;
-  }
-
-  function boxIdFromKey(k){
-    return (k || "").slice(PREFIX.length).toUpperCase();
-  }
-
-  function currentBaseUrl(){
-    // same folder as suche.html
-    // -> index.html is in same folder and opened with ?box=E002
-    return location.origin + location.pathname.replace(/suche\.html$/i, "");
-  }
-
-  function buildOpenUrl(box){
-    // index.html in same dir:
-    return currentBaseUrl() + "?box=" + encodeURIComponent(box);
-  }
-
-  function readAll(){
-    const items = [];
-    for (let i = 0; i < localStorage.length; i++) {
-      const k = localStorage.key(i);
-      if (!k || !k.startsWith(PREFIX)) continue;
-
-      const raw = localStorage.getItem(k);
-      const d = safeParse(raw);
-      if (!d) continue;
-
-      const box = boxIdFromKey(k);
-      items.push({
-        box,
-        key: k,
-        ort: (d.ort || "").toString().toUpperCase(),
-        title: (d.title || "").toString(),
-        content: (d.content || "").toString(),
-        kg: (d.kg || "").toString(),
-        fragile: !!d.fragile,
-        heavy: !!d.heavy,
-        color: (d.color || "").toString(), // "black" | "gray"
-        updatedAt: d.updatedAt || 0
-      });
-    }
-
-    // Sort: Box-ID aufsteigend (E001…)
-    items.sort((a,b) => a.box.localeCompare(b.box, "de", {numeric:true, sensitivity:"base"}));
-    all = items;
-  }
-
-  function filters(){
-    return {
-      fragile: fFragile.classList.contains("on"),
-      heavy: fHeavy.classList.contains("on"),
-      black: fBlack.classList.contains("on"),
-      gray: fGray.classList.contains("on")
+    const state = {
+      filter: { fragile:false, heavy:false, black:false, grey:false },
+      data: []
     };
-  }
 
-  function match(item, query, f){
-    if (f.fragile && !item.fragile) return false;
-    if (f.heavy && !item.heavy) return false;
-    if (f.black && item.color !== "black") return false;
-    if (f.gray && item.color !== "gray") return false;
+    function parseBox(obj, key){
+      if(!obj || typeof obj !== "object") return null;
+      const code = obj.code || (key.startsWith(BOX_PREFIX) ? key.slice(BOX_PREFIX.length) : key);
+      const ort = (obj.ort || "").toString();
+      const title = (obj.title || obj.bezeichnung || "").toString();
+      const text = (obj.text || obj.inhalt || "").toString();
+      const fragile = !!obj.fragile;
+      const heavy = (obj.heavy === undefined) ? true : !!obj.heavy;
+      const kg = (obj.kg || "").toString();
+      const color = (obj.color || "").toString().toLowerCase(); // "black" / "grey"
+      const updated = Number(obj.updated || obj.last || obj.ts || 0);
 
-    if (!query) return true;
-
-    const q = normalize(query);
-    const hay = [
-      item.box,
-      item.ort,
-      item.title,
-      item.content,
-      item.kg
-    ].map(normalize).join(" | ");
-
-    return hay.includes(q);
-  }
-
-  function pill(text, cls=""){
-    const span = document.createElement("span");
-    span.className = "pill" + (cls ? " " + cls : "");
-    span.textContent = text;
-    return span;
-  }
-
-  function render(){
-    const q = elQ.value.trim();
-    const f = filters();
-
-    const hits = all.filter(it => match(it, q, f));
-
-    elMeta.textContent = `Gefunden: ${hits.length} / ${all.length} (nur dieses Gerät)`;
-
-    elList.innerHTML = "";
-    if (all.length === 0) {
-      const empty = document.createElement("div");
-      empty.className = "empty";
-      empty.innerHTML = `Noch keine Daten auf diesem Gerät gespeichert.<br>
-      Öffne zuerst eine Box, z. B. <code>?box=E001</code>, und speichere Inhalt.`;
-      elList.appendChild(empty);
-      return;
+      return { code, ort, title, text, fragile, heavy, kg, color, updated };
     }
 
-    if (hits.length === 0) {
-      const empty = document.createElement("div");
-      empty.className = "empty";
-      empty.textContent = "Keine Treffer. Suchbegriff ändern oder Filter deaktivieren.";
-      elList.appendChild(empty);
-      return;
+    function loadAll(){
+      const items = [];
+      for(let i=0; i<localStorage.length; i++){
+        const k = localStorage.key(i);
+        if(!k || !k.startsWith(BOX_PREFIX)) continue;
+        try{
+          const raw = localStorage.getItem(k);
+          const obj = JSON.parse(raw);
+          const box = parseBox(obj, k);
+          if(box) items.push(box);
+        }catch(e){}
+      }
+
+      // sort by code (E001..E200) if possible, else by updated desc
+      items.sort((a,b)=>{
+        const na = Number((a.code||"").replace(/\D+/g,"")) || 0;
+        const nb = Number((b.code||"").replace(/\D+/g,"")) || 0;
+        if(na !== nb) return na - nb;
+        return (b.updated||0) - (a.updated||0);
+      });
+
+      state.data = items;
+      render();
     }
 
-    for (const it of hits) {
-      const row = document.createElement("div");
-      row.className = "item";
-
-      const left = document.createElement("div");
-      left.className = "left";
-
-      const box = document.createElement("div");
-      box.className = "box";
-      box.textContent = it.box;
-      left.appendChild(box);
-
-      const pills = document.createElement("div");
-      pills.className = "pills";
-      if (it.ort) pills.appendChild(pill(it.ort));
-      if (it.kg) pills.appendChild(pill(it.kg + "kg", "red"));
-      if (it.fragile) pills.appendChild(pill("🍷", "green"));
-      if (it.heavy) pills.appendChild(pill("🏋️", "red"));
-      if (it.color === "black") pills.appendChild(pill("⬛"));
-      if (it.color === "gray") pills.appendChild(pill("⬜"));
-      left.appendChild(pills);
-
-      const right = document.createElement("div");
-      right.className = "right";
-
-      const t = document.createElement("div");
-      t.className = "title";
-      t.textContent = it.title || "(ohne Bezeichnung)";
-      right.appendChild(t);
-
-      const sub = document.createElement("div");
-      sub.className = "sub";
-      const u = it.updatedAt ? new Date(it.updatedAt).toLocaleString("de-DE") : "—";
-      sub.textContent = `Zuletzt: ${u}`;
-      right.appendChild(sub);
-
-      const p = document.createElement("div");
-      p.className = "preview";
-      p.textContent = preview(it.content);
-      right.appendChild(p);
-
-      const a = document.createElement("a");
-      a.className = "open";
-      a.href = buildOpenUrl(it.box);
-      a.textContent = "Öffnen";
-      a.title = "Box öffnen";
-      // iOS: new tab optional; same tab is ok
-      // a.target = "_blank";
-
-      row.appendChild(left);
-      row.appendChild(right);
-      row.appendChild(a);
-
-      elList.appendChild(row);
+    function fmtDate(ts){
+      if(!ts) return "";
+      const d = new Date(ts);
+      const pad = (n)=> String(n).padStart(2,"0");
+      return `${pad(d.getDate())}.${pad(d.getMonth()+1)}.${d.getFullYear()}, ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
     }
-  }
 
-  function toggleChip(el){
-    el.classList.toggle("on");
-    render();
-  }
+    function normalize(s){
+      return (s||"").toString().toLowerCase().trim();
+    }
 
-  // UI events
-  elQ.addEventListener("input", render);
-  elReload.addEventListener("click", () => { readAll(); render(); });
-  elClear.addEventListener("click", () => { elQ.value = ""; render(); });
+    function matchesFilters(box){
+      const f = state.filter;
+      if(f.fragile && !box.fragile) return false;
+      if(f.heavy && !box.heavy) return false;
+      if(f.black && box.color !== "black") return false;
+      if(f.grey && box.color !== "grey") return false;
+      return true;
+    }
 
-  fFragile.addEventListener("click", () => toggleChip(fFragile));
-  fHeavy.addEventListener("click", () => toggleChip(fHeavy));
-  fBlack.addEventListener("click", () => toggleChip(fBlack));
-  fGray.addEventListener("click", () => toggleChip(fGray));
+    function matchesQuery(box, q){
+      if(!q) return true;
+      const hay = [
+        box.code, box.ort, box.title, box.text, box.kg, box.color
+      ].map(normalize).join(" ");
+      return hay.includes(q);
+    }
 
-  // Initial
-  readAll();
-  render();
-})();
-</script>
+    function snippet(text){
+      const t = (text||"").trim();
+      if(!t) return "•";
+      // take first 2 lines
+      const lines = t.split("\n").map(s=>s.trim()).filter(Boolean);
+      const take = lines.slice(0,2).join(" · ");
+      return take || "•";
+    }
+
+    function boxLink(code){
+      // direkt zur index-Seite, die deine Box per ?box= lädt
+      return `./?box=${encodeURIComponent(code)}`;
+    }
+
+    function render(){
+      const q = normalize($("q").value);
+      const list = $("list");
+      list.innerHTML = "";
+
+      const filtered = state.data.filter(b => matchesFilters(b) && matchesQuery(b, q));
+      $("meta").textContent = `Gefunden: ${filtered.length} / ${state.data.length} (nur dieses Gerät)`;
+
+      for(const b of filtered){
+        const item = document.createElement("div");
+        item.className = "item";
+
+        const badgeCol = document.createElement("div");
+        badgeCol.className = "badgeCol";
+
+        // Farb-Square
+        const sq = document.createElement("div");
+        sq.className = "square";
+        if(b.color === "grey") sq.style.background = "#C0C0C0";
+        if(b.color === "black") sq.style.background = "#111";
+        badgeCol.appendChild(sq);
+
+        // KG badge, falls gesetzt
+        if(b.kg){
+          const kg = document.createElement("div");
+          kg.className = "mini";
+          kg.textContent = "KG";
+          badgeCol.appendChild(kg);
+        }
+
+        // Icons
+        if(b.fragile){
+          const ic = document.createElement("div");
+          ic.className = "mini";
+          ic.style.fontSize = "16px";
+          ic.textContent = "🍷";
+          badgeCol.appendChild(ic);
+        }
+        if(b.heavy){
+          const ic2 = document.createElement("div");
+          ic2.className = "mini";
+          ic2.style.fontSize = "16px";
+          ic2.textContent = "🏋️";
+          badgeCol.appendChild(ic2);
+        }
+
+        const right = document.createElement("div");
+        right.className = "right";
+
+        const top = document.createElement("div");
+        top.className = "topline";
+
+        const code = document.createElement("div");
+        code.className = "code";
+        code.textContent = b.code || "(?)";
+
+        const title = document.createElement("div");
+        title.className = "title";
+        title.textContent = b.title ? b.title : "(ohne Bezeichnung)";
+
+        top.appendChild(code);
+        top.appendChild(title);
+
+        const sub = document.createElement("div");
+        sub.className = "sub";
+        sub.textContent = b.updated ? `Zuletzt: ${fmtDate(b.updated)}` : "";
+
+        const prev = document.createElement("div");
+        prev.className = "preview";
+        prev.textContent = snippet(b.text);
+
+        right.appendChild(top);
+        right.appendChild(sub);
+        right.appendChild(prev);
+
+        const open = document.createElement("a");
+        open.className = "open";
+        open.textContent = "Öffnen";
+        open.href = boxLink(b.code);
+
+        item.appendChild(badgeCol);
+        item.appendChild(right);
+        item.appendChild(open);
+
+        list.appendChild(item);
+      }
+    }
+
+    function toggleChip(key, el){
+      state.filter[key] = !state.filter[key];
+      el.classList.toggle("active", state.filter[key]);
+      render();
+    }
+
+    $("reloadBtn").addEventListener("click", loadAll);
+    $("clearBtn").addEventListener("click", ()=>{
+      $("q").value = "";
+      state.filter = { fragile:false, heavy:false, black:false, grey:false };
+      $("fFragile").classList.remove("active");
+      $("fHeavy").classList.remove("active");
+      $("fBlack").classList.remove("active");
+      $("fGrey").classList.remove("active");
+      render();
+    });
+
+    $("fFragile").addEventListener("click", ()=>toggleChip("fragile", $("fFragile")));
+    $("fHeavy").addEventListener("click", ()=>toggleChip("heavy", $("fHeavy")));
+    $("fBlack").addEventListener("click", ()=>toggleChip("black", $("fBlack")));
+    $("fGrey").addEventListener("click", ()=>toggleChip("grey", $("fGrey")));
+
+    $("q").addEventListener("input", render);
+
+    // initial
+    loadAll();
+  </script>
 </body>
 </html>
