@@ -7,15 +7,20 @@
   <style>
     :root{
       --bg: #05070d;
-      --panel: rgba(255,255,255,.06);
-      --panel2: rgba(255,255,255,.04);
-      --line: rgba(255,255,255,.12);
       --text: rgba(255,255,255,.92);
       --muted: rgba(255,255,255,.62);
-      --accent: #22c55e;
+      --line: rgba(255,255,255,.12);
+      --panel: rgba(255,255,255,.06);
+      --panel2: rgba(0,0,0,.22);
       --shadow: 0 18px 70px rgba(0,0,0,.55);
       --radius: 18px;
+
+      --ok: #22c55e;
+
+      --grey: #C0C0C0;
+      --black: #111;
     }
+
     *{ box-sizing:border-box; }
     html,body{ height:100%; }
     body{
@@ -24,129 +29,248 @@
       background: radial-gradient(1200px 800px at 30% 10%, #0d1b3a 0%, #05070d 55%, #02030a 100%);
       color: var(--text);
     }
-    .wrap{ max-width: 820px; margin: 0 auto; padding: 18px 14px 40px; }
+
+    .wrap{ max-width: 980px; margin: 0 auto; padding: 18px 14px 40px; }
+
     .card{
       background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.04));
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: 22px;
       box-shadow: var(--shadow);
       padding: 18px;
     }
-    h1{ margin: 0 0 12px; font-size: 44px; font-weight: 900; }
-    .search{ width:100%; display:flex; gap:10px; align-items:center; margin: 10px 0 12px; }
-    input[type="search"]{
-      width:100%; padding: 14px 14px;
-      border-radius: 14px; border: 1px solid var(--line);
-      background: rgba(0,0,0,.22); color: var(--text);
-      outline: none; font-size: 16px;
-    }
-    input[type="search"]::placeholder{ color: rgba(255,255,255,.45); }
 
-    .row{ display:flex; gap:10px; align-items:center; flex-wrap: wrap; }
+    h1{
+      margin: 0 0 12px;
+      font-size: 40px;
+      letter-spacing: .3px;
+    }
+
+    .searchBox{
+      display:flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items:center;
+      margin-top: 10px;
+    }
+
+    .searchInput{
+      flex: 1 1 420px;
+      min-width: 260px;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      border: 1px solid var(--line);
+      background: var(--panel2);
+      border-radius: 16px;
+      padding: 12px 14px;
+    }
+    .searchInput input{
+      width:100%;
+      background: transparent;
+      border:0;
+      outline:0;
+      color: var(--text);
+      font-size: 16px;
+      font-weight: 850;
+    }
+    .searchInput input::placeholder{ color: rgba(255,255,255,.35); }
+
+    .btnRow{
+      display:flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
     .btn{
-      padding: 12px 14px; border-radius: 14px;
+      padding: 12px 14px;
+      border-radius: 14px;
       border: 1px solid var(--line);
       background: rgba(0,0,0,.20);
       color: var(--text);
-      font-weight: 800; cursor: pointer; user-select:none; white-space: nowrap;
+      font-weight: 1000;
+      cursor: pointer;
+      user-select:none;
+      white-space: nowrap;
     }
-    .btn:active{ transform: translateY(1px); }
 
-    .chips{ display:flex; gap:10px; flex-wrap: wrap; margin: 12px 0 10px; }
+    .chipRow{
+      display:flex;
+      gap: 10px;
+      align-items:center;
+      flex-wrap: wrap;
+      margin-top: 14px;
+    }
     .chip{
-      width: 52px; height: 52px; border-radius: 999px;
+      width: 54px;
+      height: 54px;
+      border-radius: 18px;
       border: 1px solid var(--line);
       background: rgba(0,0,0,.22);
-      display:flex; align-items:center; justify-content:center;
-      font-size: 22px; cursor:pointer; user-select:none;
-      box-shadow: 0 10px 30px rgba(0,0,0,.35) inset;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size: 22px;
+      cursor:pointer;
+      user-select:none;
     }
     .chip.active{
       outline: 2px solid rgba(34,197,94,.55);
       border-color: rgba(34,197,94,.55);
     }
 
-    .meta{ margin: 8px 0 8px; color: var(--muted); font-weight: 800; }
-    .list{ display:flex; flex-direction: column; gap: 12px; margin-top: 10px; }
+    .chip.color{
+      font-size: 0;
+      position: relative;
+    }
+    .chip.color::after{
+      content:"";
+      width: 22px;
+      height: 22px;
+      border-radius: 7px;
+      border: 1px solid rgba(255,255,255,.15);
+      display:block;
+    }
+    .chip.black::after{ background: var(--black); }
+    .chip.grey::after{ background: var(--grey); }
+
+    .meta{
+      margin-top: 10px;
+      color: var(--muted);
+      font-weight: 900;
+    }
+
+    .list{
+      margin-top: 14px;
+      display:flex;
+      flex-direction: column;
+      gap: 12px;
+    }
 
     .item{
-      border:1px solid var(--line);
-      border-radius:16px;
-      background: rgba(255,255,255,.05);
-      padding: 12px 12px;
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: 18px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      padding: 12px;
       display:flex;
-      gap:12px;
-      align-items:flex-start;
-      flex-wrap: nowrap;  /* wichtig: Button wird nicht gequetscht */
+      gap: 12px;
+      align-items: stretch;
     }
 
-    .badgeCol{
-      display:flex; flex-direction: column; gap: 8px;
-      min-width: 54px; align-items:flex-start; padding-top: 2px;
+    .leftBadge{
+      width: 44px;
+      min-width: 44px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.25);
+    }
+    .badgeDot{
+      width: 18px;
+      height: 18px;
+      border-radius: 7px;
+      border: 1px solid rgba(255,255,255,.15);
+    }
+    .badgeDot.black{ background: var(--black); }
+    .badgeDot.grey{ background: var(--grey); }
+
+    .content{
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+
+    .row1{
+      display:flex;
+      align-items: baseline;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .code{
+      font-weight: 1000;
+      font-size: 28px;
+      letter-spacing: .6px;
+    }
+    .title{
+      font-weight: 1000;
+      font-size: 22px;
+      color: rgba(255,255,255,.92);
+    }
+    .title.muted{ color: rgba(255,255,255,.65); }
+
+    .row2{
+      margin-top: 2px;
+      display:flex;
+      gap: 10px;
+      align-items:center;
+      flex-wrap: wrap;
+      color: rgba(255,255,255,.70);
+      font-weight: 900;
+      font-size: 14px;
+    }
+
+    .iconsInline{
+      display:flex;
+      gap: 8px;
+      align-items:center;
     }
     .mini{
-      width: 26px; height: 26px; border-radius: 8px;
-      border: 1px solid var(--line);
-      background: rgba(0,0,0,.22);
-      display:flex; align-items:center; justify-content:center;
-      font-weight: 900; font-size: 12px;
-      color: rgba(255,255,255,.85);
+      width: 34px;
+      height: 34px;
+      border-radius: 13px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.25);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size: 18px;
     }
-    .square{
-      width: 20px; height: 20px; border-radius: 6px;
-      border: 1px solid var(--line);
-      background: rgba(0,0,0,.30);
+    .kgPill{
+      padding: 6px 10px;
+      border-radius: 13px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.25);
+      font-weight: 1000;
+      white-space: nowrap;
     }
 
-    .right{ flex: 1 1 auto; min-width: 0; } /* iOS: Text darf schrumpfen */
-    .topline{ display:flex; gap:10px; align-items:baseline; flex-wrap: wrap; }
-    .code{ font-size: 28px; font-weight: 1000; letter-spacing: .6px; }
-    .title{ font-size: 26px; font-weight: 900; color: rgba(255,255,255,.90); }
-    .sub{ margin-top: 2px; color: var(--muted); font-weight: 800; }
     .preview{
       margin-top: 8px;
-      color: rgba(255,255,255,.82);
-      font-weight: 750;
+      color: rgba(255,255,255,.86);
+      font-weight: 850;
       line-height: 1.25;
-      white-space: nowrap;
       overflow: hidden;
-      text-overflow: ellipsis;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
     }
 
-    a.open{
-      margin-left:auto;
-      align-self:center;
-      text-decoration:none;
-      font-weight:900;
-      min-width: 104px; /* fix: „Öffnen“ nie abgeschnitten */
-      text-align: center;
-      flex: 0 0 auto;
-      padding:10px 12px;
-      border-radius:12px;
-      border:1px solid var(--line);
-      background: rgba(0,0,0,.20);
+    /* WICHTIG: Öffnen-Button nicht abschneiden */
+    .openWrap{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      min-width: 120px;     /* fix */
+      flex: 0 0 120px;      /* fix */
+    }
+    .openBtn{
+      width: 100%;
+      padding: 12px 10px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.22);
       color: var(--text);
-      white-space:nowrap;
+      font-weight: 1000;
+      font-size: 16px;
+      cursor:pointer;
     }
-    a.open:active{ transform: translateY(1px); }
-
-    details.diag{
-      margin-top: 14px;
-      border:1px solid var(--line);
-      border-radius: 14px;
-      padding: 10px 12px;
-      background: rgba(0,0,0,.18);
-      color: rgba(255,255,255,.80);
-      font-weight: 750;
-    }
-    details.diag summary{ cursor:pointer; user-select:none; font-weight: 900; }
-    .mono{ font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12px; white-space: pre-wrap; word-break: break-word; }
 
     @media (max-width: 420px){
-      h1{ font-size: 40px; }
-      .code{ font-size: 26px; }
-      .title{ font-size: 22px; }
-      a.open{ min-width: 100px; }
+      .openWrap{ min-width: 110px; flex-basis: 110px; }
+      .code{ font-size: 24px; }
+      .title{ font-size: 20px; }
     }
   </style>
 </head>
@@ -155,47 +279,86 @@
     <div class="card">
       <h1>Suche</h1>
 
-      <div class="search">
-        <input id="q" type="search" placeholder="Suche nach Ort, Bezeichnung, Inhalt, kg… (z. B. E022, Küche, 12kg)" autocomplete="off" />
+      <div class="searchBox">
+        <div class="searchInput">
+          <input id="q" placeholder="Suche nach Ort, Bezeichnung, Inhalt, kg… (z. B. E022)" autocomplete="off" />
+        </div>
       </div>
 
-      <div class="row" style="gap:12px;">
+      <div class="btnRow">
         <button class="btn" id="reloadBtn">Neu einlesen</button>
         <button class="btn" id="clearBtn">Leeren</button>
       </div>
 
-      <div class="chips" aria-label="Filter">
+      <div class="chipRow" title="Filter">
         <div class="chip" id="fFragile" title="Zerbrechlich">🍷</div>
         <div class="chip" id="fHeavy" title="Heavy">🏋️</div>
-        <div class="chip" id="fBlack" title="Schwarz">⬛</div>
-        <div class="chip" id="fGrey" title="Grau">⬜</div>
+        <div class="chip color black" id="fBlack" title="Schwarz"></div>
+        <div class="chip color grey" id="fGrey" title="Grau"></div>
       </div>
 
       <div class="meta" id="meta">Gefunden: 0 / 0 (nur dieses Gerät)</div>
 
       <div class="list" id="list"></div>
-
-      <details class="diag" id="diag">
-        <summary>Diagnose (wenn Suche leer bleibt)</summary>
-        <div class="mono" id="diagText">…</div>
-      </details>
     </div>
   </div>
 
   <script>
-    const $ = (id) => document.getElementById(id);
+    const $ = (id)=>document.getElementById(id);
 
+    // ---- Config: Pfad zu deiner Box-Seite (index.html) ----
+    function openUrlFor(code){
+      // gleiche Domain, gleicher Ordner:
+      // /Euroboxen/?box=E012
+      const base = location.origin + location.pathname.replace(/\/suche\.html?$/i, "/");
+      return base + "?box=" + encodeURIComponent(code);
+    }
+
+    // ---- State ----
     const state = {
-      filter: { fragile:false, heavy:false, black:false, grey:false },
-      data: [],
-      diag: { keys: [], hits: [] }
+      boxes: [],
+      filters: { fragile:false, heavy:false, black:false, grey:false },
+      query: ""
     };
 
-    // --- Hilfen ---
-    const CODE_RE = /^E\d{3}$/i;
+    // ---- Utils ----
+    function parseBoxFromStorage(key, raw){
+      try{
+        const obj = JSON.parse(raw);
+        const code = (obj.code || "").toUpperCase().match(/E\d{3}/);
+        if(!code) return null;
 
-    function normalize(s){
-      return (s||"").toString().toLowerCase().trim();
+        // normalize
+        return {
+          code: code[0],
+          ort: (obj.ort || "").toString().toUpperCase().trim(),
+          title: (obj.title || "").toString().trim(),
+          text: (obj.text || "").toString(),
+          fragile: !!obj.fragile,
+          heavy: !!obj.heavy,
+          kg: (obj.kg || "").toString().replace(/\D/g,"").slice(0,2),
+          color: (obj.color || "").toString().toLowerCase(), // "black"|"grey"|""
+          updated: Number(obj.updated || 0) || 0
+        };
+      }catch(e){
+        return null;
+      }
+    }
+
+    function loadAllBoxes(){
+      const out = [];
+      for(let i=0; i<localStorage.length; i++){
+        const k = localStorage.key(i);
+        if(!k) continue;
+        if(!k.startsWith("box:E")) continue;
+        const raw = localStorage.getItem(k);
+        if(!raw) continue;
+        const b = parseBoxFromStorage(k, raw);
+        if(b) out.push(b);
+      }
+      // sort: neueste oben
+      out.sort((a,b)=> (b.updated||0) - (a.updated||0));
+      state.boxes = out;
     }
 
     function fmtDate(ts){
@@ -205,323 +368,149 @@
       return `${pad(d.getDate())}.${pad(d.getMonth()+1)}.${d.getFullYear()}, ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
     }
 
-    function safeJsonParse(raw){
-      if(typeof raw !== "string") return null;
-      try{ return JSON.parse(raw); }catch(e){ return null; }
+    function textPreview(t){
+      const lines = (t||"").split("\n").map(s=>s.trim()).filter(Boolean);
+      if(!lines.length) return "•";
+      return lines.slice(0,3).join("\n");
     }
 
-    function toBox(obj, keyHint){
-      if(!obj || typeof obj !== "object") return null;
-
-      // Code finden: aus obj.code oder aus Key
-      let code = (obj.code || obj.box || obj.id || "").toString().trim();
-      if(!code && keyHint){
-        // mögliche Keyformen:
-        // "box:E012", "eurobox:E012", "E012", "Eurobox:E012", ...
-        const m = keyHint.match(/E\d{3}/i);
-        if(m) code = m[0].toUpperCase();
-      }
-      if(code) code = code.toUpperCase();
-      if(code && !CODE_RE.test(code)) {
-        // manchmal steht "Box E012" drin
-        const m = code.match(/E\d{3}/i);
-        code = m ? m[0].toUpperCase() : code;
-      }
-      if(code && !CODE_RE.test(code)) return null;
-
-      // Felder tolerant mappen
-      const ort = (obj.ort ?? obj.location ?? obj.place ?? "").toString();
-      const title = (obj.title ?? obj.bezeichnung ?? obj.name ?? "").toString();
-      const text  = (obj.text ?? obj.inhalt ?? obj.content ?? "").toString();
-
-      const fragile = !!(obj.fragile ?? obj.zerbrechlich);
-      const heavy   = (obj.heavy === undefined && obj.schwer === undefined) ? true : !!(obj.heavy ?? obj.schwer);
-
-      const kg = (obj.kg ?? obj.weightKg ?? obj.weight ?? "").toString();
-
-      const colorRaw = (obj.color ?? obj.farbe ?? "").toString().toLowerCase();
-      // akzeptiere "grey/gray/grau" und "black/schwarz"
-      let color = "";
-      if(["grey","gray","grau","#c0c0c0"].includes(colorRaw)) color = "grey";
-      if(["black","schwarz","#111","#000"].includes(colorRaw)) color = "black";
-
-      const updated = Number(obj.updated ?? obj.last ?? obj.ts ?? obj.time ?? 0);
-
-      return { code, ort, title, text, fragile, heavy, kg, color, updated };
+    function haystack(b){
+      return [
+        b.code,
+        b.ort,
+        b.title,
+        b.text,
+        b.kg ? (b.kg + "kg") : ""
+      ].join(" ").toLowerCase();
     }
 
-    function addHit(source, key){
-      state.diag.hits.push(`${source}: ${key}`);
-    }
+    function applyFilters(){
+      const q = (state.query||"").trim().toLowerCase();
+      const f = state.filters;
 
-    // --- Daten laden: ALLE Varianten probieren ---
-    function loadAll(){
-      state.diag.keys = [];
-      state.diag.hits = [];
-      const itemsByCode = new Map();
+      return state.boxes.filter(b=>{
+        if(f.fragile && !b.fragile) return false;
+        if(f.heavy && !b.heavy) return false;
+        if(f.black && b.color !== "black") return false;
+        if(f.grey && b.color !== "grey") return false;
 
-      // 1) localStorage: alle Keys scannen
-      for(let i=0; i<localStorage.length; i++){
-        const k = localStorage.key(i);
-        if(!k) continue;
-        state.diag.keys.push(k);
-
-        // a) Direkt-Box-Key (egal welcher Prefix), wenn Key eine E### enthält
-        if(k.match(/E\d{3}/i)){
-          const obj = safeJsonParse(localStorage.getItem(k));
-          const box = toBox(obj, k);
-          if(box){
-            itemsByCode.set(box.code, box);
-            addHit("localStorage/Einzelkey", k);
-            continue;
-          }
+        if(q){
+          return haystack(b).includes(q);
         }
-
-        // b) Sammel-Key: enthält evtl. ein Objekt/Array mit vielen Boxen
-        const obj = safeJsonParse(localStorage.getItem(k));
-        if(!obj) continue;
-
-        const extracted = extractBoxesFromUnknown(obj, `localStorage:${k}`);
-        if(extracted.length){
-          extracted.forEach(b => itemsByCode.set(b.code, b));
-          addHit(`localStorage/Sammelkey(${extracted.length})`, k);
-        }
-      }
-
-      // 2) sessionStorage auch probieren (falls iOS dort landet)
-      for(let i=0; i<sessionStorage.length; i++){
-        const k = sessionStorage.key(i);
-        if(!k) continue;
-
-        const obj = safeJsonParse(sessionStorage.getItem(k));
-        if(!obj) continue;
-
-        // Einzelkey
-        if(k.match(/E\d{3}/i)){
-          const box = toBox(obj, k);
-          if(box){
-            itemsByCode.set(box.code, box);
-            addHit("sessionStorage/Einzelkey", k);
-            continue;
-          }
-        }
-
-        // Sammelkey
-        const extracted = extractBoxesFromUnknown(obj, `sessionStorage:${k}`);
-        if(extracted.length){
-          extracted.forEach(b => itemsByCode.set(b.code, b));
-          addHit(`sessionStorage/Sammelkey(${extracted.length})`, k);
-        }
-      }
-
-      // Map -> Array
-      const items = Array.from(itemsByCode.values());
-
-      // Sortierung: E001..E200
-      items.sort((a,b)=>{
-        const na = Number((a.code||"").replace(/\D+/g,"")) || 0;
-        const nb = Number((b.code||"").replace(/\D+/g,"")) || 0;
-        if(na !== nb) return na - nb;
-        return (b.updated||0) - (a.updated||0);
+        return true;
       });
-
-      state.data = items;
-
-      // Diagnose-Text
-      const diagLines = [];
-      diagLines.push(`Gefundene localStorage-Keys: ${localStorage.length}`);
-      diagLines.push(`Gefundene sessionStorage-Keys: ${sessionStorage.length}`);
-      diagLines.push(`Treffer/Quellen:`);
-      diagLines.push(state.diag.hits.length ? ("- " + state.diag.hits.join("\n- ")) : "- (keine Treffer)");
-      diagLines.push("");
-      diagLines.push("Erste 30 localStorage-Keys:");
-      diagLines.push(state.diag.keys.slice(0,30).map(k=>`- ${k}`).join("\n") || "- (keine)");
-      $("diagText").textContent = diagLines.join("\n");
-
-      render();
-    }
-
-    // Versucht aus einem beliebigen JSON (Array / Objekt / Map) Boxen herauszuziehen
-    function extractBoxesFromUnknown(obj, hint){
-      const out = [];
-
-      // Array direkt
-      if(Array.isArray(obj)){
-        for(const it of obj){
-          const b = toBox(it, hint);
-          if(b) out.push(b);
-        }
-        return out;
-      }
-
-      // Objekt: evtl. { E001:{...}, E002:{...} } oder { boxes:{...} } oder { data:[...] }
-      if(obj && typeof obj === "object"){
-        // a) Wenn es direkt eine Box ist:
-        const direct = toBox(obj, hint);
-        if(direct) return [direct];
-
-        // b) typische Containerfelder
-        const candidates = [];
-        if(obj.boxes) candidates.push(obj.boxes);
-        if(obj.data) candidates.push(obj.data);
-        if(obj.items) candidates.push(obj.items);
-        if(obj.list) candidates.push(obj.list);
-
-        for(const c of candidates){
-          const inner = extractBoxesFromUnknown(c, hint);
-          if(inner.length) out.push(...inner);
-        }
-        if(out.length) return out;
-
-        // c) keys prüfen: E### -> Box
-        for(const k of Object.keys(obj)){
-          if(k.match(/E\d{3}/i)){
-            const b = toBox(obj[k], k);
-            if(b) out.push(b);
-          }
-        }
-        if(out.length) return out;
-
-        // d) falls Werte irgendwo Box-ähnlich sind
-        for(const k of Object.keys(obj)){
-          const v = obj[k];
-          if(v && typeof v === "object"){
-            const inner = extractBoxesFromUnknown(v, `${hint}.${k}`);
-            if(inner.length) out.push(...inner);
-          }
-        }
-      }
-
-      return out;
-    }
-
-    function matchesFilters(box){
-      const f = state.filter;
-      if(f.fragile && !box.fragile) return false;
-      if(f.heavy && !box.heavy) return false;
-      if(f.black && box.color !== "black") return false;
-      if(f.grey && box.color !== "grey") return false;
-      return true;
-    }
-
-    function matchesQuery(box, q){
-      if(!q) return true;
-      const hay = [
-        box.code, box.ort, box.title, box.text, box.kg, box.color
-      ].map(normalize).join(" ");
-      return hay.includes(q);
-    }
-
-    function snippet(text){
-      const t = (text||"").trim();
-      if(!t) return "•";
-      const lines = t.split("\n").map(s=>s.trim()).filter(Boolean);
-      const take = lines.slice(0,2).join(" · ");
-      return take || "•";
-    }
-
-    function boxLink(code){
-      return `./?box=${encodeURIComponent(code)}`;
     }
 
     function render(){
-      const q = normalize($("q").value);
+      const all = state.boxes.length;
+      const res = applyFilters();
+      $("meta").textContent = `Gefunden: ${res.length} / ${all} (nur dieses Gerät)`;
+
       const list = $("list");
       list.innerHTML = "";
 
-      const filtered = state.data.filter(b => matchesFilters(b) && matchesQuery(b, q));
-      $("meta").textContent = `Gefunden: ${filtered.length} / ${state.data.length} (nur dieses Gerät)`;
-
-      for(const b of filtered){
+      for(const b of res){
         const item = document.createElement("div");
         item.className = "item";
 
-        const badgeCol = document.createElement("div");
-        badgeCol.className = "badgeCol";
+        const left = document.createElement("div");
+        left.className = "leftBadge";
+        const dot = document.createElement("div");
+        dot.className = "badgeDot " + (b.color === "grey" ? "grey" : (b.color === "black" ? "black" : ""));
+        left.appendChild(dot);
 
-        const sq = document.createElement("div");
-        sq.className = "square";
-        if(b.color === "grey") sq.style.background = "#C0C0C0";
-        if(b.color === "black") sq.style.background = "#111";
-        badgeCol.appendChild(sq);
+        const content = document.createElement("div");
+        content.className = "content";
 
-        if(b.kg){
-          const kg = document.createElement("div");
-          kg.className = "mini";
-          kg.textContent = "KG";
-          badgeCol.appendChild(kg);
-        }
-        if(b.fragile){
-          const ic = document.createElement("div");
-          ic.className = "mini";
-          ic.style.fontSize = "16px";
-          ic.textContent = "🍷";
-          badgeCol.appendChild(ic);
-        }
-        if(b.heavy){
-          const ic2 = document.createElement("div");
-          ic2.className = "mini";
-          ic2.style.fontSize = "16px";
-          ic2.textContent = "🏋️";
-          badgeCol.appendChild(ic2);
-        }
-
-        const right = document.createElement("div");
-        right.className = "right";
-
-        const top = document.createElement("div");
-        top.className = "topline";
-
+        const row1 = document.createElement("div");
+        row1.className = "row1";
         const code = document.createElement("div");
         code.className = "code";
-        code.textContent = b.code || "(?)";
+        code.textContent = b.code;
 
         const title = document.createElement("div");
-        title.className = "title";
+        title.className = "title" + (b.title ? "" : " muted");
         title.textContent = b.title ? b.title : "(ohne Bezeichnung)";
 
-        top.appendChild(code);
-        top.appendChild(title);
+        row1.appendChild(code);
+        row1.appendChild(title);
 
-        const sub = document.createElement("div");
-        sub.className = "sub";
-        sub.textContent = b.updated ? `Zuletzt: ${fmtDate(b.updated)}` : "";
+        const row2 = document.createElement("div");
+        row2.className = "row2";
+        const last = document.createElement("div");
+        last.textContent = b.updated ? `Zuletzt: ${fmtDate(b.updated)}` : "";
+
+        const icons = document.createElement("div");
+        icons.className = "iconsInline";
+        if(b.kg && b.kg !== "0"){
+          const kg = document.createElement("div");
+          kg.className = "kgPill";
+          kg.textContent = `${b.kg} kg`;
+          icons.appendChild(kg);
+        }
+        if(b.fragile){
+          const m = document.createElement("div");
+          m.className = "mini";
+          m.textContent = "🍷";
+          icons.appendChild(m);
+        }
+        if(b.heavy){
+          const m = document.createElement("div");
+          m.className = "mini";
+          m.textContent = "🏋️";
+          icons.appendChild(m);
+        }
+
+        row2.appendChild(last);
+        if(icons.childNodes.length) row2.appendChild(icons);
 
         const prev = document.createElement("div");
         prev.className = "preview";
-        prev.textContent = snippet(b.text);
+        prev.textContent = textPreview(b.text);
 
-        right.appendChild(top);
-        right.appendChild(sub);
-        right.appendChild(prev);
+        content.appendChild(row1);
+        content.appendChild(row2);
+        content.appendChild(prev);
 
-        const open = document.createElement("a");
-        open.className = "open";
-        open.textContent = "Öffnen";
-        open.href = boxLink(b.code);
+        const openWrap = document.createElement("div");
+        openWrap.className = "openWrap";
+        const openBtn = document.createElement("button");
+        openBtn.className = "openBtn";
+        openBtn.textContent = "Öffnen";
+        openBtn.addEventListener("click", ()=>{
+          location.href = openUrlFor(b.code);
+        });
+        openWrap.appendChild(openBtn);
 
-        item.appendChild(badgeCol);
-        item.appendChild(right);
-        item.appendChild(open);
-
+        item.appendChild(left);
+        item.appendChild(content);
+        item.appendChild(openWrap);
         list.appendChild(item);
       }
     }
 
-    function toggleChip(key, el){
-      state.filter[key] = !state.filter[key];
-      el.classList.toggle("active", state.filter[key]);
+    // ---- UI Events ----
+    function toggleChip(name, el){
+      state.filters[name] = !state.filters[name];
+      el.classList.toggle("active", state.filters[name]);
       render();
     }
 
-    $("reloadBtn").addEventListener("click", loadAll);
+    $("q").addEventListener("input", ()=>{
+      state.query = $("q").value || "";
+      render();
+    });
+
+    $("reloadBtn").addEventListener("click", ()=>{
+      loadAllBoxes();
+      render();
+    });
+
     $("clearBtn").addEventListener("click", ()=>{
       $("q").value = "";
-      state.filter = { fragile:false, heavy:false, black:false, grey:false };
-      $("fFragile").classList.remove("active");
-      $("fHeavy").classList.remove("active");
-      $("fBlack").classList.remove("active");
-      $("fGrey").classList.remove("active");
+      state.query = "";
+      state.filters = { fragile:false, heavy:false, black:false, grey:false };
+      ["fFragile","fHeavy","fBlack","fGrey"].forEach(id=>$(id).classList.remove("active"));
       render();
     });
 
@@ -530,10 +519,9 @@
     $("fBlack").addEventListener("click", ()=>toggleChip("black", $("fBlack")));
     $("fGrey").addEventListener("click", ()=>toggleChip("grey", $("fGrey")));
 
-    $("q").addEventListener("input", render);
-
-    // Start
-    loadAll();
+    // ---- Start ----
+    loadAllBoxes();
+    render();
   </script>
 </body>
 </html>
