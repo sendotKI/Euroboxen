@@ -73,7 +73,7 @@ textarea{
   resize:none;
 }
 
-.iconToggle{
+.icon{
   width:56px;
   height:56px;
   display:flex;
@@ -86,54 +86,24 @@ textarea{
   transition:.15s;
 }
 
-.iconToggle.active{
+.icon.active{
   border-color:var(--ok);
-  box-shadow:0 0 12px rgba(53,208,127,.5);
+  box-shadow:0 0 12px rgba(53,208,127,.6);
 }
 
-.iconToggle.heavy.active{
+.icon.heavy.active{
   border-color:var(--red);
-  box-shadow:0 0 12px rgba(255,77,77,.6);
+  box-shadow:0 0 14px rgba(255,77,77,.7);
+}
+
+.icon.color.active{
+  outline:3px solid var(--ok);
 }
 
 .weightBox{
   width:90px;
   text-align:center;
   font-weight:700;
-}
-
-.switchRow{
-  display:flex;
-  gap:10px;
-  margin-top:10px;
-}
-
-.switch{
-  width:44px;
-  height:26px;
-  background:#333;
-  border-radius:20px;
-  position:relative;
-  cursor:pointer;
-}
-
-.switch::after{
-  content:"";
-  position:absolute;
-  width:20px;
-  height:20px;
-  background:#fff;
-  border-radius:50%;
-  top:3px;
-  left:3px;
-  transition:.15s;
-}
-
-.switch.on{
-  background:var(--ok);
-}
-.switch.on::after{
-  left:21px;
 }
 
 .buttons{
@@ -167,14 +137,14 @@ button{
     </div>
 
     <div class="row">
-      <div class="iconToggle" id="fragile" title="Zerbrechlich">🍷</div>
-      <div class="iconToggle heavy" id="heavy" title="Schwer">🏋️</div>
+      <div class="icon" id="fragile" title="Zerbrechlich">🍷</div>
+      <div class="icon heavy" id="heavy" title="Schwer">🏋️</div>
       <input id="kg" class="weightBox" type="number" min="0" max="99" placeholder="00 kg">
     </div>
 
-    <div class="switchRow">
-      <div class="switch" id="black"></div>
-      <div class="switch on" id="grey"></div>
+    <div class="row">
+      <div class="icon color" id="black" title="Schwarze Box" style="background:#000"></div>
+      <div class="icon color active" id="grey" title="Graue Box" style="background:#C0C0C0"></div>
     </div>
 
     <textarea id="content" placeholder="• Inhalt hier eintragen…"></textarea>
@@ -189,70 +159,59 @@ button{
 </div>
 
 <script>
-const $=id=>document.getElementById(id);
+const $ = id => document.getElementById(id);
 
 const box = new URLSearchParams(location.search).get("box") || "E000";
 $("boxId").textContent = box;
 
 let state = {
   fragile:false,
-  heavy:true,
-  black:false,
-  grey:true,
+  heavy:false,
+  color:"grey",
   kg:0
 };
 
-// 🔥 ZENTRALE LOGIK
-function updateHeavyByWeight(){
-  state.kg = parseInt($("kg").value||0);
+// 🍷 Zerbrechlich
+$("fragile").onclick = () => {
+  state.fragile = !state.fragile;
+  $("fragile").classList.toggle("active", state.fragile);
+};
 
-  if(state.kg >= 16){
-    state.heavy = true;
-    $("heavy").classList.add("active");
-  }else{
-    state.heavy = false;
-    $("heavy").classList.remove("active");
-  }
+// ⚫️ / ⚪️ Farbe
+$("black").onclick = () => setColor("black");
+$("grey").onclick  = () => setColor("grey");
+
+function setColor(c){
+  state.color = c;
+  $("black").classList.toggle("active", c==="black");
+  $("grey").classList.toggle("active", c==="grey");
+  $("card").style.background = c==="black" ? "#000000" : "#C0C0C0";
 }
 
-$("kg").addEventListener("input",updateHeavyByWeight);
+// 🏋️ Heavy automatisch ab 16 kg
+$("kg").addEventListener("input",()=>{
+  state.kg = parseInt($("kg").value||0);
+  state.heavy = state.kg >= 16;
+  $("heavy").classList.toggle("active", state.heavy);
+});
 
-$("fragile").onclick=()=>{
-  state.fragile=!state.fragile;
-  $("fragile").classList.toggle("active",state.fragile);
-};
-
-$("black").onclick=()=>{
-  state.black=true; state.grey=false;
-  $("black").classList.add("on");
-  $("grey").classList.remove("on");
-  $("card").style.background=var(--black);
-};
-
-$("grey").onclick=()=>{
-  state.grey=true; state.black=false;
-  $("grey").classList.add("on");
-  $("black").classList.remove("on");
-  $("card").style.background=var(--grey);
-};
-
-// Aufzählung erzwingen
+// 📝 Aufzählung erzwingen
 $("content").addEventListener("keydown",e=>{
   if(e.key==="Enter"){
     e.preventDefault();
-    $("content").value+="\n• ";
+    $("content").value += "\n• ";
   }
   if(e.key==="Backspace"){
-    const v=$("content").value;
+    const v = $("content").value;
     if(v.endsWith("\n• ")){
-      $("content").value=v.slice(0,-3);
+      $("content").value = v.slice(0,-3);
     }
   }
 });
 
-// Initial
-$("content").value="• ";
-updateHeavyByWeight();
+// Init
+$("content").value = "• ";
+$("kg").dispatchEvent(new Event("input"));
 </script>
 </body>
 </html>
