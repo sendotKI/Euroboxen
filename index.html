@@ -1,572 +1,258 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Eurobox</title>
-  <style>
-    :root{
-      --bg:#0b1020;
-      --line:rgba(255,255,255,.10);
-      --text:rgba(255,255,255,.92);
-      --muted:rgba(255,255,255,.72);
-      --green:#29d06b;
+<meta charset="UTF-8">
+<title>Eurobox</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
-      --box-black:#0b0f14;
-      --box-gray:#C0C0C0;
-    }
+<style>
+:root{
+  --bg:#0b1220;
+  --card:#151c2f;
+  --border:#2a3555;
+  --text:#ffffff;
+  --muted:#9aa3b2;
+  --ok:#35d07f;
+  --red:#ff4d4d;
+  --grey:#C0C0C0;
+  --black:#000000;
+}
 
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      min-height:100vh;
-      background: radial-gradient(1200px 600px at 50% 20%, #111a33 0%, var(--bg) 55%, #070b16 100%);
-      color:var(--text);
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Helvetica Neue", sans-serif;
-      display:flex;
-      align-items:flex-start;
-      justify-content:center;
-      padding:28px 14px;
-    }
+body{
+  margin:0;
+  background:linear-gradient(180deg,#050810,#0b1220);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;
+  color:var(--text);
+}
 
-    .wrap{ width:min(860px, 92vw); display:flex; justify-content:center; }
+.container{
+  max-width:480px;
+  margin:20px auto;
+  padding:20px;
+}
 
-    .card{
-      width:min(720px, 92vw);
-      border-radius:18px;
-      padding:22px 22px 18px;
-      border:1px solid var(--line);
-      box-shadow: 0 10px 50px rgba(0,0,0,.35);
-      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
-      position:relative;
-      overflow:hidden;
-    }
+.card{
+  background:var(--card);
+  border-radius:20px;
+  padding:20px;
+  box-shadow:0 0 40px rgba(0,0,0,.6);
+  transition:.2s;
+}
 
-    .card::before{
-      content:"";
-      position:absolute;
-      inset:0;
-      background: var(--box-gray);
-      opacity:.22;
-      pointer-events:none;
-    }
-    .card[data-color="black"]::before{ background: var(--box-black); opacity:.28; }
-    .card[data-color="gray"]::before{ background: var(--box-gray); opacity:.22; }
-    .card > *{ position:relative; z-index:1; }
+h1{
+  text-align:center;
+  margin:0;
+  font-size:36px;
+  letter-spacing:2px;
+}
 
-    .top{ text-align:center; margin-bottom:12px; }
+.status{
+  text-align:center;
+  color:var(--ok);
+  margin-top:6px;
+}
 
-    .boxno{
-      font-weight:900;
-      letter-spacing:.08em;
-      font-size:42px;
-      line-height:1.1;
-      color: rgba(255,255,255,.92);
-      text-shadow: 0 4px 18px rgba(0,0,0,.35);
-    }
+.row{
+  display:flex;
+  gap:10px;
+  margin-top:16px;
+}
 
-    .saved{
-      margin-top:6px;
-      font-size:14px;
-      color:var(--green);
-      opacity:.65;
-      transition:opacity .25s ease, filter .25s ease;
-      user-select:none;
-    }
-    .saved.show{
-      opacity:1;
-      filter: drop-shadow(0 0 8px rgba(41,208,107,.35));
-    }
+input,textarea{
+  background:#0f172a;
+  border:1px solid var(--border);
+  border-radius:14px;
+  color:#fff;
+  padding:12px;
+  font-size:16px;
+  width:100%;
+}
 
-    .row{
-      display:flex;
-      gap:12px;
-      align-items:center;
-      margin:14px 0 10px;
-      flex-wrap:wrap;
-    }
+textarea{
+  height:180px;
+  resize:none;
+}
 
-    input[type="text"]{
-      height:48px;
-      border-radius:14px;
-      border:1px solid var(--line);
-      outline:none;
-      padding:0 14px;
-      background: rgba(0,0,0,.18);
-      color:var(--text);
-      font-size:18px;
-      width: 100%;
-    }
-    input[type="text"]::placeholder{ color:rgba(255,255,255,.35) }
+.iconToggle{
+  width:56px;
+  height:56px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:26px;
+  border-radius:16px;
+  border:2px solid var(--border);
+  cursor:pointer;
+  transition:.15s;
+}
 
-    .ort{
-      width:140px;
-      max-width: 140px;
-      text-transform:uppercase;
-      font-weight:800;
-      letter-spacing:.08em;
-    }
+.iconToggle.active{
+  border-color:var(--ok);
+  box-shadow:0 0 12px rgba(53,208,127,.5);
+}
 
-    .title{
-      flex: 1 1 220px;
-      min-width: 220px;
-    }
+.iconToggle.heavy.active{
+  border-color:var(--red);
+  box-shadow:0 0 12px rgba(255,77,77,.6);
+}
 
-    .iconToggle{
-      width:54px;
-      height:48px;
-      border-radius:14px;
-      border:1px solid var(--line);
-      background: rgba(0,0,0,.18);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size:22px;
-      cursor:pointer;
-      user-select:none;
-      transition: transform .08s ease, background .2s ease, border-color .2s ease, filter .2s ease, box-shadow .2s ease;
-    }
-    .iconToggle:active{ transform:scale(.98); }
+.weightBox{
+  width:90px;
+  text-align:center;
+  font-weight:700;
+}
 
-    .iconToggle.on{
-      border-color: rgba(41,208,107,.55);
-      background: rgba(41,208,107,.10);
-      filter: drop-shadow(0 0 10px rgba(41,208,107,.20));
-    }
+.switchRow{
+  display:flex;
+  gap:10px;
+  margin-top:10px;
+}
 
-    .iconToggle.heavy.on{
-      border-color: rgba(255, 80, 80, 0.95) !important;
-      background: rgba(255, 80, 80, 0.10) !important;
-      box-shadow:
-        0 0 0 2px rgba(255, 80, 80, 0.35),
-        0 0 22px rgba(255, 80, 80, 0.55) !important;
-      filter: none !important;
-    }
+.switch{
+  width:44px;
+  height:26px;
+  background:#333;
+  border-radius:20px;
+  position:relative;
+  cursor:pointer;
+}
 
-    .colorWrap{
-      display:flex;
-      gap:10px;
-      margin:6px 0 12px;
-      align-items:center;
-      justify-content:flex-start;
-    }
+.switch::after{
+  content:"";
+  position:absolute;
+  width:20px;
+  height:20px;
+  background:#fff;
+  border-radius:50%;
+  top:3px;
+  left:3px;
+  transition:.15s;
+}
 
-    .colorBtn{
-      width:54px;
-      height:38px;
-      border-radius:12px;
-      border:1px solid var(--line);
-      cursor:pointer;
-      background: rgba(0,0,0,.18);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      user-select:none;
-      transition: transform .08s ease, border-color .2s ease, box-shadow .2s ease;
-    }
-    .colorBtn:active{ transform:scale(.98); }
+.switch.on{
+  background:var(--ok);
+}
+.switch.on::after{
+  left:21px;
+}
 
-    .swatch{
-      width:26px;
-      height:18px;
-      border-radius:6px;
-      border:1px solid rgba(255,255,255,.14);
-    }
-    .swatch.black{ background: var(--box-black); }
-    .swatch.gray{ background: var(--box-gray); }
+.buttons{
+  display:flex;
+  gap:10px;
+  margin-top:20px;
+}
 
-    .colorBtn.on{
-      border-color: rgba(41,208,107,.55);
-      box-shadow: 0 0 0 2px rgba(41,208,107,.18);
-    }
-
-    .kgWrap{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      height:48px;
-      padding:0 14px;
-      border-radius:14px;
-      border:1px solid var(--line);
-      background: rgba(0,0,0,.18);
-      min-width: 120px;
-    }
-    .kgWrap input{
-      width: 40px;
-      font-size: 18px;
-      font-weight: 900;
-      color: #fff;
-      background: transparent;
-      border: none;
-      outline: none;
-      text-align: right;
-      padding:0;
-      margin:0;
-    }
-    .kgUnit{
-      font-size: 16px;
-      font-weight: 800;
-      color: rgba(255,255,255,.85);
-      letter-spacing:.02em;
-    }
-
-    textarea{
-      width:100%;
-      min-height:260px;
-      resize:vertical;
-      border-radius:16px;
-      border:1px solid var(--line);
-      outline:none;
-      padding:14px;
-      background: rgba(0,0,0,.18);
-      color:var(--text);
-      font-size:18px;
-      line-height:1.35;
-      white-space:pre-wrap;
-    }
-    textarea::placeholder{ color:rgba(255,255,255,.35) }
-
-    .backupRow{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      margin-top:12px;
-      align-items:center;
-      justify-content:flex-start;
-    }
-
-    .btn{
-      height:42px;
-      padding:0 14px;
-      border-radius:12px;
-      border:1px solid var(--line);
-      background: rgba(0,0,0,.18);
-      color: var(--text);
-      font-weight: 800;
-      letter-spacing: .02em;
-      cursor:pointer;
-      user-select:none;
-    }
-    .btn:active{ transform:scale(.99); }
-
-    .hint{
-      font-size:12px;
-      color: var(--muted);
-      margin-top:6px;
-    }
-
-    @media (max-width:520px){
-      .boxno{ font-size:38px; }
-      .row{ gap:10px; }
-      .ort{ width:130px; max-width:130px; }
-      .iconToggle{ width:52px; }
-      .kgWrap{ min-width: 110px; }
-    }
-  </style>
+button{
+  flex:1;
+  padding:12px;
+  border-radius:14px;
+  border:none;
+  background:#1f2a4d;
+  color:#fff;
+  font-size:14px;
+}
+</style>
 </head>
 
 <body>
-  <div class="wrap">
-    <div class="card" id="card" data-color="gray">
-      <div class="top">
-        <div class="boxno" id="boxNo">E000</div>
-        <div class="saved" id="savedState">Gespeichert ✓</div>
-      </div>
+<div class="container">
+  <div class="card" id="card">
 
-      <div class="row">
-        <input class="ort" id="ort" type="text" maxlength="6" placeholder="ORT" />
-        <input class="title" id="title" type="text" placeholder="Bezeichnung" />
+    <h1 id="boxId">E000</h1>
+    <div class="status">Gespeichert ✓</div>
 
-        <div class="iconToggle" id="fragile" title="Zerbrechlich">🍷</div>
-        <div class="iconToggle heavy" id="heavy" title="Heavy">🏋️</div>
-
-        <div class="kgWrap" title="Gewicht">
-          <input id="kg" inputmode="numeric" pattern="[0-9]*" maxlength="2" placeholder="00">
-          <span class="kgUnit">kg</span>
-        </div>
-      </div>
-
-      <div class="colorWrap">
-        <div class="colorBtn" id="cBlack" title="Schwarze Box"><div class="swatch black"></div></div>
-        <div class="colorBtn on" id="cGray" title="Graue Box"><div class="swatch gray"></div></div>
-      </div>
-
-      <textarea id="content" placeholder="Inhalt hier eintragen..."></textarea>
-
-      <div class="backupRow">
-        <button class="btn" id="exportBtn" type="button">Backup nach iCloud</button>
-        <button class="btn" id="importBtn" type="button">Backup importieren</button>
-        <input id="fileInput" type="file" accept="application/json" style="display:none" />
-      </div>
-      <div class="hint">
-        iPhone: Backup → Teilen-Menü → „In Dateien sichern“ → iCloud Drive. (1 Tap + 1 Auswahl)
-      </div>
+    <div class="row">
+      <input id="ort" maxlength="6" placeholder="ORT">
+      <input id="bez" placeholder="Bezeichnung">
     </div>
+
+    <div class="row">
+      <div class="iconToggle" id="fragile" title="Zerbrechlich">🍷</div>
+      <div class="iconToggle heavy" id="heavy" title="Schwer">🏋️</div>
+      <input id="kg" class="weightBox" type="number" min="0" max="99" placeholder="00 kg">
+    </div>
+
+    <div class="switchRow">
+      <div class="switch" id="black"></div>
+      <div class="switch on" id="grey"></div>
+    </div>
+
+    <textarea id="content" placeholder="• Inhalt hier eintragen…"></textarea>
+
+    <div class="buttons">
+      <button>Backup nach iCloud</button>
+      <button>Backup importieren</button>
+      <button>JSON laden</button>
+    </div>
+
   </div>
+</div>
 
 <script>
-(function(){
-  const BULLET = "• ";
-  const PREFIX = "eurobox:";
+const $=id=>document.getElementById(id);
 
-  const params = new URLSearchParams(location.search);
-  const box = (params.get("box") || "E000").toUpperCase().trim();
+const box = new URLSearchParams(location.search).get("box") || "E000";
+$("boxId").textContent = box;
 
-  const boxNoEl = document.getElementById("boxNo");
-  const savedEl = document.getElementById("savedState");
-  const ortEl = document.getElementById("ort");
-  const titleEl = document.getElementById("title");
-  const contentEl = document.getElementById("content");
+let state = {
+  fragile:false,
+  heavy:true,
+  black:false,
+  grey:true,
+  kg:0
+};
 
-  const fragileEl = document.getElementById("fragile");
-  const heavyEl = document.getElementById("heavy");
-  const kgEl = document.getElementById("kg");
+// 🔥 ZENTRALE LOGIK
+function updateHeavyByWeight(){
+  state.kg = parseInt($("kg").value||0);
 
-  const cardEl = document.getElementById("card");
-  const cBlackEl = document.getElementById("cBlack");
-  const cGrayEl = document.getElementById("cGray");
-
-  const exportBtn = document.getElementById("exportBtn");
-  const importBtn = document.getElementById("importBtn");
-  const fileInput = document.getElementById("fileInput");
-
-  boxNoEl.textContent = box;
-  const storageKey = PREFIX + box;
-
-  function showSaved(){
-    savedEl.classList.add("show");
-    setTimeout(()=> savedEl.classList.remove("show"), 1200);
+  if(state.kg >= 16){
+    state.heavy = true;
+    $("heavy").classList.add("active");
+  }else{
+    state.heavy = false;
+    $("heavy").classList.remove("active");
   }
+}
 
-  function cleanKg(v){ return (v || "").replace(/\D/g, "").slice(0, 2); }
+$("kg").addEventListener("input",updateHeavyByWeight);
 
-  function setToggle(el, on){
-    el.classList.toggle("on", !!on);
-    el.setAttribute("data-on", el.classList.contains("on") ? "1" : "0");
+$("fragile").onclick=()=>{
+  state.fragile=!state.fragile;
+  $("fragile").classList.toggle("active",state.fragile);
+};
+
+$("black").onclick=()=>{
+  state.black=true; state.grey=false;
+  $("black").classList.add("on");
+  $("grey").classList.remove("on");
+  $("card").style.background=var(--black);
+};
+
+$("grey").onclick=()=>{
+  state.grey=true; state.black=false;
+  $("grey").classList.add("on");
+  $("black").classList.remove("on");
+  $("card").style.background=var(--grey);
+};
+
+// Aufzählung erzwingen
+$("content").addEventListener("keydown",e=>{
+  if(e.key==="Enter"){
+    e.preventDefault();
+    $("content").value+="\n• ";
   }
-
-  function setColor(color){
-    const c = (color === "black") ? "black" : "gray";
-    cardEl.setAttribute("data-color", c);
-    cBlackEl.classList.toggle("on", c === "black");
-    cGrayEl.classList.toggle("on", c === "gray");
-  }
-
-  function applyHeavyAuto(){
-    const v = parseInt(cleanKg(kgEl.value || ""), 10);
-    setToggle(heavyEl, Number.isFinite(v) && v >= 1);
-  }
-
-  function ensureBullets(text){
-    const lines = (text || "").split("\n");
-    return lines.map(l => {
-      const t = l.replace(/^\s+/, "");
-      if (t === "") return "";
-      if (t.startsWith(BULLET)) return t;
-      if (t.startsWith("•")) return "• " + t.replace(/^•\s*/, "");
-      return BULLET + t;
-    }).join("\n");
-  }
-
-  function lineStartIndex(text, index){
-    const nl = text.lastIndexOf("\n", index - 1);
-    return nl === -1 ? 0 : nl + 1;
-  }
-
-  function load(){
-    const raw = localStorage.getItem(storageKey);
-    if(!raw) return;
-    try{
-      const d = JSON.parse(raw);
-      ortEl.value = (d.ort || "").toUpperCase().slice(0,6);
-      titleEl.value = d.title || "";
-      kgEl.value = cleanKg(d.kg || "");
-      setToggle(fragileEl, !!d.fragile);
-      setColor(d.color || "gray");
-      contentEl.value = ensureBullets(d.content || "");
-      applyHeavyAuto();
-    }catch(e){}
-  }
-
-  function save(){
-    applyHeavyAuto();
-    const normContent = ensureBullets(contentEl.value);
-
-    if (contentEl.value !== normContent) {
-      const pos = contentEl.selectionStart;
-      contentEl.value = normContent;
-      contentEl.selectionStart = contentEl.selectionEnd = Math.min(pos, contentEl.value.length);
+  if(e.key==="Backspace"){
+    const v=$("content").value;
+    if(v.endsWith("\n• ")){
+      $("content").value=v.slice(0,-3);
     }
-
-    const data = {
-      ort: (ortEl.value || "").toUpperCase().slice(0,6),
-      title: titleEl.value || "",
-      kg: cleanKg(kgEl.value),
-      fragile: fragileEl.classList.contains("on"),
-      heavy: heavyEl.classList.contains("on"),
-      color: cardEl.getAttribute("data-color") || "gray",
-      content: normContent,
-      updatedAt: Date.now()
-    };
-
-    localStorage.setItem(storageKey, JSON.stringify(data));
-    showSaved();
   }
+});
 
-  let t = null;
-  function queueSave(){ clearTimeout(t); t = setTimeout(save, 250); }
-
-  // Enter -> new bullet line, Backspace at line start -> remove bullet
-  contentEl.addEventListener("keydown", (e) => {
-    const v = contentEl.value;
-    const start = contentEl.selectionStart;
-    const end = contentEl.selectionEnd;
-
-    if (e.key === "Enter") {
-      e.preventDefault();
-
-      if (v.trim() === "") {
-        contentEl.value = BULLET;
-        contentEl.selectionStart = contentEl.selectionEnd = contentEl.value.length;
-        queueSave();
-        return;
-      }
-
-      const before = v.slice(0, start);
-      const after = v.slice(end);
-      const insert = "\n" + BULLET;
-      contentEl.value = before + insert + after;
-
-      const newPos = (before + insert).length;
-      contentEl.selectionStart = contentEl.selectionEnd = newPos;
-      queueSave();
-      return;
-    }
-
-    if (e.key === "Backspace" && start === end) {
-      const ls = lineStartIndex(v, start);
-      const prefix = v.slice(ls, ls + BULLET.length);
-
-      // Cursor direkt hinter "• " -> entferne Bullet
-      if (start === ls + BULLET.length && prefix === BULLET) {
-        e.preventDefault();
-        contentEl.value = v.slice(0, ls) + v.slice(ls + BULLET.length);
-        contentEl.selectionStart = contentEl.selectionEnd = ls;
-        queueSave();
-        return;
-      }
-    }
-  });
-
-  contentEl.addEventListener("focus", () => {
-    if (contentEl.value.trim() === "") {
-      contentEl.value = BULLET;
-      contentEl.selectionStart = contentEl.selectionEnd = contentEl.value.length;
-      queueSave();
-    }
-  });
-
-  contentEl.addEventListener("input", queueSave);
-
-  ortEl.addEventListener("input", ()=>{ ortEl.value = (ortEl.value || "").toUpperCase().slice(0,6); queueSave(); });
-  titleEl.addEventListener("input", queueSave);
-
-  kgEl.addEventListener("input", ()=>{ kgEl.value = cleanKg(kgEl.value); queueSave(); });
-
-  fragileEl.addEventListener("click", ()=>{ setToggle(fragileEl, !fragileEl.classList.contains("on")); save(); });
-
-  cBlackEl.addEventListener("click", ()=>{ setColor("black"); save(); });
-  cGrayEl.addEventListener("click", ()=>{ setColor("gray"); save(); });
-
-  // ---- Backup (Share Sheet on iOS if available) ----
-  function buildBackupPayload(){
-    const payload = {
-      version: 1,
-      exportedAt: new Date().toISOString(),
-      origin: location.origin + location.pathname,
-      items: {}
-    };
-    for (let i = 0; i < localStorage.length; i++) {
-      const k = localStorage.key(i);
-      if (!k || !k.startsWith(PREFIX)) continue;
-      payload.items[k] = localStorage.getItem(k);
-    }
-    return payload;
-  }
-
-  async function backupToICloud(){
-    const payload = buildBackupPayload();
-    const blob = new Blob([JSON.stringify(payload, null, 2)], {type:"application/json"});
-    const filename = "Euroboxen-Backup.json";
-
-    // iOS Share Sheet via Web Share API (best effort)
-    if (navigator.canShare && navigator.share) {
-      try{
-        const file = new File([blob], filename, { type: "application/json" });
-        if (navigator.canShare({ files: [file] })) {
-          await navigator.share({
-            files: [file],
-            title: "Euroboxen Backup",
-            text: "Backup-Datei für Euroboxen"
-          });
-          // Nach dem Teilen ist es meist in iCloud/Dateien speicherbar.
-          return;
-        }
-      }catch(e){
-        // fallback below
-      }
-    }
-
-    // Fallback: normaler Download
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    setTimeout(()=> URL.revokeObjectURL(url), 3000);
-    alert("Hinweis: Auf iPhone im Teilen-Menü „In Dateien sichern“ → iCloud Drive.");
-  }
-
-  function importBackupFile(file){
-    const reader = new FileReader();
-    reader.onload = () => {
-      try{
-        const payload = JSON.parse(reader.result);
-        if (!payload || typeof payload !== "object" || !payload.items) {
-          alert("Das Backup-Format ist ungültig.");
-          return;
-        }
-        for (const [k, v] of Object.entries(payload.items)) {
-          if (!k.startsWith(PREFIX)) continue;
-          if (typeof v !== "string") continue;
-          localStorage.setItem(k, v);
-        }
-        load();
-        showSaved();
-        alert("Backup importiert ✓");
-      }catch(e){
-        alert("Backup konnte nicht gelesen werden.");
-      }
-    };
-    reader.readAsText(file);
-  }
-
-  exportBtn.addEventListener("click", backupToICloud);
-  importBtn.addEventListener("click", ()=> fileInput.click());
-  fileInput.addEventListener("change", (e)=>{
-    const f = e.target.files && e.target.files[0];
-    if (f) importBackupFile(f);
-    fileInput.value = "";
-  });
-
-  // init
-  setToggle(fragileEl, false);
-  setToggle(heavyEl, false);
-  load();
-  applyHeavyAuto();
-})();
+// Initial
+$("content").value="• ";
+updateHeavyByWeight();
 </script>
 </body>
 </html>
