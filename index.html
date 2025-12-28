@@ -9,6 +9,7 @@
       --bg:#0b1020;
       --line:rgba(255,255,255,.10);
       --text:rgba(255,255,255,.92);
+      --muted:rgba(255,255,255,.72);
       --green:#29d06b;
 
       /* Box colors */
@@ -56,7 +57,6 @@
     }
     .card[data-color="black"]::before{ background: var(--box-black); opacity:.28; }
     .card[data-color="gray"]::before{ background: var(--box-gray); opacity:.22; }
-
     .card > *{ position:relative; z-index:1; }
 
     .top{
@@ -231,8 +231,38 @@
       color:var(--text);
       font-size:18px;
       line-height:1.35;
+      white-space:pre-wrap;
     }
     textarea::placeholder{ color:rgba(255,255,255,.35) }
+
+    .backupRow{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:12px;
+      align-items:center;
+      justify-content:flex-start;
+    }
+
+    .btn{
+      height:42px;
+      padding:0 14px;
+      border-radius:12px;
+      border:1px solid var(--line);
+      background: rgba(0,0,0,.18);
+      color: var(--text);
+      font-weight: 800;
+      letter-spacing: .02em;
+      cursor:pointer;
+      user-select:none;
+    }
+    .btn:active{ transform:scale(.99); }
+
+    .hint{
+      font-size:12px;
+      color: var(--muted);
+      margin-top:6px;
+    }
 
     @media (max-width:520px){
       .boxno{ font-size:38px; }
@@ -271,12 +301,22 @@
       </div>
 
       <textarea id="content" placeholder="Inhalt hier eintragen..."></textarea>
+
+      <div class="backupRow">
+        <button class="btn" id="exportBtn" type="button">Backup exportieren</button>
+        <button class="btn" id="importBtn" type="button">Backup importieren</button>
+        <input id="fileInput" type="file" accept="application/json" style="display:none" />
+      </div>
+      <div class="hint">
+        Backup enthält alle Boxen, die auf diesem Gerät gespeichert sind (iPhone/PC getrennt).
+      </div>
     </div>
   </div>
 
 <script>
 (function(){
   const BULLET = "• ";
+  const PREFIX = "eurobox:";
 
   const params = new URLSearchParams(location.search);
   const box = (params.get("box") || "E000").toUpperCase().trim();
@@ -295,8 +335,12 @@
   const cBlackEl = document.getElementById("cBlack");
   const cGrayEl = document.getElementById("cGray");
 
+  const exportBtn = document.getElementById("exportBtn");
+  const importBtn = document.getElementById("importBtn");
+  const fileInput = document.getElementById("fileInput");
+
   boxNoEl.textContent = box;
-  const storageKey = "eurobox:" + box;
+  const storageKey = PREFIX + box;
 
   function showSaved(){
     savedEl.classList.add("show");
@@ -309,6 +353,8 @@
 
   function setToggle(el, on){
     el.classList.toggle("on", !!on);
+    // Für CSS-Selektor (optional): data-on
+    el.setAttribute("data-on", el.classList.contains("on") ? "1" : "0");
   }
 
   function setColor(color){
@@ -319,25 +365,39 @@
   }
 
   function applyHeavyAuto(){
-    // ✅ Heavy automatisch ON wenn kg >= 1, sonst OFF
     const v = parseInt(cleanKg(kgEl.value || ""), 10);
     setToggle(heavyEl, Number.isFinite(v) && v >= 1);
   }
 
   function ensureBullets(text){
-    // Macht aus Zeilen automatisch "• " Zeilen, außer leere Zeilen
     const lines = (text || "").split("\n");
     const out = lines.map(l => {
-      const t = l.replace(/^\s+/, ""); // führende spaces weg
+      const t = l.replace(/^\s+/, "");
       if (t === "") return "";
-      return t.startsWith(BULLET) ? t : (BULLET + t.replace(/^•\s?/, ""));
+      if (t.startsWith(BULLET)) return t;
+      // falls jemand "•" ohne Leerzeichen tippt
+      if (t.startsWith("•")) return "• " + t.replace(/^•\s*/, "");
+      return BULLET + t;
     });
     return out.join("\n");
   }
 
+  function normalizeContentKeepCursor(){
+    const before = contentEl.value;
+    const pos = contentEl.selectionStart;
+    const after = ensureBullets(before);
+    if (after !== before) {
+      contentEl.value = after;
+      contentEl.selectionStart = contentEl.selectionEnd = Math.min(pos, after.length);
+    }
+  }
+
   function load(){
     const raw = localStorage.getItem(storageKey);
-    if(!raw) return;
+    if(!raw) {
+      // beim ersten Fokus -> Bullet
+      return;
+    }
 
     try{
       const d = JSON.parse(raw);
@@ -354,79 +414,105 @@
   }
 
   function save(){
-    applyHeavyAuto(); // heavy wird durch kg bestimmt
+    applyHeavyAuto();
+
+    // Inhalt bullet-sicher speichern
+    const normContent = ensureBullets(contentEl.value);
+
+    // Cursor möglichst stabil halten, wenn normalisiert
+    if (contentEl.value !== normContent) {
+      const pos = contentEl.selectionStart;
+      contentEl.value = normContent;
+      contentEl.selectionStart = contentEl.selectionEnd = Math.min(pos, contentEl.value.length);
+    }
 
     const data = {
       ort: (ortEl.value || "").toUpperCase().slice(0,6),
       title: titleEl.value || "",
       kg: cleanKg(kgEl.value),
       fragile: fragileEl.classList.contains("on"),
-      heavy: heavyEl.classList.contains("on"), // wird automatisch gesetzt
+      heavy: heavyEl.classList.contains("on"), // auto
       color: cardEl.getAttribute("data-color") || "gray",
-      content: ensureBullets(contentEl.value),
+      content: normContent,
       updatedAt: Date.now()
     };
-
-    // content ggf. normalisieren (damit es wirklich als Bullet gespeichert wird)
-    if (contentEl.value !== data.content) {
-      const pos = contentEl.selectionStart;
-      contentEl.value = data.content;
-      // cursor möglichst stabil halten
-      contentEl.selectionStart = contentEl.selectionEnd = Math.min(pos, contentEl.value.length);
-    }
 
     localStorage.setItem(storageKey, JSON.stringify(data));
     showSaved();
   }
 
-  // autosave
   let t = null;
   function queueSave(){
     clearTimeout(t);
     t = setTimeout(save, 250);
   }
 
-  // --- Bullet behavior on Enter ---
+  // -------- Bullet behavior --------
+  function lineStartIndex(text, index){
+    const nl = text.lastIndexOf("\n", index - 1);
+    return nl === -1 ? 0 : nl + 1;
+  }
+
   contentEl.addEventListener("keydown", (e) => {
-    if (e.key !== "Enter") return;
-
-    // Standard Enter verhindern und selbst einfügen:
-    e.preventDefault();
-
+    const v = contentEl.value;
     const start = contentEl.selectionStart;
     const end = contentEl.selectionEnd;
-    const v = contentEl.value;
 
-    const before = v.slice(0, start);
-    const after = v.slice(end);
+    // Enter -> neue Zeile mit Bullet
+    if (e.key === "Enter") {
+      e.preventDefault();
 
-    // Wenn am Anfang und leer: erste Bullet setzen
-    const insert = "\n" + BULLET;
+      if (v.trim() === "") {
+        contentEl.value = BULLET;
+        contentEl.selectionStart = contentEl.selectionEnd = contentEl.value.length;
+        queueSave();
+        return;
+      }
 
-    // Wenn Feld komplett leer: direkt Bullet ohne führendes \n
-    if (v.trim() === "") {
-      contentEl.value = BULLET;
-      contentEl.selectionStart = contentEl.selectionEnd = contentEl.value.length;
+      const before = v.slice(0, start);
+      const after = v.slice(end);
+      const insert = "\n" + BULLET;
+      contentEl.value = before + insert + after;
+
+      const newPos = (before + insert).length;
+      contentEl.selectionStart = contentEl.selectionEnd = newPos;
       queueSave();
       return;
     }
 
-    contentEl.value = before + insert + after;
+    // Backspace am Zeilenanfang: Bullet "• " entfernen
+    if (e.key === "Backspace" && start === end) {
+      const ls = lineStartIndex(v, start);
+      const linePrefix = v.slice(ls, ls + BULLET.length);
 
-    const newPos = (before + insert).length;
-    contentEl.selectionStart = contentEl.selectionEnd = newPos;
-
-    queueSave();
+      // Cursor steht direkt hinter dem Bullet?
+      if (start === ls + BULLET.length && linePrefix === BULLET) {
+        e.preventDefault();
+        // entferne den Bullet aus dieser Zeile
+        contentEl.value = v.slice(0, ls) + v.slice(ls + BULLET.length);
+        contentEl.selectionStart = contentEl.selectionEnd = ls;
+        queueSave();
+        return;
+      }
+    }
   });
 
-  // Wenn Nutzer tippt und Feld ist leer → Bullet voranstellen
+  // Beim Fokus: wenn leer -> Bullet setzen
+  contentEl.addEventListener("focus", () => {
+    if (contentEl.value.trim() === "") {
+      contentEl.value = BULLET;
+      contentEl.selectionStart = contentEl.selectionEnd = contentEl.value.length;
+      queueSave();
+    }
+  });
+
+  // Beim normalen Tippen: gelegentlich normalisieren
   contentEl.addEventListener("input", () => {
-    if (contentEl.value === "") return;
-    // Wenn erste Zeile nicht mit Bullet startet, normalisieren (sanft)
+    // nur sanft normalisieren (kein nerviges Cursor-Springen)
     queueSave();
   });
 
-  // events
+  // -------- Standardfelder --------
   ortEl.addEventListener("input", ()=>{ ortEl.value = (ortEl.value || "").toUpperCase().slice(0,6); queueSave(); });
   titleEl.addEventListener("input", queueSave);
 
@@ -437,23 +523,81 @@
 
   fragileEl.addEventListener("click", ()=>{
     setToggle(fragileEl, !fragileEl.classList.contains("on"));
-    save(); // direkt speichern
+    save();
   });
 
   cBlackEl.addEventListener("click", ()=>{ setColor("black"); save(); });
   cGrayEl.addEventListener("click", ()=>{ setColor("gray"); save(); });
 
-  // initial
-  load();
+  // -------- Backup Export/Import --------
+  function exportBackup(){
+    const payload = {
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      origin: location.origin + location.pathname,
+      items: {}
+    };
 
-  // Wenn leer, beim ersten Fokus direkt Bullet setzen
-  contentEl.addEventListener("focus", () => {
-    if (contentEl.value.trim() === "") {
-      contentEl.value = BULLET;
-      contentEl.selectionStart = contentEl.selectionEnd = contentEl.value.length;
-      queueSave();
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (!k || !k.startsWith(PREFIX)) continue;
+      payload.items[k] = localStorage.getItem(k);
     }
-  }, { once:false });
+
+    const blob = new Blob([JSON.stringify(payload, null, 2)], {type:"application/json"});
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "Euroboxen-Backup.json";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+
+    setTimeout(()=> URL.revokeObjectURL(url), 3000);
+  }
+
+  function importBackupFile(file){
+    const reader = new FileReader();
+    reader.onload = () => {
+      try{
+        const payload = JSON.parse(reader.result);
+        if (!payload || typeof payload !== "object" || !payload.items) {
+          alert("Das Backup-Format ist ungültig.");
+          return;
+        }
+
+        // Einspielen (nur eurobox:-Keys)
+        const entries = Object.entries(payload.items);
+        for (const [k, v] of entries) {
+          if (!k.startsWith(PREFIX)) continue;
+          if (typeof v !== "string") continue;
+          localStorage.setItem(k, v);
+        }
+
+        // aktuelle Box neu laden
+        load();
+        showSaved();
+        alert("Backup importiert ✓");
+      }catch(e){
+        alert("Backup konnte nicht gelesen werden.");
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  exportBtn.addEventListener("click", exportBackup);
+  importBtn.addEventListener("click", ()=> fileInput.click());
+  fileInput.addEventListener("change", (e)=>{
+    const f = e.target.files && e.target.files[0];
+    if (f) importBackupFile(f);
+    fileInput.value = "";
+  });
+
+  // initial
+  setToggle(fragileEl, false);
+  setToggle(heavyEl, false);
+  load();
 })();
 </script>
 </body>
