@@ -103,9 +103,14 @@ textarea{
   box-shadow:0 0 14px rgba(255,77,77,.7);
 }
 
-/* 🎨 Farbauswahl kleiner (50%) */
+.weightBox{
+  width:96px;
+  text-align:center;
+  font-weight:700;
+}
+
 .color{
-  width:28px;
+  width:28px;   /* 50% kleiner als vorherige große Schalter */
   height:28px;
   border-radius:8px;
   border:2px solid #444;
@@ -115,19 +120,13 @@ textarea{
   outline:2px solid var(--ok);
 }
 
-.weightBox{
-  width:96px;
-  text-align:center;
-  font-weight:700;
-}
-
 .buttons{
   display:flex;
   gap:10px;
   margin-top:20px;
 }
 
-button{
+button, .btnLike{
   flex:1;
   padding:12px;
   border-radius:14px;
@@ -136,9 +135,13 @@ button{
   color:#fff;
   font-size:14px;
   cursor:pointer;
+  text-align:center;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
 }
 
-button:active{
+button:active, .btnLike:active{
   transform:scale(.99);
 }
 
@@ -147,6 +150,16 @@ button:active{
   font-size:13px;
   color:var(--muted);
   text-align:center;
+}
+
+/* wichtig: NICHT hidden/display:none, damit label for="" zuverlässig funktioniert */
+.fileOffscreen{
+  position:absolute;
+  left:-10000px;
+  top:auto;
+  width:1px;
+  height:1px;
+  opacity:0;
 }
 </style>
 </head>
@@ -178,9 +191,11 @@ button:active{
     <textarea id="content" placeholder="• Inhalt hier eintragen…"></textarea>
 
     <div class="buttons">
-      <button id="btnExport">Backup nach iCloud</button>
-      <button id="btnImport">Backup importieren</button>
-      <button id="btnLoad">Euroboxen.json einlesen</button>
+      <button id="btnExport" type="button">Backup nach iCloud</button>
+
+      <!-- Statt JS-click: Label öffnet Datei-Dialog stabil (kein Chrome-Crash) -->
+      <label class="btnLike" for="fileInput" id="btnImport">Backup importieren</label>
+      <label class="btnLike" for="fileInput" id="btnLoad">Euroboxen.json einlesen</label>
     </div>
 
     <div class="toast" id="toast"></div>
@@ -188,18 +203,16 @@ button:active{
   </div>
 </div>
 
-<input type="file" id="fileInput" accept=".json,application/json" hidden>
+<input type="file" id="fileInput" class="fileOffscreen" accept=".json,application/json">
 
 <script>
 const $ = id => document.getElementById(id);
 
-// ---------- Platform hint ----------
 const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 $("platformHint").textContent = isIOS
   ? "iPhone: Backup → Teilen → In Dateien sichern → iCloud Drive"
-  : "Windows: Backup lädt eine Datei herunter (Downloads). Import liest die Datei wieder ein.";
+  : "Windows: Backup lädt Euroboxen.json herunter. Import liest sie wieder ein.";
 
-// ---------- Load box ----------
 const box = new URLSearchParams(location.search).get("box") || "E000";
 $("boxId").textContent = box;
 
@@ -209,15 +222,12 @@ let state = data[box] || {
   ort:"",
   bez:"",
   content:"",
-
-
   fragile:false,
   heavy:false,
   kg:0,
   color:"grey"
 };
 
-// ---------- Helpers ----------
 function showToast(msg){
   $("toast").textContent = msg;
   setTimeout(()=>{ if($("toast").textContent===msg) $("toast").textContent=""; }, 3500);
@@ -232,7 +242,6 @@ function save(){
   localStorage.setItem("Euroboxen", JSON.stringify(data));
 }
 
-// ---------- UI init ----------
 $("ort").value = state.ort;
 $("bez").value = state.bez;
 $("content").value = state.content || "• ";
@@ -241,7 +250,6 @@ $("kg").value = (state.kg ?? "");
 $("fragile").classList.toggle("active", !!state.fragile);
 $("heavy").classList.toggle("active", !!state.heavy);
 
-// Color
 function setColor(c){
   state.color=c;
   $("grey").classList.toggle("active",c==="grey");
@@ -253,14 +261,13 @@ $("grey").onclick=()=>setColor("grey");
 $("black").onclick=()=>setColor("black");
 setColor(state.color || "grey");
 
-// Fragile toggle (click & glow)
 $("fragile").onclick = ()=>{
   state.fragile=!state.fragile;
   $("fragile").classList.toggle("active",state.fragile);
   save();
 };
 
-// Heavy: auto by weight (>=16)
+// Heavy automatisch ab 16 kg
 $("kg").addEventListener("input", ()=>{
   const v = parseInt(($("kg").value||"0"),10);
   state.kg = isNaN(v) ? 0 : v;
@@ -269,10 +276,9 @@ $("kg").addEventListener("input", ()=>{
   save();
 });
 
-// Inputs save
 document.querySelectorAll("input,textarea").forEach(el=>el.addEventListener("input", save));
 
-// Bullet behavior
+// Bullet-Liste
 $("content").addEventListener("keydown",e=>{
   if(e.key==="Enter"){
     e.preventDefault();
@@ -285,14 +291,13 @@ $("content").addEventListener("keydown",e=>{
   }
 });
 
-// ---------- Backup: Export (Windows-safe) ----------
+// Export (Windows-safe)
 function exportBackup(){
   try{
     const json = JSON.stringify(data, null, 2);
     const blob = new Blob([json], {type:"application/json"});
     const url = URL.createObjectURL(blob);
 
-    // Must be directly in click handler for some browsers
     const a = document.createElement("a");
     a.href = url;
     a.download = "Euroboxen.json";
@@ -306,42 +311,46 @@ function exportBackup(){
     showToast("Fehler beim Export: " + err.message);
   }
 }
+$("btnExport").addEventListener("click", exportBackup);
 
-// ---------- Import ----------
-function openFilePicker(){
-  $("fileInput").value = "";
-  $("fileInput").click();
-}
+// Import (für beide Labels gleich)
+$("fileInput").addEventListener("change", (e)=>{
+  const file = e.target.files && e.target.files[0];
+  if(!file) return;
 
-function handleFile(file){
-  if(!file){ return; }
   const r = new FileReader();
   r.onload = ()=>{
     try{
       const obj = JSON.parse(r.result);
-      if(typeof obj !== "object" || obj === null){
-        throw new Error("Ungültige JSON-Struktur");
-      }
+      if(typeof obj !== "object" || obj === null) throw new Error("Ungültige JSON-Struktur");
+
       data = obj;
       localStorage.setItem("Euroboxen", JSON.stringify(data));
       const count = Object.keys(data).length;
       showToast("Import OK: " + count + " Box(en) geladen.");
-      location.reload();
-    }catch(e){
-      showToast("Import fehlgeschlagen: " + e.message);
+
+      // UI neu befüllen (ohne location.reload → stabiler)
+      state = data[box] || state;
+
+      $("ort").value = state.ort || "";
+      $("bez").value = state.bez || "";
+      $("content").value = state.content || "• ";
+      $("kg").value = (state.kg ?? "");
+
+      $("fragile").classList.toggle("active", !!state.fragile);
+      state.heavy = (parseInt(state.kg||"0",10) >= 16) || !!state.heavy;
+      $("heavy").classList.toggle("active", !!state.heavy);
+      setColor(state.color || "grey");
+
+    }catch(err){
+      showToast("Import fehlgeschlagen: " + err.message);
+    }finally{
+      // wichtig: damit man dieselbe Datei nochmal auswählen kann
+      $("fileInput").value = "";
     }
   };
   r.readAsText(file);
-}
-
-$("fileInput").addEventListener("change", (e)=>{
-  handleFile(e.target.files[0]);
 });
-
-// Buttons
-$("btnExport").addEventListener("click", exportBackup);
-$("btnImport").addEventListener("click", openFilePicker);
-$("btnLoad").addEventListener("click", openFilePicker);
 </script>
 
 </body>
