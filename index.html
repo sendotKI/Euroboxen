@@ -12,7 +12,6 @@
       --muted:rgba(255,255,255,.72);
       --green:#29d06b;
 
-      /* Box colors */
       --box-black:#0b0f14;
       --box-gray:#C0C0C0;
     }
@@ -30,11 +29,7 @@
       padding:28px 14px;
     }
 
-    .wrap{
-      width:min(860px, 92vw);
-      display:flex;
-      justify-content:center;
-    }
+    .wrap{ width:min(860px, 92vw); display:flex; justify-content:center; }
 
     .card{
       width:min(720px, 92vw);
@@ -59,10 +54,7 @@
     .card[data-color="gray"]::before{ background: var(--box-gray); opacity:.22; }
     .card > *{ position:relative; z-index:1; }
 
-    .top{
-      text-align:center;
-      margin-bottom:12px;
-    }
+    .top{ text-align:center; margin-bottom:12px; }
 
     .boxno{
       font-weight:900;
@@ -142,7 +134,6 @@
       filter: drop-shadow(0 0 10px rgba(41,208,107,.20));
     }
 
-    /* Heavy strong red */
     .iconToggle.heavy.on{
       border-color: rgba(255, 80, 80, 0.95) !important;
       background: rgba(255, 80, 80, 0.10) !important;
@@ -303,12 +294,12 @@
       <textarea id="content" placeholder="Inhalt hier eintragen..."></textarea>
 
       <div class="backupRow">
-        <button class="btn" id="exportBtn" type="button">Backup exportieren</button>
+        <button class="btn" id="exportBtn" type="button">Backup nach iCloud</button>
         <button class="btn" id="importBtn" type="button">Backup importieren</button>
         <input id="fileInput" type="file" accept="application/json" style="display:none" />
       </div>
       <div class="hint">
-        Backup enthält alle Boxen, die auf diesem Gerät gespeichert sind (iPhone/PC getrennt).
+        iPhone: Backup → Teilen-Menü → „In Dateien sichern“ → iCloud Drive. (1 Tap + 1 Auswahl)
       </div>
     </div>
   </div>
@@ -347,13 +338,10 @@
     setTimeout(()=> savedEl.classList.remove("show"), 1200);
   }
 
-  function cleanKg(v){
-    return (v || "").replace(/\D/g, "").slice(0, 2);
-  }
+  function cleanKg(v){ return (v || "").replace(/\D/g, "").slice(0, 2); }
 
   function setToggle(el, on){
     el.classList.toggle("on", !!on);
-    // Für CSS-Selektor (optional): data-on
     el.setAttribute("data-on", el.classList.contains("on") ? "1" : "0");
   }
 
@@ -371,43 +359,30 @@
 
   function ensureBullets(text){
     const lines = (text || "").split("\n");
-    const out = lines.map(l => {
+    return lines.map(l => {
       const t = l.replace(/^\s+/, "");
       if (t === "") return "";
       if (t.startsWith(BULLET)) return t;
-      // falls jemand "•" ohne Leerzeichen tippt
       if (t.startsWith("•")) return "• " + t.replace(/^•\s*/, "");
       return BULLET + t;
-    });
-    return out.join("\n");
+    }).join("\n");
   }
 
-  function normalizeContentKeepCursor(){
-    const before = contentEl.value;
-    const pos = contentEl.selectionStart;
-    const after = ensureBullets(before);
-    if (after !== before) {
-      contentEl.value = after;
-      contentEl.selectionStart = contentEl.selectionEnd = Math.min(pos, after.length);
-    }
+  function lineStartIndex(text, index){
+    const nl = text.lastIndexOf("\n", index - 1);
+    return nl === -1 ? 0 : nl + 1;
   }
 
   function load(){
     const raw = localStorage.getItem(storageKey);
-    if(!raw) {
-      // beim ersten Fokus -> Bullet
-      return;
-    }
-
+    if(!raw) return;
     try{
       const d = JSON.parse(raw);
       ortEl.value = (d.ort || "").toUpperCase().slice(0,6);
       titleEl.value = d.title || "";
       kgEl.value = cleanKg(d.kg || "");
-
       setToggle(fragileEl, !!d.fragile);
       setColor(d.color || "gray");
-
       contentEl.value = ensureBullets(d.content || "");
       applyHeavyAuto();
     }catch(e){}
@@ -415,11 +390,8 @@
 
   function save(){
     applyHeavyAuto();
-
-    // Inhalt bullet-sicher speichern
     const normContent = ensureBullets(contentEl.value);
 
-    // Cursor möglichst stabil halten, wenn normalisiert
     if (contentEl.value !== normContent) {
       const pos = contentEl.selectionStart;
       contentEl.value = normContent;
@@ -431,7 +403,7 @@
       title: titleEl.value || "",
       kg: cleanKg(kgEl.value),
       fragile: fragileEl.classList.contains("on"),
-      heavy: heavyEl.classList.contains("on"), // auto
+      heavy: heavyEl.classList.contains("on"),
       color: cardEl.getAttribute("data-color") || "gray",
       content: normContent,
       updatedAt: Date.now()
@@ -442,23 +414,14 @@
   }
 
   let t = null;
-  function queueSave(){
-    clearTimeout(t);
-    t = setTimeout(save, 250);
-  }
+  function queueSave(){ clearTimeout(t); t = setTimeout(save, 250); }
 
-  // -------- Bullet behavior --------
-  function lineStartIndex(text, index){
-    const nl = text.lastIndexOf("\n", index - 1);
-    return nl === -1 ? 0 : nl + 1;
-  }
-
+  // Enter -> new bullet line, Backspace at line start -> remove bullet
   contentEl.addEventListener("keydown", (e) => {
     const v = contentEl.value;
     const start = contentEl.selectionStart;
     const end = contentEl.selectionEnd;
 
-    // Enter -> neue Zeile mit Bullet
     if (e.key === "Enter") {
       e.preventDefault();
 
@@ -480,15 +443,13 @@
       return;
     }
 
-    // Backspace am Zeilenanfang: Bullet "• " entfernen
     if (e.key === "Backspace" && start === end) {
       const ls = lineStartIndex(v, start);
-      const linePrefix = v.slice(ls, ls + BULLET.length);
+      const prefix = v.slice(ls, ls + BULLET.length);
 
-      // Cursor steht direkt hinter dem Bullet?
-      if (start === ls + BULLET.length && linePrefix === BULLET) {
+      // Cursor direkt hinter "• " -> entferne Bullet
+      if (start === ls + BULLET.length && prefix === BULLET) {
         e.preventDefault();
-        // entferne den Bullet aus dieser Zeile
         contentEl.value = v.slice(0, ls) + v.slice(ls + BULLET.length);
         contentEl.selectionStart = contentEl.selectionEnd = ls;
         queueSave();
@@ -497,7 +458,6 @@
     }
   });
 
-  // Beim Fokus: wenn leer -> Bullet setzen
   contentEl.addEventListener("focus", () => {
     if (contentEl.value.trim() === "") {
       contentEl.value = BULLET;
@@ -506,55 +466,67 @@
     }
   });
 
-  // Beim normalen Tippen: gelegentlich normalisieren
-  contentEl.addEventListener("input", () => {
-    // nur sanft normalisieren (kein nerviges Cursor-Springen)
-    queueSave();
-  });
+  contentEl.addEventListener("input", queueSave);
 
-  // -------- Standardfelder --------
   ortEl.addEventListener("input", ()=>{ ortEl.value = (ortEl.value || "").toUpperCase().slice(0,6); queueSave(); });
   titleEl.addEventListener("input", queueSave);
 
-  kgEl.addEventListener("input", ()=>{
-    kgEl.value = cleanKg(kgEl.value);
-    queueSave();
-  });
+  kgEl.addEventListener("input", ()=>{ kgEl.value = cleanKg(kgEl.value); queueSave(); });
 
-  fragileEl.addEventListener("click", ()=>{
-    setToggle(fragileEl, !fragileEl.classList.contains("on"));
-    save();
-  });
+  fragileEl.addEventListener("click", ()=>{ setToggle(fragileEl, !fragileEl.classList.contains("on")); save(); });
 
   cBlackEl.addEventListener("click", ()=>{ setColor("black"); save(); });
   cGrayEl.addEventListener("click", ()=>{ setColor("gray"); save(); });
 
-  // -------- Backup Export/Import --------
-  function exportBackup(){
+  // ---- Backup (Share Sheet on iOS if available) ----
+  function buildBackupPayload(){
     const payload = {
       version: 1,
       exportedAt: new Date().toISOString(),
       origin: location.origin + location.pathname,
       items: {}
     };
-
     for (let i = 0; i < localStorage.length; i++) {
       const k = localStorage.key(i);
       if (!k || !k.startsWith(PREFIX)) continue;
       payload.items[k] = localStorage.getItem(k);
     }
+    return payload;
+  }
 
+  async function backupToICloud(){
+    const payload = buildBackupPayload();
     const blob = new Blob([JSON.stringify(payload, null, 2)], {type:"application/json"});
-    const url = URL.createObjectURL(blob);
+    const filename = "Euroboxen-Backup.json";
 
+    // iOS Share Sheet via Web Share API (best effort)
+    if (navigator.canShare && navigator.share) {
+      try{
+        const file = new File([blob], filename, { type: "application/json" });
+        if (navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            files: [file],
+            title: "Euroboxen Backup",
+            text: "Backup-Datei für Euroboxen"
+          });
+          // Nach dem Teilen ist es meist in iCloud/Dateien speicherbar.
+          return;
+        }
+      }catch(e){
+        // fallback below
+      }
+    }
+
+    // Fallback: normaler Download
+    const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "Euroboxen-Backup.json";
+    a.download = filename;
     document.body.appendChild(a);
     a.click();
     a.remove();
-
     setTimeout(()=> URL.revokeObjectURL(url), 3000);
+    alert("Hinweis: Auf iPhone im Teilen-Menü „In Dateien sichern“ → iCloud Drive.");
   }
 
   function importBackupFile(file){
@@ -566,16 +538,11 @@
           alert("Das Backup-Format ist ungültig.");
           return;
         }
-
-        // Einspielen (nur eurobox:-Keys)
-        const entries = Object.entries(payload.items);
-        for (const [k, v] of entries) {
+        for (const [k, v] of Object.entries(payload.items)) {
           if (!k.startsWith(PREFIX)) continue;
           if (typeof v !== "string") continue;
           localStorage.setItem(k, v);
         }
-
-        // aktuelle Box neu laden
         load();
         showSaved();
         alert("Backup importiert ✓");
@@ -586,7 +553,7 @@
     reader.readAsText(file);
   }
 
-  exportBtn.addEventListener("click", exportBackup);
+  exportBtn.addEventListener("click", backupToICloud);
   importBtn.addEventListener("click", ()=> fileInput.click());
   fileInput.addEventListener("change", (e)=>{
     const f = e.target.files && e.target.files[0];
@@ -594,10 +561,11 @@
     fileInput.value = "";
   });
 
-  // initial
+  // init
   setToggle(fragileEl, false);
   setToggle(heavyEl, false);
   load();
+  applyHeavyAuto();
 })();
 </script>
 </body>
