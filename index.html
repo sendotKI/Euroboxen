@@ -13,10 +13,7 @@
 
       /* Box colors */
       --box-black:#0b0f14;
-      --box-gray:#C0C0C0; /* ✅ wie gewünscht */
-
-      /* Heavy tint */
-      --heavy-tint: rgba(255, 80, 80, 0.16);
+      --box-gray:#C0C0C0;
     }
 
     *{box-sizing:border-box}
@@ -38,7 +35,6 @@
       justify-content:center;
     }
 
-    /* Card with dynamic background */
     .card{
       width:min(720px, 92vw);
       border-radius:18px;
@@ -50,7 +46,6 @@
       overflow:hidden;
     }
 
-    /* base color overlay */
     .card::before{
       content:"";
       position:absolute;
@@ -61,19 +56,6 @@
     }
     .card[data-color="black"]::before{ background: var(--box-black); opacity:.28; }
     .card[data-color="gray"]::before{ background: var(--box-gray); opacity:.22; }
-
-    /* heavy warning overlay */
-    .card::after{
-      content:"";
-      position:absolute;
-      inset:0;
-      background: transparent;
-      pointer-events:none;
-      transition: background .25s ease;
-    }
-    .card[data-heavy="1"]::after{
-      background: var(--heavy-tint);
-    }
 
     .card > *{ position:relative; z-index:1; }
 
@@ -125,7 +107,6 @@
     }
     input[type="text"]::placeholder{ color:rgba(255,255,255,.35) }
 
-    /* ORT field: 6 chars */
     .ort{
       width:140px;
       max-width: 140px;
@@ -139,7 +120,6 @@
       min-width: 220px;
     }
 
-    /* Icon toggles */
     .iconToggle{
       width:54px;
       height:48px;
@@ -162,7 +142,7 @@
       filter: drop-shadow(0 0 10px rgba(41,208,107,.20));
     }
 
-    /* Heavy: deutlich stärker (rot) */
+    /* Heavy strong red */
     .iconToggle.heavy.on{
       border-color: rgba(255, 80, 80, 0.95) !important;
       background: rgba(255, 80, 80, 0.10) !important;
@@ -172,7 +152,6 @@
       filter: none !important;
     }
 
-    /* Color selector */
     .colorWrap{
       display:flex;
       gap:10px;
@@ -188,7 +167,6 @@
       border:1px solid var(--line);
       cursor:pointer;
       background: rgba(0,0,0,.18);
-      position:relative;
       display:flex;
       align-items:center;
       justify-content:center;
@@ -211,7 +189,6 @@
       box-shadow: 0 0 0 2px rgba(41,208,107,.18);
     }
 
-    /* KG field (max 2 digits + fixed kg) */
     .kgWrap{
       display:flex;
       align-items:center;
@@ -269,31 +246,25 @@
 
 <body>
   <div class="wrap">
-    <div class="card" id="card" data-color="gray" data-heavy="0">
+    <div class="card" id="card" data-color="gray">
       <div class="top">
         <div class="boxno" id="boxNo">E000</div>
         <div class="saved" id="savedState">Gespeichert ✓</div>
       </div>
 
-      <!-- ORT + Bezeichnung + Icons + KG -->
       <div class="row">
         <input class="ort" id="ort" type="text" maxlength="6" placeholder="ORT" />
         <input class="title" id="title" type="text" placeholder="Bezeichnung" />
 
-        <!-- Zerbrechlich -->
         <div class="iconToggle" id="fragile" title="Zerbrechlich">🍷</div>
-
-        <!-- Heavy -->
         <div class="iconToggle heavy" id="heavy" title="Heavy">🏋️</div>
 
-        <!-- Gewicht -->
         <div class="kgWrap" title="Gewicht">
           <input id="kg" inputmode="numeric" pattern="[0-9]*" maxlength="2" placeholder="00">
           <span class="kgUnit">kg</span>
         </div>
       </div>
 
-      <!-- Box-Farbe -->
       <div class="colorWrap">
         <div class="colorBtn" id="cBlack" title="Schwarze Box"><div class="swatch black"></div></div>
         <div class="colorBtn on" id="cGray" title="Graue Box"><div class="swatch gray"></div></div>
@@ -305,10 +276,10 @@
 
 <script>
 (function(){
+  const BULLET = "• ";
+
   const params = new URLSearchParams(location.search);
   const box = (params.get("box") || "E000").toUpperCase().trim();
-
-  const HEAVY_THRESHOLD = 15; // ✅ ab 15kg automatisch Heavy
 
   const boxNoEl = document.getElementById("boxNo");
   const savedEl = document.getElementById("savedState");
@@ -325,7 +296,6 @@
   const cGrayEl = document.getElementById("cGray");
 
   boxNoEl.textContent = box;
-
   const storageKey = "eurobox:" + box;
 
   function showSaved(){
@@ -348,26 +318,21 @@
     cGrayEl.classList.toggle("on", c === "gray");
   }
 
-  function applyHeavyVisual(on){
-    cardEl.setAttribute("data-heavy", on ? "1" : "0");
+  function applyHeavyAuto(){
+    // ✅ Heavy automatisch ON wenn kg >= 1, sonst OFF
+    const v = parseInt(cleanKg(kgEl.value || ""), 10);
+    setToggle(heavyEl, Number.isFinite(v) && v >= 1);
   }
 
-  function parseKg(){
-    const v = cleanKg(kgEl.value);
-    if (!v) return 0;
-    return parseInt(v, 10) || 0;
-  }
-
-  // ✅ Heavy automatisch anhand kg setzen (ohne „Flackern“)
-  function autoHeavyFromKg(){
-    const kg = parseKg();
-    const shouldBeHeavy = kg >= HEAVY_THRESHOLD;
-    const isHeavy = heavyEl.classList.contains("on");
-
-    if (shouldBeHeavy !== isHeavy){
-      setToggle(heavyEl, shouldBeHeavy);
-    }
-    applyHeavyVisual(heavyEl.classList.contains("on"));
+  function ensureBullets(text){
+    // Macht aus Zeilen automatisch "• " Zeilen, außer leere Zeilen
+    const lines = (text || "").split("\n");
+    const out = lines.map(l => {
+      const t = l.replace(/^\s+/, ""); // führende spaces weg
+      if (t === "") return "";
+      return t.startsWith(BULLET) ? t : (BULLET + t.replace(/^•\s?/, ""));
+    });
+    return out.join("\n");
   }
 
   function load(){
@@ -378,65 +343,101 @@
       const d = JSON.parse(raw);
       ortEl.value = (d.ort || "").toUpperCase().slice(0,6);
       titleEl.value = d.title || "";
-      contentEl.value = d.content || "";
       kgEl.value = cleanKg(d.kg || "");
 
       setToggle(fragileEl, !!d.fragile);
-      setToggle(heavyEl, !!d.heavy);
-
       setColor(d.color || "gray");
 
-      // nach load kg -> heavy-sync + tint
-      autoHeavyFromKg();
+      contentEl.value = ensureBullets(d.content || "");
+      applyHeavyAuto();
     }catch(e){}
   }
 
   function save(){
-    // vor dem Speichern: kg -> heavy-sync + tint
-    autoHeavyFromKg();
+    applyHeavyAuto(); // heavy wird durch kg bestimmt
 
     const data = {
       ort: (ortEl.value || "").toUpperCase().slice(0,6),
       title: titleEl.value || "",
-      content: contentEl.value || "",
       kg: cleanKg(kgEl.value),
-
       fragile: fragileEl.classList.contains("on"),
-      heavy: heavyEl.classList.contains("on"),
+      heavy: heavyEl.classList.contains("on"), // wird automatisch gesetzt
       color: cardEl.getAttribute("data-color") || "gray",
-
+      content: ensureBullets(contentEl.value),
       updatedAt: Date.now()
     };
+
+    // content ggf. normalisieren (damit es wirklich als Bullet gespeichert wird)
+    if (contentEl.value !== data.content) {
+      const pos = contentEl.selectionStart;
+      contentEl.value = data.content;
+      // cursor möglichst stabil halten
+      contentEl.selectionStart = contentEl.selectionEnd = Math.min(pos, contentEl.value.length);
+    }
+
     localStorage.setItem(storageKey, JSON.stringify(data));
     showSaved();
   }
 
-  // autosave (debounced)
+  // autosave
   let t = null;
   function queueSave(){
     clearTimeout(t);
     t = setTimeout(save, 250);
   }
 
+  // --- Bullet behavior on Enter ---
+  contentEl.addEventListener("keydown", (e) => {
+    if (e.key !== "Enter") return;
+
+    // Standard Enter verhindern und selbst einfügen:
+    e.preventDefault();
+
+    const start = contentEl.selectionStart;
+    const end = contentEl.selectionEnd;
+    const v = contentEl.value;
+
+    const before = v.slice(0, start);
+    const after = v.slice(end);
+
+    // Wenn am Anfang und leer: erste Bullet setzen
+    const insert = "\n" + BULLET;
+
+    // Wenn Feld komplett leer: direkt Bullet ohne führendes \n
+    if (v.trim() === "") {
+      contentEl.value = BULLET;
+      contentEl.selectionStart = contentEl.selectionEnd = contentEl.value.length;
+      queueSave();
+      return;
+    }
+
+    contentEl.value = before + insert + after;
+
+    const newPos = (before + insert).length;
+    contentEl.selectionStart = contentEl.selectionEnd = newPos;
+
+    queueSave();
+  });
+
+  // Wenn Nutzer tippt und Feld ist leer → Bullet voranstellen
+  contentEl.addEventListener("input", () => {
+    if (contentEl.value === "") return;
+    // Wenn erste Zeile nicht mit Bullet startet, normalisieren (sanft)
+    queueSave();
+  });
+
   // events
   ortEl.addEventListener("input", ()=>{ ortEl.value = (ortEl.value || "").toUpperCase().slice(0,6); queueSave(); });
   titleEl.addEventListener("input", queueSave);
-  contentEl.addEventListener("input", queueSave);
 
-  fragileEl.addEventListener("click", ()=>{ setToggle(fragileEl, !fragileEl.classList.contains("on")); save(); });
-
-  // Heavy manuell toggeln (und tint setzen)
-  heavyEl.addEventListener("click", ()=>{
-    setToggle(heavyEl, !heavyEl.classList.contains("on"));
-    applyHeavyVisual(heavyEl.classList.contains("on"));
-    save();
-  });
-
-  // kg -> heavy automatisch
   kgEl.addEventListener("input", ()=>{
     kgEl.value = cleanKg(kgEl.value);
-    autoHeavyFromKg();  // sofort visuell
     queueSave();
+  });
+
+  fragileEl.addEventListener("click", ()=>{
+    setToggle(fragileEl, !fragileEl.classList.contains("on"));
+    save(); // direkt speichern
   });
 
   cBlackEl.addEventListener("click", ()=>{ setColor("black"); save(); });
@@ -444,8 +445,15 @@
 
   // initial
   load();
-  // falls noch nix gespeichert war:
-  applyHeavyVisual(heavyEl.classList.contains("on"));
+
+  // Wenn leer, beim ersten Fokus direkt Bullet setzen
+  contentEl.addEventListener("focus", () => {
+    if (contentEl.value.trim() === "") {
+      contentEl.value = BULLET;
+      contentEl.selectionStart = contentEl.selectionEnd = contentEl.value.length;
+      queueSave();
+    }
+  }, { once:false });
 })();
 </script>
 </body>
