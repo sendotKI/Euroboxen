@@ -1,87 +1,444 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-<meta charset="UTF-8">
-<title>Euroboxen – Suche</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Suche – Euroboxen</title>
+  <style>
+    :root{
+      --bg:#0b1020;
+      --line:rgba(255,255,255,.10);
+      --text:rgba(255,255,255,.92);
+      --muted:rgba(255,255,255,.70);
+      --green:#29d06b;
+      --red:rgba(255,80,80,.95);
+      --card:rgba(0,0,0,.18);
+      --pill:rgba(255,255,255,.08);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      min-height:100vh;
+      background: radial-gradient(1200px 600px at 50% 20%, #111a33 0%, var(--bg) 55%, #070b16 100%);
+      color:var(--text);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Helvetica Neue", sans-serif;
+      padding:22px 14px;
+    }
 
-<style>
-  body {
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-    background: #0b1220;
-    color: #fff;
-    padding: 20px;
-  }
-  h1 {
-    text-align: center;
-    margin-bottom: 20px;
-  }
-  input {
-    width: 100%;
-    padding: 14px;
-    font-size: 18px;
-    border-radius: 12px;
-    border: none;
-    margin-bottom: 20px;
-  }
-  .result {
-    background: #111a2e;
-    border-radius: 12px;
-    padding: 12px;
-    margin-bottom: 10px;
-  }
-  .box {
-    font-weight: bold;
-    font-size: 20px;
-  }
-  .content {
-    opacity: 0.85;
-  }
-</style>
+    .wrap{ max-width: 900px; margin: 0 auto; }
+
+    h1{
+      margin:0 0 10px 0;
+      font-size:28px;
+      font-weight:900;
+      letter-spacing:.02em;
+    }
+
+    .bar{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin: 10px 0 14px;
+      align-items:center;
+    }
+
+    .search{
+      flex: 1 1 320px;
+      height:46px;
+      border-radius:14px;
+      border:1px solid var(--line);
+      background: var(--card);
+      color: var(--text);
+      padding: 0 14px;
+      font-size: 16px;
+      outline:none;
+    }
+    .search::placeholder{ color: rgba(255,255,255,.35); }
+
+    .btn{
+      height:46px;
+      padding: 0 14px;
+      border-radius:14px;
+      border:1px solid var(--line);
+      background: var(--card);
+      color: var(--text);
+      font-weight: 900;
+      letter-spacing:.02em;
+      cursor:pointer;
+      user-select:none;
+    }
+    .btn:active{ transform:scale(.99); }
+
+    .filters{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-bottom: 10px;
+    }
+
+    .chip{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:10px 12px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background: var(--pill);
+      cursor:pointer;
+      user-select:none;
+      font-weight:800;
+      color: var(--text);
+    }
+    .chip.on{
+      border-color: rgba(41,208,107,.55);
+      box-shadow: 0 0 0 2px rgba(41,208,107,.14);
+      background: rgba(41,208,107,.10);
+    }
+
+    .meta{
+      color: var(--muted);
+      font-size: 13px;
+      margin: 6px 0 12px;
+    }
+
+    .list{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+
+    .item{
+      border:1px solid var(--line);
+      border-radius:16px;
+      background: rgba(255,255,255,.05);
+      padding: 12px 12px;
+      display:flex;
+      gap:12px;
+      align-items:flex-start;
+    }
+
+    .left{
+      min-width:92px;
+    }
+    .box{
+      font-weight: 900;
+      letter-spacing:.08em;
+      font-size: 18px;
+      margin-bottom: 4px;
+    }
+    .pills{
+      display:flex;
+      gap:6px;
+      flex-wrap:wrap;
+    }
+    .pill{
+      font-size:12px;
+      padding:6px 8px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background: rgba(0,0,0,.20);
+      color: rgba(255,255,255,.86);
+      font-weight: 800;
+      white-space:nowrap;
+    }
+    .pill.red{
+      border-color: rgba(255,80,80,.55);
+      box-shadow: 0 0 0 2px rgba(255,80,80,.12);
+    }
+    .pill.green{
+      border-color: rgba(41,208,107,.55);
+      box-shadow: 0 0 0 2px rgba(41,208,107,.12);
+    }
+
+    .right{
+      flex: 1 1 auto;
+      min-width: 200px;
+    }
+
+    .title{
+      font-size: 16px;
+      font-weight: 900;
+      margin: 0 0 2px;
+    }
+    .sub{
+      font-size: 13px;
+      color: var(--muted);
+      margin: 0 0 6px;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .preview{
+      font-size: 14px;
+      color: rgba(255,255,255,.86);
+      white-space: pre-wrap;
+      overflow:hidden;
+      display:-webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+    }
+
+    a.open{
+      margin-left:auto;
+      align-self:center;
+      text-decoration:none;
+      font-weight:900;
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid var(--line);
+      background: rgba(0,0,0,.20);
+      color: var(--text);
+      white-space:nowrap;
+    }
+
+    .empty{
+      border:1px dashed var(--line);
+      border-radius:16px;
+      padding:16px;
+      color: var(--muted);
+      background: rgba(0,0,0,.15);
+    }
+    code{ color: rgba(255,255,255,.9); }
+  </style>
 </head>
-
 <body>
+  <div class="wrap">
+    <h1>Suche</h1>
 
-<h1>🔍 Eurobox-Suche</h1>
+    <div class="bar">
+      <input id="q" class="search" placeholder="Suche nach Ort, Bezeichnung, Inhalt, kg… (z. B. Kabel, Küche, 12)" />
+      <button id="reload" class="btn" type="button">Neu einlesen</button>
+      <button id="clear" class="btn" type="button">Leeren</button>
+    </div>
 
-<input
-  type="text"
-  id="search"
-  placeholder="z. B. Handschuhe, Kabel, Halloween…"
-  oninput="searchBoxes()"
-/>
+    <div class="filters">
+      <div id="fFragile" class="chip" title="nur zerbrechlich">🍷</div>
+      <div id="fHeavy" class="chip" title="nur heavy">🏋️</div>
+      <div id="fBlack" class="chip" title="nur schwarze Box">⬛</div>
+      <div id="fGray" class="chip" title="nur graue Box">⬜</div>
+    </div>
 
-<div id="results"></div>
+    <div id="meta" class="meta"></div>
+    <div id="list" class="list"></div>
+  </div>
 
 <script>
-const boxes = [
-  { box: "E001", content: "Kabel, Mehrfachsteckdosen, Router" },
-  { box: "E002", content: "Halloween, Kostüme, Schminke" },
-  { box: "E003", content: "Werkzeug, Schraubenzieher, Zange" },
-  { box: "E023", content: "Handschuhe, Schals, Mützen, Winter" },
-  { box: "E041", content: "Küche, Pfannen, Töpfe" }
-  // ← hier einfach erweitern
-];
+(() => {
+  const PREFIX = "eurobox:";
+  const BULLET = "• ";
 
-function searchBoxes() {
-  const q = document.getElementById("search").value.toLowerCase();
-  const res = document.getElementById("results");
-  res.innerHTML = "";
+  const elQ = document.getElementById("q");
+  const elReload = document.getElementById("reload");
+  const elClear = document.getElementById("clear");
+  const elList = document.getElementById("list");
+  const elMeta = document.getElementById("meta");
 
-  if (!q) return;
+  const fFragile = document.getElementById("fFragile");
+  const fHeavy = document.getElementById("fHeavy");
+  const fBlack = document.getElementById("fBlack");
+  const fGray = document.getElementById("fGray");
 
-  boxes.forEach(b => {
-    if (b.content.toLowerCase().includes(q)) {
-      res.innerHTML += `
-        <div class="result">
-          <div class="box">📦 ${b.box}</div>
-          <div class="content">${b.content}</div>
-        </div>
-      `;
+  let all = [];
+
+  function safeParse(s){
+    try { return JSON.parse(s); } catch { return null; }
+  }
+
+  function normalize(text){
+    return (text || "").toString().toLowerCase();
+  }
+
+  function preview(text){
+    const t = (text || "").toString().trim();
+    if (!t) return "";
+    // optional: bullets hübsch lassen
+    return t;
+  }
+
+  function boxIdFromKey(k){
+    return (k || "").slice(PREFIX.length).toUpperCase();
+  }
+
+  function currentBaseUrl(){
+    // same folder as suche.html
+    // -> index.html is in same folder and opened with ?box=E002
+    return location.origin + location.pathname.replace(/suche\.html$/i, "");
+  }
+
+  function buildOpenUrl(box){
+    // index.html in same dir:
+    return currentBaseUrl() + "?box=" + encodeURIComponent(box);
+  }
+
+  function readAll(){
+    const items = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (!k || !k.startsWith(PREFIX)) continue;
+
+      const raw = localStorage.getItem(k);
+      const d = safeParse(raw);
+      if (!d) continue;
+
+      const box = boxIdFromKey(k);
+      items.push({
+        box,
+        key: k,
+        ort: (d.ort || "").toString().toUpperCase(),
+        title: (d.title || "").toString(),
+        content: (d.content || "").toString(),
+        kg: (d.kg || "").toString(),
+        fragile: !!d.fragile,
+        heavy: !!d.heavy,
+        color: (d.color || "").toString(), // "black" | "gray"
+        updatedAt: d.updatedAt || 0
+      });
     }
-  });
-}
-</script>
 
+    // Sort: Box-ID aufsteigend (E001…)
+    items.sort((a,b) => a.box.localeCompare(b.box, "de", {numeric:true, sensitivity:"base"}));
+    all = items;
+  }
+
+  function filters(){
+    return {
+      fragile: fFragile.classList.contains("on"),
+      heavy: fHeavy.classList.contains("on"),
+      black: fBlack.classList.contains("on"),
+      gray: fGray.classList.contains("on")
+    };
+  }
+
+  function match(item, query, f){
+    if (f.fragile && !item.fragile) return false;
+    if (f.heavy && !item.heavy) return false;
+    if (f.black && item.color !== "black") return false;
+    if (f.gray && item.color !== "gray") return false;
+
+    if (!query) return true;
+
+    const q = normalize(query);
+    const hay = [
+      item.box,
+      item.ort,
+      item.title,
+      item.content,
+      item.kg
+    ].map(normalize).join(" | ");
+
+    return hay.includes(q);
+  }
+
+  function pill(text, cls=""){
+    const span = document.createElement("span");
+    span.className = "pill" + (cls ? " " + cls : "");
+    span.textContent = text;
+    return span;
+  }
+
+  function render(){
+    const q = elQ.value.trim();
+    const f = filters();
+
+    const hits = all.filter(it => match(it, q, f));
+
+    elMeta.textContent = `Gefunden: ${hits.length} / ${all.length} (nur dieses Gerät)`;
+
+    elList.innerHTML = "";
+    if (all.length === 0) {
+      const empty = document.createElement("div");
+      empty.className = "empty";
+      empty.innerHTML = `Noch keine Daten auf diesem Gerät gespeichert.<br>
+      Öffne zuerst eine Box, z. B. <code>?box=E001</code>, und speichere Inhalt.`;
+      elList.appendChild(empty);
+      return;
+    }
+
+    if (hits.length === 0) {
+      const empty = document.createElement("div");
+      empty.className = "empty";
+      empty.textContent = "Keine Treffer. Suchbegriff ändern oder Filter deaktivieren.";
+      elList.appendChild(empty);
+      return;
+    }
+
+    for (const it of hits) {
+      const row = document.createElement("div");
+      row.className = "item";
+
+      const left = document.createElement("div");
+      left.className = "left";
+
+      const box = document.createElement("div");
+      box.className = "box";
+      box.textContent = it.box;
+      left.appendChild(box);
+
+      const pills = document.createElement("div");
+      pills.className = "pills";
+      if (it.ort) pills.appendChild(pill(it.ort));
+      if (it.kg) pills.appendChild(pill(it.kg + "kg", "red"));
+      if (it.fragile) pills.appendChild(pill("🍷", "green"));
+      if (it.heavy) pills.appendChild(pill("🏋️", "red"));
+      if (it.color === "black") pills.appendChild(pill("⬛"));
+      if (it.color === "gray") pills.appendChild(pill("⬜"));
+      left.appendChild(pills);
+
+      const right = document.createElement("div");
+      right.className = "right";
+
+      const t = document.createElement("div");
+      t.className = "title";
+      t.textContent = it.title || "(ohne Bezeichnung)";
+      right.appendChild(t);
+
+      const sub = document.createElement("div");
+      sub.className = "sub";
+      const u = it.updatedAt ? new Date(it.updatedAt).toLocaleString("de-DE") : "—";
+      sub.textContent = `Zuletzt: ${u}`;
+      right.appendChild(sub);
+
+      const p = document.createElement("div");
+      p.className = "preview";
+      p.textContent = preview(it.content);
+      right.appendChild(p);
+
+      const a = document.createElement("a");
+      a.className = "open";
+      a.href = buildOpenUrl(it.box);
+      a.textContent = "Öffnen";
+      a.title = "Box öffnen";
+      // iOS: new tab optional; same tab is ok
+      // a.target = "_blank";
+
+      row.appendChild(left);
+      row.appendChild(right);
+      row.appendChild(a);
+
+      elList.appendChild(row);
+    }
+  }
+
+  function toggleChip(el){
+    el.classList.toggle("on");
+    render();
+  }
+
+  // UI events
+  elQ.addEventListener("input", render);
+  elReload.addEventListener("click", () => { readAll(); render(); });
+  elClear.addEventListener("click", () => { elQ.value = ""; render(); });
+
+  fFragile.addEventListener("click", () => toggleChip(fFragile));
+  fHeavy.addEventListener("click", () => toggleChip(fHeavy));
+  fBlack.addEventListener("click", () => toggleChip(fBlack));
+  fGray.addEventListener("click", () => toggleChip(fGray));
+
+  // Initial
+  readAll();
+  render();
+})();
+</script>
 </body>
 </html>
