@@ -1,536 +1,405 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="de">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Box</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Suche</title>
+  <style>
+    :root{
+      --bg1:#05070c;
+      --card: rgba(255,255,255,.06);
+      --stroke: rgba(255,255,255,.10);
+      --text: rgba(255,255,255,.92);
+      --muted: rgba(255,255,255,.55);
+      --good:#39d98a;
+      --btn: rgba(40,70,140,.22);
 
-<style>
-  :root{
-    --karton:#ADAC62;
-    --euroGrey:#C0C0C0;
-    --euroBlack:#0b0f19;
+      --grey:#C0C0C0;
+      --karton:#ADAC62;
+    }
 
-    --bg1:#050914;
-    --bg2:#02040a;
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, -apple-system, system-ui, Segoe UI, Roboto, Arial, sans-serif;
+      color:var(--text);
+      min-height:100vh;
+      background: radial-gradient(1200px 700px at 50% -200px, #1a2a55 0%, var(--bg1) 35%) ,
+                  radial-gradient(900px 700px at 50% 120%, #0b1a3c 0%, var(--bg1) 45%);
+      padding: 18px 14px 24px;
+      display:flex;
+      justify-content:center;
+      align-items:flex-start;
+    }
+    .wrap{ width:min(720px,100%); }
 
-    --card:#0b1220;
-    --card2:#0a1020;
+    .title{
+      font-size: 44px;
+      font-weight: 900;
+      margin: 8px 0 14px;
+      letter-spacing:.02em;
+    }
 
-    --text:#e7eaf0;
-    --muted:#9aa3b2;
+    .search{
+      width:100%;
+      height:58px;
+      border-radius: 18px;
+      border:1px solid var(--stroke);
+      background: rgba(0,0,0,.18);
+      color: var(--text);
+      font-size: 18px;
+      padding: 0 14px;
+      outline:none;
+    }
 
-    --border: rgba(255,255,255,.12);
-    --field: rgba(255,255,255,.07);
+    .btnRow{
+      display:flex;
+      gap:12px;
+      margin-top: 12px;
+    }
+    .btn{
+      height:56px;
+      border-radius: 18px;
+      border:1px solid var(--stroke);
+      background: var(--btn);
+      color: var(--text);
+      font-size: 18px;
+      font-weight: 800;
+      padding: 0 16px;
+      cursor:pointer;
+      white-space:nowrap;
+    }
 
-    --ok:#22c55e;
-    --warn:#ef4444;
-    --chip: rgba(255,255,255,.08);
-  }
+    .filters{
+      display:flex;
+      gap:10px;
+      margin-top: 12px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+    .fchip{
+      width:56px;height:56px;
+      border-radius: 18px;
+      border:1px solid var(--stroke);
+      background: rgba(0,0,0,.18);
+      display:flex;align-items:center;justify-content:center;
+      cursor:pointer;
+      font-size: 22px;
+      user-select:none;
+    }
+    .fchip.active{
+      border-color: rgba(57,217,138,.60);
+      box-shadow: 0 0 0 3px rgba(57,217,138,.18);
+    }
+    .fcolor{
+      width:56px;height:56px;
+      border-radius: 18px;
+      border:1px solid var(--stroke);
+      background: rgba(0,0,0,.18);
+      display:flex;align-items:center;justify-content:center;
+      cursor:pointer;
+      user-select:none;
+      gap:8px;
+      padding:0 10px;
+    }
+    .dot{
+      width:18px;height:18px;border-radius:6px;
+      border:1px solid rgba(255,255,255,.22);
+    }
+    .dot.grey{ background: var(--grey); }
+    .dot.black{ background: #000; }
+    .dot.karton{ background: var(--karton); }
+    .meta{
+      margin: 10px 0 10px;
+      color: var(--muted);
+      font-weight: 700;
+    }
 
-  *{box-sizing:border-box}
-  body{
-    margin:0;
-    font-family: system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
-    color:var(--text);
-    background: radial-gradient(1100px 600px at 50% -10%, #0b1a3a 0%, var(--bg1) 38%, var(--bg2) 100%);
-    padding: 18px 12px;
-  }
+    .list{ display:flex; flex-direction:column; gap: 12px; margin-top: 8px; }
 
-  .wrap{max-width:560px;margin:0 auto;}
-  .card{
-    position:relative;
-    border-radius:28px;
-    padding:18px;
-    border:1px solid rgba(255,255,255,.10);
-    background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02)) , var(--card);
-    box-shadow: 0 20px 70px rgba(0,0,0,.55);
-    overflow:hidden;
-  }
+    .item{
+      border-radius: 22px;
+      border:1px solid var(--stroke);
+      background: rgba(0,0,0,.16);
+      padding: 14px;
+      display:flex;
+      gap: 12px;
+      align-items:stretch;
+    }
 
-  /* Dezente Tönung (NICHT alles grau machen!) */
-  .card::before{
-    content:"";
-    position:absolute; inset:0;
-    background: radial-gradient(900px 420px at 50% 0%, rgba(255,255,255,.06), transparent 55%);
-    pointer-events:none;
-    opacity:1;
-  }
+    .left{
+      min-width: 86px;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      align-items:flex-start;
+      justify-content:center;
+    }
+    .id{
+      font-weight: 900;
+      font-size: 26px;
+      letter-spacing:.06em;
+    }
+    .icons{ display:flex; gap:8px; }
+    .mini{
+      width:40px;height:40px;border-radius: 14px;
+      border:1px solid var(--stroke);
+      background: rgba(0,0,0,.18);
+      display:flex;align-items:center;justify-content:center;
+      font-size: 18px;
+    }
+    .mini.active{
+      border-color: rgba(57,217,138,.60);
+      box-shadow: 0 0 0 3px rgba(57,217,138,.18);
+    }
 
-  /* Farbbalken oben */
-  .topbar{
-    position:absolute; left:18px; right:18px; top:14px;
-    height:10px;
-    border-radius:10px;
-    background: var(--accentColor);
-    opacity:.28;
-    filter: saturate(1.2);
-  }
+    .mid{ flex:1; min-width: 0; }
+    .name{
+      font-size: 20px;
+      font-weight: 900;
+      margin-bottom: 2px;
+    }
+    .sub{ color: var(--muted); font-weight: 700; font-size: 14px; }
+    .preview{
+      margin-top: 6px;
+      color: rgba(255,255,255,.82);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      font-weight: 650;
+    }
 
-  .title{
-    position:relative;
-    text-align:center;
-    font-weight:900;
-    letter-spacing:3px;
-    font-size:52px;
-    margin: 18px 0 4px 0;
-    text-shadow: 0 8px 20px rgba(0,0,0,.35);
-  }
+    .right{
+      display:flex;
+      align-items:center;
+    }
+    .open{
+      height: 52px;
+      min-width: 110px;          /* ✅ damit „Öffnen“ nicht abgeschnitten ist */
+      border-radius: 18px;
+      border:1px solid var(--stroke);
+      background: rgba(40,70,140,.22);
+      color: var(--text);
+      font-weight: 900;
+      font-size: 18px;
+      padding: 0 16px;
+      cursor:pointer;
+      white-space:nowrap;
+    }
 
-  .status{
-    position:relative;
-    text-align:center;
-    color: var(--ok);
-    font-weight:700;
-    margin-bottom: 14px;
-  }
-
-  .row{position:relative; display:flex; gap:12px; margin:12px 0;}
-  .field{
-    width:100%;
-    background: var(--field);
-    border: 1px solid var(--border);
-    color: var(--text);
-    border-radius: 16px;
-    padding: 14px 14px;
-    font-size:16px;
-    outline:none;
-    box-shadow: inset 0 0 0 1px rgba(0,0,0,.12);
-  }
-  .field::placeholder{color: rgba(231,234,240,.45);}
-
-  .ort{max-width:140px; font-weight:800; letter-spacing:1px; text-transform:uppercase;}
-  .bez{flex:1;}
-
-  .iconToggle{
-    width:56px; height:56px;
-    border-radius:18px;
-    display:flex; align-items:center; justify-content:center;
-    background: var(--chip);
-    border: 2px solid transparent;
-    cursor:pointer;
-    user-select:none;
-    font-size:24px;
-    box-shadow: inset 0 0 0 1px rgba(0,0,0,.18);
-  }
-  .iconToggle.active{
-    border-color: rgba(34,197,94,.9);
-    background: rgba(34,197,94,.22);
-  }
-  .iconToggle.heavy.active{
-    border-color: rgba(239,68,68,.95);
-    background: rgba(239,68,68,.25);
-  }
-
-  /* Gewicht: Input + "kg" fest */
-  .kgWrap{
-    flex:1;
-    display:flex;
-    align-items:center;
-    gap:10px;
-  }
-  .kgBox{
-    position:relative;
-    flex:1;
-  }
-  .kgInput{
-    padding-right:44px;
-    text-align:center;
-    font-weight:900;
-    letter-spacing:1px;
-    font-variant-numeric: tabular-nums;
-  }
-  .kgSuffix{
-    position:absolute;
-    right:14px; top:50%;
-    transform:translateY(-50%);
-    color: rgba(231,234,240,.60);
-    font-weight:800;
-    pointer-events:none;
-  }
-
-  /* Farbauswahl kleiner + Abstand zum Inhaltsfeld */
-  .colorRow{
-    display:flex;
-    gap:10px;
-    margin: 6px 0 18px 0; /* Abstand zum Inhaltsfeld */
-    transform: scale(.5);
-    transform-origin: left center;
-  }
-
-  .colorChip{
-    width:84px; height:54px;
-    border-radius:18px;
-    border:2px solid transparent;
-    background: var(--chip);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    gap:8px;
-    cursor:pointer;
-    user-select:none;
-    padding: 0 10px;
-  }
-  .colorChip.active{
-    border-color: rgba(34,197,94,.85);
-    background: rgba(34,197,94,.18);
-  }
-  .swatch{
-    width:18px;height:18px;border-radius:6px;
-    border:1px solid rgba(255,255,255,.20);
-  }
-
-  textarea.field{
-    min-height: 320px;
-    resize:none;
-    line-height:1.35;
-    padding:16px;
-  }
-
-  .buttons{
-    display:flex;
-    gap:14px;
-    margin-top: 16px;
-  }
-  button{
-    flex:1;
-    background: rgba(30,41,59,.85);
-    border: 1px solid rgba(255,255,255,.12);
-    color: var(--text);
-    border-radius: 18px;
-    padding: 14px 12px;
-    font-weight:800;
-    font-size:16px;
-    cursor:pointer;
-  }
-  button:active{transform: translateY(1px);}
-
-  /* kleines Farbbadge links unten (Info) */
-  .badge{
-    position:absolute;
-    left:18px; bottom:18px;
-    width:18px; height:18px;
-    border-radius:6px;
-    background: var(--accentColor);
-    opacity:.55;
-    border:1px solid rgba(255,255,255,.18);
-  }
-</style>
+    @media (max-width: 420px){
+      .open{ min-width: 120px; }
+    }
+  </style>
 </head>
-
 <body>
-<div class="wrap">
-  <div class="card" id="card" style="--accentColor: var(--euroGrey);">
+  <div class="wrap">
+    <div class="title">Suche</div>
+    <input class="search" id="q" placeholder="Suche nach Ort, Bezeichnung, Inhalt, kg… (z. B. E024)" />
 
-    <div class="topbar"></div>
-    <div class="title" id="boxTitle">E000</div>
-    <div class="status" id="status">Gespeichert ✓</div>
-
-    <div class="row">
-      <input id="ort" class="field ort" placeholder="ORT" maxlength="6" />
-      <input id="bez" class="field bez" placeholder="Bezeichnung" />
+    <div class="btnRow">
+      <button class="btn" id="reload">Neu einlesen</button>
+      <button class="btn" id="clear">Leeren</button>
     </div>
 
-    <div class="row" style="align-items:center;">
-      <div class="iconToggle" id="fragile" title="Zerbrechlich (klick)">🥂</div>
-      <div class="iconToggle heavy" id="heavy" title="Schwer (ab 16 kg automatisch)">🏋️</div>
-
-      <div class="kgWrap">
-        <div class="kgBox">
-          <input id="weight" class="field kgInput" inputmode="numeric" maxlength="2" placeholder="00" />
-          <div class="kgSuffix">kg</div>
-        </div>
-      </div>
+    <div class="filters">
+      <div class="fchip" id="fFragile" title="Zerbrechlich">🍷</div>
+      <div class="fchip" id="fHeavy" title="Schwer (ab 16 kg)">🏋️</div>
+      <div class="fcolor" id="fGrey" title="Grau"><span class="dot grey"></span></div>
+      <div class="fcolor" id="fBlack" title="Schwarz"><span class="dot black"></span></div>
+      <div class="fcolor" id="fKarton" title="Karton"><span class="dot karton"></span></div>
     </div>
 
-    <!-- Farbauswahl (nur für Euroboxen; Karton = automatisch) -->
-    <div id="colorRow" class="colorRow" aria-label="Farbe">
-      <div class="colorChip" id="cGrey" title="Eurobox grau">
-        <span class="swatch" style="background: var(--euroGrey)"></span><span>Grau</span>
-      </div>
-      <div class="colorChip" id="cBlack" title="Eurobox schwarz">
-        <span class="swatch" style="background: var(--euroBlack)"></span><span>Schwarz</span>
-      </div>
-    </div>
-
-    <textarea id="content" class="field" placeholder="• Inhalt hier eintragen..."></textarea>
-
-    <div class="buttons">
-      <button id="btnBackup">Backup nach iCloud</button>
-      <button id="btnImport">Backup importieren</button>
-    </div>
-
-    <div class="badge" title="Box-Farbe"></div>
+    <div class="meta" id="meta">Gefunden: 0 (nur dieses Gerät)</div>
+    <div class="list" id="list"></div>
   </div>
-</div>
 
 <script>
-/* -------------------------
-   Box-ID + Storage Keys
--------------------------- */
-const qs = new URLSearchParams(location.search);
-const boxId = (qs.get("box") || "E000").toUpperCase();
-const storeKey = "box_" + boxId;
-const metaKey  = "meta_colors"; // merkt pro Box die Eurobox-Farbe
+(() => {
+  const STORAGE_KEY = "eurobox_data_v1";
+  const $ = (id) => document.getElementById(id);
 
-/* -------------------------
-   State
--------------------------- */
-const state = {
-  ort: "",
-  bez: "",
-  content: "",
-  fragile: false,
-  heavy: false,
-  weight: ""
-};
+  const elQ = $("q");
+  const elList = $("list");
+  const elMeta = $("meta");
 
-function $(id){ return document.getElementById(id); }
+  const fFragile = $("fFragile");
+  const fHeavy = $("fHeavy");
+  const fGrey = $("fGrey");
+  const fBlack = $("fBlack");
+  const fKarton = $("fKarton");
 
-/* -------------------------
-   Helpers: Bullets
--------------------------- */
-function ensureStartsWithBullet(text){
-  const t = (text ?? "");
-  if (t.trim() === "") return "• ";
-  // Wenn erste nicht Bullet, vorne Bullet setzen
-  if (!t.startsWith("• ")) return "• " + t;
-  return t;
-}
+  const state = {
+    fragile:false,
+    heavy:false,
+    grey:false,
+    black:false,
+    karton:false
+  };
 
-function insertBulletAtCursor(el){
-  const start = el.selectionStart;
-  const end   = el.selectionEnd;
-  const before = el.value.slice(0, start);
-  const after  = el.value.slice(end);
-  const ins = "\n• ";
-  el.value = before + ins + after;
-  el.selectionStart = el.selectionEnd = start + ins.length;
-}
+  function loadAll(){
+    try{ return JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}"); }
+    catch{ return {}; }
+  }
 
-function backspaceBulletIfAtLineStart(el){
-  const pos = el.selectionStart;
-  if (pos !== el.selectionEnd) return false;
+  let all = loadAll();
 
-  const v = el.value;
-  const lineStart = v.lastIndexOf("\n", pos - 1) + 1;
-  // Wenn Cursor genau nach "• " steht -> entferne Bullet
-  const segment = v.slice(lineStart, pos);
-  if (segment === "• "){
-    const before = v.slice(0, lineStart);
-    const after  = v.slice(pos);
-    el.value = before + after;
-    el.selectionStart = el.selectionEnd = lineStart;
+  function colorHex(color){
+    if (color === "black") return "#000";
+    if (color === "karton") return "#ADAC62";
+    return "#C0C0C0";
+  }
+
+  function heavyByWeight(w){
+    return Number(w || 0) >= 16;
+  }
+
+  function matchesFilters(item){
+    if (state.fragile && !item.fragile) return false;
+    if (state.heavy && !heavyByWeight(item.weight)) return false;
+
+    const c = (item.color || (item.id||"").startsWith("K") ? "karton" : "grey");
+    const wantColor = state.grey || state.black || state.karton;
+    if (wantColor){
+      if (state.grey && c === "grey") return true;
+      if (state.black && c === "black") return true;
+      if (state.karton && c === "karton") return true;
+      return false;
+    }
     return true;
   }
-  return false;
-}
 
-/* -------------------------
-   Color logic
--------------------------- */
-function getMeta(){
-  try { return JSON.parse(localStorage.getItem(metaKey) || "{}"); }
-  catch { return {}; }
-}
-function setMeta(m){
-  localStorage.setItem(metaKey, JSON.stringify(m));
-}
-
-function setAccentColor(hex){
-  const card = $("card");
-  card.style.setProperty("--accentColor", hex);
-}
-
-function applyAutoColor(){
-  // Karton: automatisch
-  if (boxId.startsWith("K")){
-    $("colorRow").style.display = "none";
-    setAccentColor(getComputedStyle(document.documentElement).getPropertyValue("--karton").trim() || "#ADAC62");
-    return;
+  function normalize(s){
+    return (s||"").toString().toLowerCase();
   }
 
-  // Eurobox: gespeicherte Auswahl je Box (oder Default Grau)
-  $("colorRow").style.display = "flex";
-
-  const meta = getMeta();
-  const choice = meta[storeKey]?.color || "grey";
-  setEuroChoice(choice);
-}
-
-function setEuroChoice(choice){
-  const meta = getMeta();
-  meta[storeKey] = meta[storeKey] || {};
-  meta[storeKey].color = choice;
-  setMeta(meta);
-
-  $("cGrey").classList.toggle("active", choice === "grey");
-  $("cBlack").classList.toggle("active", choice === "black");
-
-  if (choice === "black"){
-    setAccentColor(getComputedStyle(document.documentElement).getPropertyValue("--euroBlack").trim() || "#0b0f19");
-  } else {
-    setAccentColor(getComputedStyle(document.documentElement).getPropertyValue("--euroGrey").trim() || "#C0C0C0");
+  function itemText(item){
+    return [
+      item.id,
+      item.ort,
+      item.bez,
+      item.text,
+      (item.weight ? String(item.weight) : "")
+    ].map(normalize).join(" ");
   }
-}
 
-/* -------------------------
-   Save/Load
--------------------------- */
-function render(){
-  localStorage.setItem(storeKey, JSON.stringify(state));
+  function render(){
+    const q = normalize(elQ.value).trim();
 
-  $("status").textContent = "Gespeichert ✓";
-  $("fragile").classList.toggle("active", !!state.fragile);
-  $("heavy").classList.toggle("active", !!state.heavy);
-}
+    const items = Object.values(all)
+      .filter(it => it && it.id && /^[EK]\d{3}$/.test(it.id))
+      .sort((a,b) => a.id.localeCompare(b.id))
+      .filter(it => matchesFilters(it))
+      .filter(it => !q || itemText(it).includes(q));
 
-function load(){
-  $("boxTitle").textContent = boxId;
+    elMeta.textContent = `Gefunden: ${items.length} (nur dieses Gerät)`;
+    elList.innerHTML = "";
 
-  try{
-    const raw = localStorage.getItem(storeKey);
-    if (raw){
-      const obj = JSON.parse(raw);
-      Object.assign(state, obj);
+    for (const it of items){
+      const c = it.color || (it.id.startsWith("K") ? "karton" : "grey");
+      const heavy = heavyByWeight(it.weight);
+
+      const div = document.createElement("div");
+      div.className = "item";
+
+      const left = document.createElement("div");
+      left.className = "left";
+
+      const id = document.createElement("div");
+      id.className = "id";
+      id.textContent = it.id;
+
+      const icons = document.createElement("div");
+      icons.className = "icons";
+
+      const miniColor = document.createElement("div");
+      miniColor.className = "mini";
+      miniColor.style.background = colorHex(c);
+
+      const miniFrag = document.createElement("div");
+      miniFrag.className = "mini";
+      miniFrag.textContent = "🍷";
+      if (it.fragile) miniFrag.classList.add("active");
+
+      const miniHeavy = document.createElement("div");
+      miniHeavy.className = "mini";
+      miniHeavy.textContent = "🏋️";
+      if (heavy) miniHeavy.classList.add("active");
+
+      icons.appendChild(miniColor);
+      icons.appendChild(miniFrag);
+      icons.appendChild(miniHeavy);
+
+      left.appendChild(id);
+      left.appendChild(icons);
+
+      const mid = document.createElement("div");
+      mid.className = "mid";
+
+      const name = document.createElement("div");
+      name.className = "name";
+      name.textContent = it.bez && it.bez.trim() ? it.bez.trim() : "(ohne Bezeichnung)";
+
+      const sub = document.createElement("div");
+      sub.className = "sub";
+      const dt = it.updatedAt ? new Date(it.updatedAt) : null;
+      sub.textContent = "Zuletzt: " + (dt && !isNaN(dt) ? dt.toLocaleString() : "-");
+
+      const prev = document.createElement("div");
+      prev.className = "preview";
+      const firstLine = (it.text || "").split("\n").find(l => l.trim()) || "";
+      prev.textContent = firstLine;
+
+      mid.appendChild(name);
+      mid.appendChild(sub);
+      mid.appendChild(prev);
+
+      const right = document.createElement("div");
+      right.className = "right";
+
+      const open = document.createElement("button");
+      open.className = "open";
+      open.textContent = "Öffnen";
+      open.addEventListener("click", () => {
+        location.href = `./?box=${encodeURIComponent(it.id)}`;
+      });
+
+      right.appendChild(open);
+
+      div.appendChild(left);
+      div.appendChild(mid);
+      div.appendChild(right);
+
+      elList.appendChild(div);
     }
-  }catch{}
-
-  $("ort").value = state.ort || "";
-  $("bez").value = state.bez || "";
-
-  // Inhalt: Bullet-Start erzwingen, damit "jede Eingabe Bullet" passt
-  state.content = ensureStartsWithBullet(state.content || "");
-  $("content").value = state.content;
-
-  $("weight").value = (state.weight ?? "").toString().replace(/\D/g,"").slice(0,2);
-
-  // Heavy ab 16 kg automatisch aus Gewicht
-  const w = parseInt($("weight").value || "0", 10);
-  state.heavy = w >= 16;
-
-  applyAutoColor();
-  render();
-}
-
-/* -------------------------
-   Events
--------------------------- */
-$("ort").addEventListener("input", (e)=>{ state.ort = e.target.value.toUpperCase().slice(0,6); render(); });
-$("bez").addEventListener("input", (e)=>{ state.bez = e.target.value; render(); });
-
-$("fragile").addEventListener("click", ()=>{
-  state.fragile = !state.fragile;
-  render();
-});
-
-// Heavy: Klick toggelt nur, wenn kein Gewicht gesetzt ist.
-// Sonst regelt Gewicht (ab 16kg).
-$("heavy").addEventListener("click", ()=>{
-  const w = parseInt($("weight").value || "0", 10);
-  if (w > 0){
-    // Gewicht hat Vorrang
-    state.heavy = w >= 16;
-  } else {
-    state.heavy = !state.heavy;
   }
-  render();
-});
 
-$("weight").addEventListener("input", (e)=>{
-  const digits = (e.target.value || "").replace(/\D/g,"").slice(0,2);
-  e.target.value = digits;
-  state.weight = digits;
-  const w = parseInt(digits || "0", 10);
-  state.heavy = w >= 16;
-  render();
-});
-
-$("content").addEventListener("focus", (e)=>{
-  if (!e.target.value || e.target.value.trim()===""){
-    e.target.value = "• ";
-    state.content = e.target.value;
+  function toggle(el, key){
+    state[key] = !state[key];
+    el.classList.toggle("active", state[key]);
     render();
   }
-});
 
-$("content").addEventListener("keydown", (e)=>{
-  if (e.key === "Enter"){
-    e.preventDefault();
-    insertBulletAtCursor(e.target);
-    state.content = e.target.value;
+  fFragile.addEventListener("click", () => toggle(fFragile, "fragile"));
+  fHeavy.addEventListener("click", () => toggle(fHeavy, "heavy"));
+  fGrey.addEventListener("click", () => toggle(fGrey, "grey"));
+  fBlack.addEventListener("click", () => toggle(fBlack, "black"));
+  fKarton.addEventListener("click", () => toggle(fKarton, "karton"));
+
+  $("reload").addEventListener("click", () => {
+    all = loadAll();
     render();
-    return;
-  }
-  if (e.key === "Backspace"){
-    // Bullet am Zeilenanfang entfernen
-    if (backspaceBulletIfAtLineStart(e.target)){
-      e.preventDefault();
-      state.content = e.target.value;
-      render();
-    }
-  }
-});
+  });
 
-$("content").addEventListener("input", (e)=>{
-  state.content = e.target.value;
+  $("clear").addEventListener("click", () => {
+    elQ.value = "";
+    render();
+  });
+
+  elQ.addEventListener("input", render);
+
   render();
-});
-
-$("cGrey").addEventListener("click", ()=> setEuroChoice("grey"));
-$("cBlack").addEventListener("click", ()=> setEuroChoice("black"));
-
-/* -------------------------
-   Backup Export/Import (funktional)
--------------------------- */
-function collectAllBoxData(){
-  const out = {};
-  for (let i=0;i<localStorage.length;i++){
-    const k = localStorage.key(i);
-    if (!k) continue;
-    if (k.startsWith("box_") || k === metaKey){
-      out[k] = localStorage.getItem(k);
-    }
-  }
-  return out;
-}
-
-$("btnBackup").addEventListener("click", ()=>{
-  const payload = collectAllBoxData();
-  const blob = new Blob([JSON.stringify(payload, null, 2)], {type:"application/json"});
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = "Euroboxen_Backup.json";
-  a.click();
-});
-
-$("btnImport").addEventListener("click", ()=>{
-  const inp = document.createElement("input");
-  inp.type = "file";
-  inp.accept = "application/json,.json";
-  inp.onchange = async ()=>{
-    const file = inp.files?.[0];
-    if (!file) return;
-    const text = await file.text();
-    let data;
-    try{ data = JSON.parse(text); }catch{ alert("Backup-Datei ist kein gültiges JSON."); return; }
-
-    // nur erwartete Keys importieren
-    Object.keys(data).forEach(k=>{
-      if (k.startsWith("box_") || k === metaKey){
-        localStorage.setItem(k, data[k]);
-      }
-    });
-
-    location.reload();
-  };
-  inp.click();
-});
-
-/* -------------------------
-   Init
--------------------------- */
-load();
+})();
 </script>
 </body>
 </html>
