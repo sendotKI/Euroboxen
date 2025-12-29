@@ -1,391 +1,591 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>Eurobox</title>
   <style>
     :root{
-      --bg:#0b1020;
-      --line:rgba(255,255,255,.10);
-      --text:rgba(255,255,255,.92);
-      --green:#29d06b;
+      --bg1:#05070c;
+      --cardTint: rgba(255,255,255,.00); /* wird per JS gesetzt */
+      --stroke: rgba(255,255,255,.10);
+      --text: rgba(255,255,255,.92);
+      --muted: rgba(255,255,255,.55);
+      --good:#39d98a;
 
-      /* Box colors */
-      --box-black:#0b0f14;
-      --box-gray:#C0C0C0; /* ✅ wie gewünscht */
+      --boxGrey:#C0C0C0;
+      --boxBlack:#000000;
+      --boxKarton:#ADAC62;
     }
 
     *{box-sizing:border-box}
     body{
       margin:0;
-      min-height:100vh;
-      background: radial-gradient(1200px 600px at 50% 20%, #111a33 0%, var(--bg) 55%, #070b16 100%);
+      font-family: ui-sans-serif, -apple-system, system-ui, Segoe UI, Roboto, Arial, sans-serif;
       color:var(--text);
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Helvetica Neue", sans-serif;
+      min-height:100vh;
+      background: radial-gradient(1200px 700px at 50% -200px, #1a2a55 0%, var(--bg1) 35%) ,
+                  radial-gradient(900px 700px at 50% 120%, #0b1a3c 0%, var(--bg1) 45%);
+      padding: 18px 14px 24px;
       display:flex;
       align-items:flex-start;
       justify-content:center;
-      padding:28px 14px;
     }
 
-    .wrap{
-      width:min(860px, 92vw);
-      display:flex;
-      justify-content:center;
-    }
+    .wrap{ width:min(560px, 100%); margin-top: 8px; }
 
-    /* Card with dynamic background */
     .card{
-      width:min(720px, 92vw);
-      border-radius:18px;
-      padding:22px 22px 18px;
-      border:1px solid var(--line);
-      box-shadow: 0 10px 50px rgba(0,0,0,.35);
-      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
       position:relative;
+      border-radius: 26px;
+      padding: 18px 16px 16px;
       overflow:hidden;
+      border:1px solid var(--stroke);
+      box-shadow: 0 25px 60px rgba(0,0,0,.45);
+
+      /* Grundlook + Tönung je nach Boxfarbe */
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03)),
+        linear-gradient(180deg, var(--cardTint), var(--cardTint));
     }
 
-    /* color overlay (depends on selection) */
-    .card::before{
-      content:"";
+    .colorBar{
       position:absolute;
-      inset:0;
-      background: var(--box-gray);
-      opacity:.22; /* default */
+      top:10px; left:12px; right:12px;
+      height:10px;
+      border-radius: 999px;
+      opacity:.65;
+      border:1px solid rgba(255,255,255,.10);
+      display:block;
+    }
+
+    .head{ text-align:center; padding-top: 8px; }
+    .boxId{
+      font-weight: 900;
+      letter-spacing: .08em;
+      font-size: 56px;
+      line-height: 1.0;
+      margin: 10px 0 6px;
+      text-shadow: 0 6px 20px rgba(0,0,0,.35);
+    }
+    .status{
+      font-weight: 700;
+      color: var(--good);
+      margin-bottom: 14px;
+    }
+    .status.saving{ color: rgba(255,255,255,.45); }
+
+    .gridTop{
+      display:grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    .input{
+      width:100%;
+      height: 54px;
+      padding: 0 14px;
+      border-radius: 16px;
+      border:1px solid var(--stroke);
+      background: rgba(0,0,0,.18);
+      color: var(--text);
+      font-size: 18px;
+      outline:none;
+    }
+    .input::placeholder{ color: rgba(255,255,255,.35); }
+    .input:focus{ border-color: rgba(120,160,255,.35); }
+
+    .row2{
+      display:grid;
+      grid-template-columns: 58px 58px 1fr;
+      gap: 12px;
+      margin-top: 12px;
+      align-items:center;
+    }
+
+    .chip{
+      width:58px; height:58px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      border-radius: 16px;
+      border:1px solid var(--stroke);
+      background: rgba(0,0,0,.18);
+      cursor:pointer;
+      user-select:none;
+      position:relative;
+      transition: transform .06s ease, box-shadow .15s ease, border-color .15s ease;
+      font-size: 26px;
+    }
+    .chip:active{ transform: scale(.98); }
+    .chip.active{
+      border-color: rgba(57,217,138,.65);
+      box-shadow: 0 0 0 3px rgba(57,217,138,.18);
+    }
+
+    .chip.danger.active{
+      border-color: rgba(255,77,77,.70);
+      box-shadow: 0 0 0 3px rgba(255,77,77,.18);
+    }
+
+    .chip.fragile::after{
+      content:"💥";
+      position:absolute;
+      right:6px;
+      bottom:6px;
+      font-size: 14px;
+      opacity: .0;
+      transform: rotate(-10deg);
+      transition: opacity .15s ease;
       pointer-events:none;
     }
-    .card[data-color="black"]::before{ background: var(--box-black); opacity:.28; }
-    .card[data-color="gray"]::before{ background: var(--box-gray); opacity:.22; }
+    .chip.fragile.active::after{ opacity:.9; }
 
-    .card > *{ position:relative; z-index:1; }
-
-    .top{
-      text-align:center;
-      margin-bottom:12px;
-    }
-
-    .boxno{
-      font-weight:900;
-      letter-spacing:.08em;
-      font-size:42px;
-      line-height:1.1;
-      color: rgba(255,255,255,.92);
-      text-shadow: 0 4px 18px rgba(0,0,0,.35);
-    }
-
-    .saved{
-      margin-top:6px;
-      font-size:14px;
-      color:var(--green);
-      opacity:.65;                 /* dauerhaft sichtbar */
-      transition:opacity .25s ease, filter .25s ease;
-      user-select:none;
-    }
-    .saved.show{
-      opacity:1;                   /* bei Änderung stärker sichtbar */
-      filter: drop-shadow(0 0 8px rgba(41,208,107,.35));
-    }
-
-    .row{
+    .weightWrap{
+      height:58px;
+      border-radius:16px;
+      border:1px solid var(--stroke);
+      background: rgba(0,0,0,.18);
       display:flex;
-      gap:12px;
       align-items:center;
-      margin:14px 0 10px;
-      flex-wrap:wrap;
+      padding: 0 12px;
+      gap: 10px;
     }
-
-    input[type="text"]{
-      height:48px;
-      border-radius:14px;
-      border:1px solid var(--line);
+    .weightInput{
+      width: 72px;
+      border:none;
       outline:none;
-      padding:0 14px;
-      background: rgba(0,0,0,.18);
-      color:var(--text);
-      font-size:18px;
-      width: 100%;
-    }
-    input[type="text"]::placeholder{ color:rgba(255,255,255,.35) }
-
-    /* ORT field: 6 chars */
-    .ort{
-      width:140px;
-      max-width: 140px;
-      text-transform:uppercase;
-      font-weight:800;
-      letter-spacing:.08em;
-    }
-
-    .title{
-      flex: 1 1 220px;
-      min-width: 220px;
-    }
-
-    /* Icon toggles */
-    .iconToggle{
-      width:54px;
-      height:48px;
-      border-radius:14px;
-      border:1px solid var(--line);
-      background: rgba(0,0,0,.18);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size:22px;
-      cursor:pointer;
-      user-select:none;
-      transition: transform .08s ease, background .2s ease, border-color .2s ease, filter .2s ease, box-shadow .2s ease;
-    }
-    .iconToggle:active{ transform:scale(.98); }
-
-    .iconToggle.on{
-      border-color: rgba(41,208,107,.55);
-      background: rgba(41,208,107,.10);
-      filter: drop-shadow(0 0 10px rgba(41,208,107,.20));
-    }
-
-    /* Heavy: deutlich stärker (rot) */
-    .iconToggle.heavy.on{
-      border-color: rgba(255, 80, 80, 0.95) !important;
-      background: rgba(255, 80, 80, 0.10) !important;
-      box-shadow:
-        0 0 0 2px rgba(255, 80, 80, 0.35),
-        0 0 22px rgba(255, 80, 80, 0.55) !important;
-      filter: none !important;
-    }
-
-    /* Color selector */
-    .colorWrap{
-      display:flex;
-      gap:10px;
-      margin:6px 0 12px;
-      align-items:center;
-      justify-content:flex-start;
-    }
-
-    .colorBtn{
-      width:54px;
-      height:38px;
-      border-radius:12px;
-      border:1px solid var(--line);
-      cursor:pointer;
-      background: rgba(0,0,0,.18);
-      position:relative;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      user-select:none;
-      transition: transform .08s ease, border-color .2s ease, box-shadow .2s ease;
-    }
-    .colorBtn:active{ transform:scale(.98); }
-
-    .swatch{
-      width:26px;
-      height:18px;
-      border-radius:6px;
-      border:1px solid rgba(255,255,255,.14);
-    }
-    .swatch.black{ background: var(--box-black); }
-    .swatch.gray{ background: var(--box-gray); }
-
-    .colorBtn.on{
-      border-color: rgba(41,208,107,.55);
-      box-shadow: 0 0 0 2px rgba(41,208,107,.18);
-    }
-
-    /* KG field (max 2 digits + fixed kg) */
-    .kgWrap{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      height:48px;
-      padding:0 14px;
-      border-radius:14px;
-      border:1px solid var(--line);
-      background: rgba(0,0,0,.18);
-      min-width: 120px;
-    }
-    .kgWrap input{
-      width: 40px;
-      font-size: 18px;
-      font-weight: 900;
-      color: #fff;
       background: transparent;
-      border: none;
-      outline: none;
-      text-align: right;
-      padding:0;
-      margin:0;
-    }
-    .kgUnit{
-      font-size: 16px;
+      color: var(--text);
+      font-size: 22px;
       font-weight: 800;
-      color: rgba(255,255,255,.85);
-      letter-spacing:.02em;
+      text-align:center;
+      appearance: textfield;
+    }
+    .weightInput::-webkit-outer-spin-button,
+    .weightInput::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0; }
+    .kg{
+      margin-left:auto;
+      color: rgba(255,255,255,.55);
+      font-weight: 800;
+      font-size: 22px;
+      padding-right: 4px;
     }
 
+    .colorRow{
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      margin-top: 12px;
+      margin-bottom: 14px;
+    }
+    .swatch{
+      width: 28px; height: 28px;
+      border-radius: 10px;
+      border:1px solid rgba(255,255,255,.22);
+      cursor:pointer;
+      position:relative;
+      flex:0 0 auto;
+    }
+    .swatch.active{
+      outline: 3px solid rgba(57,217,138,.35);
+      border-color: rgba(57,217,138,.60);
+    }
+    .swatch.grey{ background: var(--boxGrey); }
+    .swatch.black{ background: #000; }
+
+    .content{
+      border-radius: 20px;
+      border:1px solid var(--stroke);
+      background: rgba(0,0,0,.16);
+      padding: 12px;
+    }
     textarea{
       width:100%;
-      min-height:260px;
-      resize:vertical;
-      border-radius:16px;
-      border:1px solid var(--line);
+      min-height: 260px;
+      resize: vertical;
+      border:none;
       outline:none;
-      padding:14px;
-      background: rgba(0,0,0,.18);
-      color:var(--text);
-      font-size:18px;
-      line-height:1.35;
+      background: transparent;
+      color: var(--text);
+      font-size: 18px;
+      line-height: 1.4;
     }
-    textarea::placeholder{ color:rgba(255,255,255,.35) }
+    textarea::placeholder{ color: rgba(255,255,255,.30); }
 
-    @media (max-width:520px){
-      .boxno{ font-size:38px; }
-      .row{ gap:10px; }
-      .ort{ width:130px; max-width:130px; }
-      .iconToggle{ width:52px; }
-      .kgWrap{ min-width: 110px; }
+    .btnRow{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 14px;
     }
+    .btn{
+      height: 58px;
+      border-radius: 18px;
+      border:1px solid var(--stroke);
+      background: rgba(40,70,140,.22);
+      color: var(--text);
+      font-size: 18px;
+      font-weight: 800;
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      padding: 0 10px;
+    }
+    .hint{
+      margin-top: 8px;
+      color: rgba(255,255,255,.40);
+      font-size: 13px;
+      text-align:center;
+    }
+    .hidden{ display:none !important; }
   </style>
 </head>
-
 <body>
   <div class="wrap">
-    <div class="card" id="card" data-color="gray">
-      <div class="top">
-        <div class="boxno" id="boxNo">E000</div>
-        <div class="saved" id="savedState">Gespeichert ✓</div>
+    <div class="card" id="card">
+      <div class="colorBar" id="colorBar"></div>
+
+      <div class="head">
+        <div class="boxId" id="boxId">E000</div>
+        <div class="status" id="status">Gespeichert ✓</div>
       </div>
 
-      <!-- ORT + Bezeichnung + Icons + KG -->
-      <div class="row">
-        <input class="ort" id="ort" type="text" maxlength="6" placeholder="ORT" />
-        <input class="title" id="title" type="text" placeholder="Bezeichnung" />
+      <div class="gridTop">
+        <input class="input" id="ort" maxlength="6" placeholder="ORT" />
+        <input class="input" id="bez" placeholder="Bezeichnung" />
+      </div>
 
-        <!-- Zerbrechlich (🍷 bleibt) -->
-        <div class="iconToggle" id="fragile" title="Zerbrechlich">🍷</div>
+      <div class="row2">
+        <div class="chip fragile" id="fragile" title="Zerbrechlich">🍷</div>
+        <div class="chip danger" id="heavy" title="Schwer (ab 16 kg)">🏋️</div>
 
-        <!-- Heavy (stark rot) -->
-        <div class="iconToggle heavy" id="heavy" title="Heavy">🏋️</div>
-
-        <!-- Gewicht: max 2 Ziffern + kg -->
-        <div class="kgWrap" title="Gewicht">
-          <input id="kg" inputmode="numeric" pattern="[0-9]*" maxlength="2" placeholder="00">
-          <span class="kgUnit">kg</span>
+        <div class="weightWrap">
+          <input class="weightInput" id="kg" inputmode="numeric" pattern="[0-9]*" maxlength="2" placeholder="00" />
+          <div class="kg">kg</div>
         </div>
       </div>
 
-      <!-- Box-Farbe -->
-      <div class="colorWrap">
-        <div class="colorBtn" id="cBlack" title="Schwarze Box"><div class="swatch black"></div></div>
-        <div class="colorBtn on" id="cGray" title="Graue Box"><div class="swatch gray"></div></div>
+      <div class="colorRow" id="colorRow">
+        <div class="swatch grey" id="swGrey" title="Grau"></div>
+        <div class="swatch black" id="swBlack" title="Schwarz"></div>
       </div>
 
-      <textarea id="content" placeholder="Inhalt hier eintragen..."></textarea>
+      <div class="content">
+        <textarea id="text" placeholder="• Inhalt hier eintragen..."></textarea>
+      </div>
+
+      <div class="btnRow">
+        <button class="btn" id="btnBackup">Backup nach iCloud</button>
+        <button class="btn" id="btnImport">Backup importieren</button>
+      </div>
+
+      <div class="hint">iPhone: Backup → Teilen → „In Dateien sichern“ → iCloud Drive</div>
     </div>
   </div>
 
 <script>
-(function(){
+(() => {
+  const STORAGE_KEY = "eurobox_data_v1";
+  const $ = (id) => document.getElementById(id);
+
+  const elBoxId = $("boxId");
+  const elStatus = $("status");
+  const elOrt = $("ort");
+  const elBez = $("bez");
+  const elFragile = $("fragile");
+  const elHeavy = $("heavy");
+  const elKg = $("kg");
+  const elText = $("text");
+  const elSwGrey = $("swGrey");
+  const elSwBlack = $("swBlack");
+  const elColorRow = $("colorRow");
+  const elColorBar = $("colorBar");
+  const elCard = $("card");
+
+  const btnBackup = $("btnBackup");
+  const btnImport = $("btnImport");
+
+  // --- BoxId aus URL ---
   const params = new URLSearchParams(location.search);
-  const box = (params.get("box") || "E000").toUpperCase().trim();
+  const rawId = (params.get("box") || "E000").toUpperCase().trim();
+  const boxId = /^[EK]\d{3}$/.test(rawId) ? rawId : "E000";
+  elBoxId.textContent = boxId;
+  document.title = boxId;
 
-  const boxNoEl = document.getElementById("boxNo");
-  const savedEl = document.getElementById("savedState");
-  const ortEl = document.getElementById("ort");
-  const titleEl = document.getElementById("title");
-  const contentEl = document.getElementById("content");
+  const isK = boxId.startsWith("K");
 
-  const fragileEl = document.getElementById("fragile");
-  const heavyEl = document.getElementById("heavy");
-  const kgEl = document.getElementById("kg");
+  function loadAll(){
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}"); }
+    catch { return {}; }
+  }
+  function saveAll(all){
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
+  }
+  function nowISO(){ return new Date().toISOString(); }
 
-  const cardEl = document.getElementById("card");
-  const cBlackEl = document.getElementById("cBlack");
-  const cGrayEl = document.getElementById("cGray");
-
-  boxNoEl.textContent = box;
-
-  const storageKey = "eurobox:" + box;
-
-  function showSaved(){
-    savedEl.classList.add("show");
-    setTimeout(()=> savedEl.classList.remove("show"), 1200);
+  function defaultColorFor(){
+    return isK ? "karton" : "grey";
   }
 
-  function cleanKg(v){
-    return (v || "").replace(/\D/g, "").slice(0, 2);
+  function colorToHex(color){
+    if (color === "black") return "#000000";
+    if (color === "karton") return "#ADAC62";
+    return "#C0C0C0";
   }
 
-  function setToggle(el, on){
-    el.classList.toggle("on", !!on);
+  // deutliche Karton-Tönung im Card-Background (nicht zu heftig)
+  function tintFor(color){
+    if (color === "karton") return "rgba(173,172,98,.22)";
+    if (color === "black")  return "rgba(0,0,0,.10)";
+    return "rgba(192,192,192,.16)";
   }
 
-  function setColor(color){
-    const c = (color === "black") ? "black" : "gray";
-    cardEl.setAttribute("data-color", c);
-    cBlackEl.classList.toggle("on", c === "black");
-    cGrayEl.classList.toggle("on", c === "gray");
+  let all = loadAll();
+  let item = all[boxId] || {
+    id: boxId,
+    ort: "",
+    bez: "",
+    text: "",
+    fragile: false,
+    weight: 0,
+    color: defaultColorFor(),
+    updatedAt: nowISO()
+  };
+
+  // ✅ HART: Kartons immer karton – egal was gespeichert war
+  function enforceKarton(){
+    if (isK) item.color = "karton";
+  }
+  enforceKarton();
+
+  // --- UI ---
+  function setSaving(saving){
+    if (saving){
+      elStatus.textContent = "Speichern…";
+      elStatus.classList.add("saving");
+    } else {
+      elStatus.textContent = "Gespeichert ✓";
+      elStatus.classList.remove("saving");
+    }
   }
 
-  function load(){
-    const raw = localStorage.getItem(storageKey);
-    if(!raw) return;
+  function renderColorUI(){
+    enforceKarton();
 
-    try{
-      const d = JSON.parse(raw);
-      ortEl.value = (d.ort || "").toUpperCase().slice(0,6);
-      titleEl.value = d.title || "";
-      contentEl.value = d.content || "";
-      kgEl.value = cleanKg(d.kg || "");
+    const hex = colorToHex(item.color);
+    elColorBar.style.background = hex;
 
-      setToggle(fragileEl, !!d.fragile);
-      setToggle(heavyEl, !!d.heavy);
-      setColor(d.color || "gray");
-    }catch(e){}
+    // Card-Tönung setzen
+    elCard.style.setProperty("--cardTint", tintFor(item.color));
+
+    if (isK){
+      elColorRow.classList.add("hidden");
+      return;
+    }
+    elColorRow.classList.remove("hidden");
+    elSwGrey.classList.toggle("active", item.color === "grey");
+    elSwBlack.classList.toggle("active", item.color === "black");
   }
 
-  function save(){
-    const data = {
-      ort: (ortEl.value || "").toUpperCase().slice(0,6),
-      title: titleEl.value || "",
-      content: contentEl.value || "",
-      kg: cleanKg(kgEl.value),
-
-      fragile: fragileEl.classList.contains("on"),
-      heavy: heavyEl.classList.contains("on"),
-      color: cardEl.getAttribute("data-color") || "gray",
-
-      updatedAt: Date.now()
-    };
-    localStorage.setItem(storageKey, JSON.stringify(data));
-    showSaved();
+  function heavyByWeight(){
+    const w = Number(item.weight || 0);
+    elHeavy.classList.toggle("active", w >= 16); // ✅ erst ab 16kg
   }
 
-  // autosave (debounced)
+  function render(){
+    enforceKarton();
+
+    elOrt.value = item.ort || "";
+    elBez.value = item.bez || "";
+    elText.value = item.text || "";
+    elFragile.classList.toggle("active", !!item.fragile);
+
+    const w = Number(item.weight || 0);
+    elKg.value = w ? String(w) : "";
+
+    heavyByWeight();
+    renderColorUI();
+  }
+
+  // --- Autosave ---
   let t = null;
-  function queueSave(){
+  function scheduleSave(){
+    enforceKarton(); // ✅ auch vor jedem Save erzwingen
+
+    setSaving(true);
     clearTimeout(t);
-    t = setTimeout(save, 250);
+    t = setTimeout(() => {
+      enforceKarton();
+      item.updatedAt = nowISO();
+      all[boxId] = item;
+      saveAll(all);
+      setSaving(false);
+    }, 250);
   }
 
-  // events
-  ortEl.addEventListener("input", ()=>{ ortEl.value = (ortEl.value || "").toUpperCase().slice(0,6); queueSave(); });
-  titleEl.addEventListener("input", queueSave);
-  contentEl.addEventListener("input", queueSave);
+  // --- Bullets ---
+  function normalizeBullets(text){
+    const lines = text.replace(/\r/g, "").split("\n");
+    return lines.map(line => {
+      const trimmed = line.replace(/^\s+/, "");
+      if (trimmed === "") return "";
+      if (trimmed.startsWith("• ")) return "• " + trimmed.slice(2);
+      if (trimmed.startsWith("•")) return "• " + trimmed.slice(1).trimStart();
+      return "• " + trimmed;
+    }).join("\n");
+  }
 
-  fragileEl.addEventListener("click", ()=>{ setToggle(fragileEl, !fragileEl.classList.contains("on")); save(); });
-  heavyEl.addEventListener("click", ()=>{ setToggle(heavyEl, !heavyEl.classList.contains("on")); save(); });
+  elText.addEventListener("keydown", (e) => {
+    if (e.key === "Backspace"){
+      const start = elText.selectionStart;
+      const end = elText.selectionEnd;
+      if (start !== end) return;
 
-  kgEl.addEventListener("input", ()=>{ kgEl.value = cleanKg(kgEl.value); queueSave(); });
+      const value = elText.value;
+      const before = value.slice(0, start);
+      const lineStart = before.lastIndexOf("\n") + 1;
+      const at = start - lineStart;
+      const linePrefix = value.slice(lineStart, lineStart + 2);
 
-  cBlackEl.addEventListener("click", ()=>{ setColor("black"); save(); });
-  cGrayEl.addEventListener("click", ()=>{ setColor("gray"); save(); });
+      if (at === 2 && linePrefix === "• "){
+        e.preventDefault();
+        elText.value = value.slice(0, lineStart) + value.slice(lineStart + 2);
+        elText.setSelectionRange(start - 2, start - 2);
+        item.text = normalizeBullets(elText.value);
+        scheduleSave();
+      }
+    }
+  });
 
-  // initial
-  load();
+  elText.addEventListener("input", () => {
+    const pos = elText.selectionStart;
+    const oldLen = elText.value.length;
+
+    elText.value = normalizeBullets(elText.value);
+
+    const newLen = elText.value.length;
+    const delta = newLen - oldLen;
+    elText.setSelectionRange(Math.max(0, pos + delta), Math.max(0, pos + delta));
+
+    item.text = elText.value;
+    scheduleSave();
+  });
+
+  // Inputs
+  elOrt.addEventListener("input", () => {
+    item.ort = (elOrt.value || "").toUpperCase().slice(0,6);
+    elOrt.value = item.ort;
+    scheduleSave();
+  });
+
+  elBez.addEventListener("input", () => {
+    item.bez = (elBez.value || "");
+    scheduleSave();
+  });
+
+  elFragile.addEventListener("click", () => {
+    item.fragile = !item.fragile;
+    elFragile.classList.toggle("active", !!item.fragile);
+    scheduleSave();
+  });
+
+  // Heavy nicht manuell toggeln
+  elHeavy.addEventListener("click", () => {
+    elHeavy.style.transform = "scale(.98)";
+    setTimeout(()=> elHeavy.style.transform = "", 80);
+  });
+
+  elKg.addEventListener("input", () => {
+    let v = (elKg.value || "").replace(/\D/g, "").slice(0,2);
+    elKg.value = v;
+    item.weight = v ? Number(v) : 0;
+    heavyByWeight();
+    scheduleSave();
+  });
+
+  elSwGrey.addEventListener("click", () => {
+    if (isK) return;
+    item.color = "grey";
+    renderColorUI();
+    scheduleSave();
+  });
+  elSwBlack.addEventListener("click", () => {
+    if (isK) return;
+    item.color = "black";
+    renderColorUI();
+    scheduleSave();
+  });
+
+  // Backup Export/Import
+  function buildBackup(){
+    const fresh = loadAll();
+    return { version: 1, exportedAt: nowISO(), data: fresh };
+  }
+
+  async function shareOrDownload(filename, blob){
+    if (navigator.canShare && navigator.canShare({ files: [new File([blob], filename, { type: blob.type })] })){
+      try{
+        await navigator.share({ files: [new File([blob], filename, { type: blob.type })], title: filename });
+        return;
+      }catch(e){}
+    }
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url), 2000);
+  }
+
+  btnBackup.addEventListener("click", async () => {
+    const blob = new Blob([JSON.stringify(buildBackup(), null, 2)], { type:"application/json" });
+    const name = `Euroboxen_Backup_${new Date().toISOString().slice(0,10)}.json`;
+    await shareOrDownload(name, blob);
+  });
+
+  btnImport.addEventListener("click", () => {
+    const inp = document.createElement("input");
+    inp.type = "file";
+    inp.accept = ".json,application/json";
+    inp.addEventListener("change", async () => {
+      const file = inp.files && inp.files[0];
+      if (!file) return;
+      const txt = await file.text();
+      let parsed;
+      try { parsed = JSON.parse(txt); }
+      catch { alert("Ungültige JSON-Datei."); return; }
+
+      const incoming = parsed && parsed.data && typeof parsed.data === "object" ? parsed.data : null;
+      if (!incoming){ alert("Backup-Format nicht erkannt."); return; }
+
+      const current = loadAll();
+      const merged = { ...current, ...incoming };
+
+      // ✅ Kartons in merged fixieren
+      for (const k of Object.keys(merged)){
+        if (k.startsWith("K") && merged[k]) merged[k].color = "karton";
+      }
+
+      saveAll(merged);
+      all = merged;
+
+      item = all[boxId] || item;
+      enforceKarton();
+      render();
+      setSaving(false);
+      alert("Backup importiert ✓");
+    });
+    inp.click();
+  });
+
+  // init
+  render();
+  setSaving(false);
 })();
 </script>
 </body>
