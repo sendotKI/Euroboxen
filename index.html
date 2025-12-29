@@ -3,157 +3,279 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Eurobox / Karton</title>
+<title>Box</title>
 
 <style>
-  :root {
-    --bg-euro-grey: #C0C0C0;
-    --bg-euro-black: #1a1a1a;
-    --bg-karton: #ADAC62;
-    --card-bg: #0f172a;
-    --text: #e5e7eb;
-    --accent: #22c55e;
+  :root{
+    --karton:#ADAC62;
+    --euroGrey:#C0C0C0;
+    --euroBlack:#0b0f19;
+
+    --bg1:#050914;
+    --bg2:#02040a;
+
+    --card:#0b1220;
+    --card2:#0a1020;
+
+    --text:#e7eaf0;
+    --muted:#9aa3b2;
+
+    --border: rgba(255,255,255,.12);
+    --field: rgba(255,255,255,.07);
+
+    --ok:#22c55e;
+    --warn:#ef4444;
+    --chip: rgba(255,255,255,.08);
   }
 
-  body {
-    margin: 0;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-    background: radial-gradient(circle at top, #020617, #000);
-    color: var(--text);
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family: system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+    color:var(--text);
+    background: radial-gradient(1100px 600px at 50% -10%, #0b1a3a 0%, var(--bg1) 38%, var(--bg2) 100%);
+    padding: 18px 12px;
   }
 
-  .wrapper {
-    max-width: 520px;
-    margin: 20px auto;
-    padding: 12px;
+  .wrap{max-width:560px;margin:0 auto;}
+  .card{
+    position:relative;
+    border-radius:28px;
+    padding:18px;
+    border:1px solid rgba(255,255,255,.10);
+    background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02)) , var(--card);
+    box-shadow: 0 20px 70px rgba(0,0,0,.55);
+    overflow:hidden;
   }
 
-  .card {
-    border-radius: 24px;
-    padding: 18px;
-    transition: background 0.3s ease;
+  /* Dezente Tönung (NICHT alles grau machen!) */
+  .card::before{
+    content:"";
+    position:absolute; inset:0;
+    background: radial-gradient(900px 420px at 50% 0%, rgba(255,255,255,.06), transparent 55%);
+    pointer-events:none;
+    opacity:1;
   }
 
-  .title {
-    text-align: center;
-    font-size: 42px;
-    font-weight: 800;
-    letter-spacing: 2px;
+  /* Farbbalken oben */
+  .topbar{
+    position:absolute; left:18px; right:18px; top:14px;
+    height:10px;
+    border-radius:10px;
+    background: var(--accentColor);
+    opacity:.28;
+    filter: saturate(1.2);
   }
 
-  .status {
-    text-align: center;
-    color: var(--accent);
+  .title{
+    position:relative;
+    text-align:center;
+    font-weight:900;
+    letter-spacing:3px;
+    font-size:52px;
+    margin: 18px 0 4px 0;
+    text-shadow: 0 8px 20px rgba(0,0,0,.35);
+  }
+
+  .status{
+    position:relative;
+    text-align:center;
+    color: var(--ok);
+    font-weight:700;
     margin-bottom: 14px;
   }
 
-  .row {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 12px;
+  .row{position:relative; display:flex; gap:12px; margin:12px 0;}
+  .field{
+    width:100%;
+    background: var(--field);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 16px;
+    padding: 14px 14px;
+    font-size:16px;
+    outline:none;
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,.12);
   }
+  .field::placeholder{color: rgba(231,234,240,.45);}
 
-  input, textarea {
-    width: 100%;
-    background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(255,255,255,0.15);
-    border-radius: 14px;
-    padding: 12px;
-    color: white;
-    font-size: 16px;
-  }
+  .ort{max-width:140px; font-weight:800; letter-spacing:1px; text-transform:uppercase;}
+  .bez{flex:1;}
 
-  textarea {
-    min-height: 220px;
-    resize: none;
-  }
-
-  .iconToggle {
-    width: 48px;
-    height: 48px;
-    border-radius: 14px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 22px;
-    background: rgba(255,255,255,0.08);
-    cursor: pointer;
+  .iconToggle{
+    width:56px; height:56px;
+    border-radius:18px;
+    display:flex; align-items:center; justify-content:center;
+    background: var(--chip);
     border: 2px solid transparent;
+    cursor:pointer;
+    user-select:none;
+    font-size:24px;
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,.18);
+  }
+  .iconToggle.active{
+    border-color: rgba(34,197,94,.9);
+    background: rgba(34,197,94,.22);
+  }
+  .iconToggle.heavy.active{
+    border-color: rgba(239,68,68,.95);
+    background: rgba(239,68,68,.25);
   }
 
-  .iconToggle.active {
-    border-color: var(--accent);
-    background: rgba(34,197,94,0.25);
+  /* Gewicht: Input + "kg" fest */
+  .kgWrap{
+    flex:1;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .kgBox{
+    position:relative;
+    flex:1;
+  }
+  .kgInput{
+    padding-right:44px;
+    text-align:center;
+    font-weight:900;
+    letter-spacing:1px;
+    font-variant-numeric: tabular-nums;
+  }
+  .kgSuffix{
+    position:absolute;
+    right:14px; top:50%;
+    transform:translateY(-50%);
+    color: rgba(231,234,240,.60);
+    font-weight:800;
+    pointer-events:none;
   }
 
-  .heavy.active {
-    background: rgba(239,68,68,0.35);
-    border-color: #ef4444;
+  /* Farbauswahl kleiner + Abstand zum Inhaltsfeld */
+  .colorRow{
+    display:flex;
+    gap:10px;
+    margin: 6px 0 18px 0; /* Abstand zum Inhaltsfeld */
+    transform: scale(.5);
+    transform-origin: left center;
   }
 
-  .weight {
-    max-width: 110px;
-    text-align: center;
-    font-weight: 700;
+  .colorChip{
+    width:84px; height:54px;
+    border-radius:18px;
+    border:2px solid transparent;
+    background: var(--chip);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    cursor:pointer;
+    user-select:none;
+    padding: 0 10px;
+  }
+  .colorChip.active{
+    border-color: rgba(34,197,94,.85);
+    background: rgba(34,197,94,.18);
+  }
+  .swatch{
+    width:18px;height:18px;border-radius:6px;
+    border:1px solid rgba(255,255,255,.20);
   }
 
-  .spacer {
-    height: 14px;
+  textarea.field{
+    min-height: 320px;
+    resize:none;
+    line-height:1.35;
+    padding:16px;
   }
 
-  .buttons {
-    display: flex;
-    gap: 10px;
+  .buttons{
+    display:flex;
+    gap:14px;
     margin-top: 16px;
   }
+  button{
+    flex:1;
+    background: rgba(30,41,59,.85);
+    border: 1px solid rgba(255,255,255,.12);
+    color: var(--text);
+    border-radius: 18px;
+    padding: 14px 12px;
+    font-weight:800;
+    font-size:16px;
+    cursor:pointer;
+  }
+  button:active{transform: translateY(1px);}
 
-  button {
-    flex: 1;
-    padding: 14px;
-    border-radius: 16px;
-    border: none;
-    font-size: 15px;
-    background: #1e293b;
-    color: white;
-    cursor: pointer;
+  /* kleines Farbbadge links unten (Info) */
+  .badge{
+    position:absolute;
+    left:18px; bottom:18px;
+    width:18px; height:18px;
+    border-radius:6px;
+    background: var(--accentColor);
+    opacity:.55;
+    border:1px solid rgba(255,255,255,.18);
   }
 </style>
 </head>
 
 <body>
-<div class="wrapper">
-  <div class="card" id="card">
+<div class="wrap">
+  <div class="card" id="card" style="--accentColor: var(--euroGrey);">
 
+    <div class="topbar"></div>
     <div class="title" id="boxTitle">E000</div>
     <div class="status" id="status">Gespeichert ✓</div>
 
     <div class="row">
-      <input id="ort" placeholder="ORT" maxlength="6" />
-      <input id="bez" placeholder="Bezeichnung" />
+      <input id="ort" class="field ort" placeholder="ORT" maxlength="6" />
+      <input id="bez" class="field bez" placeholder="Bezeichnung" />
     </div>
 
-    <div class="row">
-      <div class="iconToggle" id="fragile" title="Zerbrechlich">🍷</div>
-      <div class="iconToggle heavy" id="heavy" title="Schwer">🏋️</div>
-      <input id="weight" class="weight" placeholder="00 kg" maxlength="2" />
+    <div class="row" style="align-items:center;">
+      <div class="iconToggle" id="fragile" title="Zerbrechlich (klick)">🥂</div>
+      <div class="iconToggle heavy" id="heavy" title="Schwer (ab 16 kg automatisch)">🏋️</div>
+
+      <div class="kgWrap">
+        <div class="kgBox">
+          <input id="weight" class="field kgInput" inputmode="numeric" maxlength="2" placeholder="00" />
+          <div class="kgSuffix">kg</div>
+        </div>
+      </div>
     </div>
 
-    <div class="spacer"></div>
+    <!-- Farbauswahl (nur für Euroboxen; Karton = automatisch) -->
+    <div id="colorRow" class="colorRow" aria-label="Farbe">
+      <div class="colorChip" id="cGrey" title="Eurobox grau">
+        <span class="swatch" style="background: var(--euroGrey)"></span><span>Grau</span>
+      </div>
+      <div class="colorChip" id="cBlack" title="Eurobox schwarz">
+        <span class="swatch" style="background: var(--euroBlack)"></span><span>Schwarz</span>
+      </div>
+    </div>
 
-    <textarea id="content" placeholder="• Inhalt hier eintragen..."></textarea>
+    <textarea id="content" class="field" placeholder="• Inhalt hier eintragen..."></textarea>
 
     <div class="buttons">
-      <button onclick="backup()">Backup nach iCloud</button>
-      <button onclick="importBackup()">Backup importieren</button>
+      <button id="btnBackup">Backup nach iCloud</button>
+      <button id="btnImport">Backup importieren</button>
     </div>
 
+    <div class="badge" title="Box-Farbe"></div>
   </div>
 </div>
 
 <script>
-const boxId = new URLSearchParams(location.search).get("box") || "E000";
+/* -------------------------
+   Box-ID + Storage Keys
+-------------------------- */
+const qs = new URLSearchParams(location.search);
+const boxId = (qs.get("box") || "E000").toUpperCase();
 const storeKey = "box_" + boxId;
+const metaKey  = "meta_colors"; // merkt pro Box die Eurobox-Farbe
 
+/* -------------------------
+   State
+-------------------------- */
 const state = {
   ort: "",
   bez: "",
@@ -163,96 +285,251 @@ const state = {
   weight: ""
 };
 
-function applyBackground() {
-  const card = document.getElementById("card");
-  if (boxId.startsWith("K")) {
-    card.style.background = "var(--bg-karton)";
+function $(id){ return document.getElementById(id); }
+
+/* -------------------------
+   Helpers: Bullets
+-------------------------- */
+function ensureStartsWithBullet(text){
+  const t = (text ?? "");
+  if (t.trim() === "") return "• ";
+  // Wenn erste nicht Bullet, vorne Bullet setzen
+  if (!t.startsWith("• ")) return "• " + t;
+  return t;
+}
+
+function insertBulletAtCursor(el){
+  const start = el.selectionStart;
+  const end   = el.selectionEnd;
+  const before = el.value.slice(0, start);
+  const after  = el.value.slice(end);
+  const ins = "\n• ";
+  el.value = before + ins + after;
+  el.selectionStart = el.selectionEnd = start + ins.length;
+}
+
+function backspaceBulletIfAtLineStart(el){
+  const pos = el.selectionStart;
+  if (pos !== el.selectionEnd) return false;
+
+  const v = el.value;
+  const lineStart = v.lastIndexOf("\n", pos - 1) + 1;
+  // Wenn Cursor genau nach "• " steht -> entferne Bullet
+  const segment = v.slice(lineStart, pos);
+  if (segment === "• "){
+    const before = v.slice(0, lineStart);
+    const after  = v.slice(pos);
+    el.value = before + after;
+    el.selectionStart = el.selectionEnd = lineStart;
+    return true;
+  }
+  return false;
+}
+
+/* -------------------------
+   Color logic
+-------------------------- */
+function getMeta(){
+  try { return JSON.parse(localStorage.getItem(metaKey) || "{}"); }
+  catch { return {}; }
+}
+function setMeta(m){
+  localStorage.setItem(metaKey, JSON.stringify(m));
+}
+
+function setAccentColor(hex){
+  const card = $("card");
+  card.style.setProperty("--accentColor", hex);
+}
+
+function applyAutoColor(){
+  // Karton: automatisch
+  if (boxId.startsWith("K")){
+    $("colorRow").style.display = "none";
+    setAccentColor(getComputedStyle(document.documentElement).getPropertyValue("--karton").trim() || "#ADAC62");
+    return;
+  }
+
+  // Eurobox: gespeicherte Auswahl je Box (oder Default Grau)
+  $("colorRow").style.display = "flex";
+
+  const meta = getMeta();
+  const choice = meta[storeKey]?.color || "grey";
+  setEuroChoice(choice);
+}
+
+function setEuroChoice(choice){
+  const meta = getMeta();
+  meta[storeKey] = meta[storeKey] || {};
+  meta[storeKey].color = choice;
+  setMeta(meta);
+
+  $("cGrey").classList.toggle("active", choice === "grey");
+  $("cBlack").classList.toggle("active", choice === "black");
+
+  if (choice === "black"){
+    setAccentColor(getComputedStyle(document.documentElement).getPropertyValue("--euroBlack").trim() || "#0b0f19");
   } else {
-    card.style.background = "var(--bg-euro-grey)";
+    setAccentColor(getComputedStyle(document.documentElement).getPropertyValue("--euroGrey").trim() || "#C0C0C0");
   }
 }
 
-function render() {
+/* -------------------------
+   Save/Load
+-------------------------- */
+function render(){
   localStorage.setItem(storeKey, JSON.stringify(state));
-  document.getElementById("status").textContent = "Gespeichert ✓";
 
-  document.getElementById("fragile").classList.toggle("active", state.fragile);
-  document.getElementById("heavy").classList.toggle("active", state.heavy);
+  $("status").textContent = "Gespeichert ✓";
+  $("fragile").classList.toggle("active", !!state.fragile);
+  $("heavy").classList.toggle("active", !!state.heavy);
 }
 
-function load() {
-  const data = localStorage.getItem(storeKey);
-  if (data) Object.assign(state, JSON.parse(data));
+function load(){
+  $("boxTitle").textContent = boxId;
 
-  document.getElementById("boxTitle").textContent = boxId;
-  document.getElementById("ort").value = state.ort;
-  document.getElementById("bez").value = state.bez;
-  document.getElementById("content").value = state.content;
-  document.getElementById("weight").value = state.weight;
+  try{
+    const raw = localStorage.getItem(storeKey);
+    if (raw){
+      const obj = JSON.parse(raw);
+      Object.assign(state, obj);
+    }
+  }catch{}
 
-  applyBackground();
+  $("ort").value = state.ort || "";
+  $("bez").value = state.bez || "";
+
+  // Inhalt: Bullet-Start erzwingen, damit "jede Eingabe Bullet" passt
+  state.content = ensureStartsWithBullet(state.content || "");
+  $("content").value = state.content;
+
+  $("weight").value = (state.weight ?? "").toString().replace(/\D/g,"").slice(0,2);
+
+  // Heavy ab 16 kg automatisch aus Gewicht
+  const w = parseInt($("weight").value || "0", 10);
+  state.heavy = w >= 16;
+
+  applyAutoColor();
   render();
 }
 
-document.getElementById("ort").oninput = e => { state.ort = e.target.value; render(); };
-document.getElementById("bez").oninput = e => { state.bez = e.target.value; render(); };
+/* -------------------------
+   Events
+-------------------------- */
+$("ort").addEventListener("input", (e)=>{ state.ort = e.target.value.toUpperCase().slice(0,6); render(); });
+$("bez").addEventListener("input", (e)=>{ state.bez = e.target.value; render(); });
 
-document.getElementById("content").onkeydown = e => {
-  if (e.key === "Enter") {
-    e.preventDefault();
-    state.content += "\n• ";
-    e.target.value = state.content;
-    render();
-  }
-};
-
-document.getElementById("content").oninput = e => {
-  state.content = e.target.value;
-  render();
-};
-
-document.getElementById("fragile").onclick = () => {
+$("fragile").addEventListener("click", ()=>{
   state.fragile = !state.fragile;
   render();
-};
+});
 
-document.getElementById("heavy").onclick = () => {
-  state.heavy = !state.heavy;
+// Heavy: Klick toggelt nur, wenn kein Gewicht gesetzt ist.
+// Sonst regelt Gewicht (ab 16kg).
+$("heavy").addEventListener("click", ()=>{
+  const w = parseInt($("weight").value || "0", 10);
+  if (w > 0){
+    // Gewicht hat Vorrang
+    state.heavy = w >= 16;
+  } else {
+    state.heavy = !state.heavy;
+  }
   render();
-};
+});
 
-document.getElementById("weight").oninput = e => {
-  const v = parseInt(e.target.value || "0", 10);
-  state.weight = v;
-  state.heavy = v >= 16;
+$("weight").addEventListener("input", (e)=>{
+  const digits = (e.target.value || "").replace(/\D/g,"").slice(0,2);
+  e.target.value = digits;
+  state.weight = digits;
+  const w = parseInt(digits || "0", 10);
+  state.heavy = w >= 16;
   render();
-};
+});
 
-function backup() {
-  const blob = new Blob([JSON.stringify(localStorage, null, 2)], {type: "application/json"});
+$("content").addEventListener("focus", (e)=>{
+  if (!e.target.value || e.target.value.trim()===""){
+    e.target.value = "• ";
+    state.content = e.target.value;
+    render();
+  }
+});
+
+$("content").addEventListener("keydown", (e)=>{
+  if (e.key === "Enter"){
+    e.preventDefault();
+    insertBulletAtCursor(e.target);
+    state.content = e.target.value;
+    render();
+    return;
+  }
+  if (e.key === "Backspace"){
+    // Bullet am Zeilenanfang entfernen
+    if (backspaceBulletIfAtLineStart(e.target)){
+      e.preventDefault();
+      state.content = e.target.value;
+      render();
+    }
+  }
+});
+
+$("content").addEventListener("input", (e)=>{
+  state.content = e.target.value;
+  render();
+});
+
+$("cGrey").addEventListener("click", ()=> setEuroChoice("grey"));
+$("cBlack").addEventListener("click", ()=> setEuroChoice("black"));
+
+/* -------------------------
+   Backup Export/Import (funktional)
+-------------------------- */
+function collectAllBoxData(){
+  const out = {};
+  for (let i=0;i<localStorage.length;i++){
+    const k = localStorage.key(i);
+    if (!k) continue;
+    if (k.startsWith("box_") || k === metaKey){
+      out[k] = localStorage.getItem(k);
+    }
+  }
+  return out;
+}
+
+$("btnBackup").addEventListener("click", ()=>{
+  const payload = collectAllBoxData();
+  const blob = new Blob([JSON.stringify(payload, null, 2)], {type:"application/json"});
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
   a.download = "Euroboxen_Backup.json";
   a.click();
-}
+});
 
-function importBackup() {
-  const input = document.createElement("input");
-  input.type = "file";
-  input.accept = ".json";
-  input.onchange = e => {
-    const file = e.target.files[0];
-    const reader = new FileReader();
-    reader.onload = () => {
-      const data = JSON.parse(reader.result);
-      Object.keys(data).forEach(k => localStorage.setItem(k, data[k]));
-      location.reload();
-    };
-    reader.readAsText(file);
+$("btnImport").addEventListener("click", ()=>{
+  const inp = document.createElement("input");
+  inp.type = "file";
+  inp.accept = "application/json,.json";
+  inp.onchange = async ()=>{
+    const file = inp.files?.[0];
+    if (!file) return;
+    const text = await file.text();
+    let data;
+    try{ data = JSON.parse(text); }catch{ alert("Backup-Datei ist kein gültiges JSON."); return; }
+
+    // nur erwartete Keys importieren
+    Object.keys(data).forEach(k=>{
+      if (k.startsWith("box_") || k === metaKey){
+        localStorage.setItem(k, data[k]);
+      }
+    });
+
+    location.reload();
   };
-  input.click();
-}
+  inp.click();
+});
 
+/* -------------------------
+   Init
+-------------------------- */
 load();
 </script>
 </body>
