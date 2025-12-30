@@ -7,9 +7,9 @@
 
   <style>
     :root{
-      --bg:#071225;
+      --page:#071225;
 
-      /* E */
+      /* E Farben */
       --eGrey:#2b3447;
       --eBlack:#000000;
 
@@ -18,13 +18,16 @@
       --tCard:#9FFCFD;
 
       --ok:#27d17e;
-      --ink:#e9eef7;
+      --text:#e9eef7;
 
-      --stroke:rgba(255,255,255,.12);
+      --stroke:rgba(255,255,255,.14);
       --tileBg:rgba(0,0,0,.18);
 
-      --glowGreen:rgba(39,209,126,.42);
-      --glowRed:rgba(255,80,80,.45);
+      --glowGreen:rgba(39,209,126,.55);
+      --glowRed:rgba(255,80,80,.55);
+
+      --radius:26px;
+      --tileRadius:18px;
     }
 
     *{ box-sizing:border-box; }
@@ -34,83 +37,99 @@
       display:flex;
       justify-content:center;
       align-items:flex-start;
-      padding:22px 12px;
-      background:var(--bg);
+      padding:18px 12px;
+      background:var(--page);
       font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif;
-      color:var(--ink);
+      color:var(--text);
     }
 
     .card{
-      width:min(640px,94vw);
-      border-radius:28px;
-      padding:18px 18px 16px;
+      width:min(520px, 92vw);
+      border-radius:var(--radius);
+      padding:16px 16px 14px;
       background:var(--eGrey);
       box-shadow:0 26px 70px rgba(0,0,0,.55);
-      position:relative;
       overflow:hidden;
+      position:relative;
     }
 
     .topbar{
       height:10px;
       width:92%;
-      margin:4px auto 14px;
+      margin:4px auto 12px;
       border-radius:999px;
       background:rgba(255,255,255,.10);
     }
 
-    /* Überschrift kleiner */
-    h1{
+    /* Überschrift kleiner (wie du willst) */
+    .title{
       margin:0;
       text-align:center;
-      font-size:52px;
+      font-size:44px;       /* <-- kleiner */
       font-weight:900;
       letter-spacing:1px;
+      line-height:1.0;
     }
     .status{
       margin-top:6px;
       text-align:center;
-      font-size:24px;
+      font-size:22px;
       font-weight:900;
       color:var(--ok);
     }
 
-    /* ====== LAYOUT wie E022 ====== */
-    .rowFields{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
+    /* ===== Layout exakt wie E022 =====
+       1) Zeile: ORT | Bezeichnung
+       2) Zeile: 🍷 | 🏋️ | KG
+       3) Zeile (nur E): Farbauswahl
+       4) Inhalt
+    */
+    .row2{
+      display:flex;
       gap:14px;
-      margin-top:18px;
+      margin-top:16px;
+      width:100%;
     }
-    .rowIcons{
-      display:grid;
-      grid-template-columns: 76px 76px 1fr;
-      gap:14px;
-      margin-top:14px;
-      align-items:stretch;
+    .row2 > *{
+      flex:1;
+      min-width:0; /* verhindert Overflow */
     }
 
-    /* falls schmal -> stacken, aber Reihenfolge bleibt */
-    @media (max-width: 380px){
-      .rowFields{ grid-template-columns:1fr; }
-      .rowIcons{ grid-template-columns: 76px 1fr; grid-auto-rows:72px; }
-      .kgTile{ grid-column: 1 / -1; }
+    .rowIcons{
+      display:flex;
+      gap:14px;
+      margin-top:14px;
+      width:100%;
+      align-items:stretch;
+    }
+    .rowIcons .iconTile{
+      width:74px;
+      flex:0 0 74px;
+    }
+    .rowIcons .kgTile{
+      flex:1;
+      min-width:0;
     }
 
     .input{
       height:62px;
-      border-radius:18px;
+      border-radius:var(--tileRadius);
       border:2px solid var(--stroke);
       background:var(--tileBg);
-      color:var(--ink);
+      color:var(--text);
       font-size:22px;
       padding:0 16px;
       outline:none;
+      width:100%;
     }
-    .input::placeholder{ color:rgba(233,238,247,.45); font-weight:700; }
+    .input::placeholder{
+      color:rgba(233,238,247,.45);
+      font-weight:800;
+    }
 
     .tile{
       height:72px;
-      border-radius:18px;
+      border-radius:var(--tileRadius);
       border:2px solid var(--stroke);
       background:var(--tileBg);
       display:flex;
@@ -119,13 +138,14 @@
       font-size:30px;
       user-select:none;
       -webkit-tap-highlight-color: transparent;
+      width:100%;
     }
     .tile.btn{ cursor:pointer; }
 
     .tile.active.fragile{ box-shadow:0 0 0 4px var(--glowGreen); }
     .tile.active.heavy{ box-shadow:0 0 0 4px var(--glowRed); }
 
-    /* kg Tile (komfortabel klickbar wie die anderen) */
+    /* KG Tile: groß, komfortabel */
     .kgTile{
       justify-content:center;
       gap:12px;
@@ -133,39 +153,41 @@
       cursor:text;
     }
     .kgTile input{
-      width:140px;
-      text-align:center;
+      flex:1;
+      min-width:0;
       border:none;
       outline:none;
       background:transparent;
-      color:var(--ink);
+      color:var(--text);
       font-size:40px;
       font-weight:900;
       letter-spacing:1px;
+      text-align:center;
       padding:0;
     }
     .kgTile .unit{
-      font-size:30px;
+      font-size:32px;
       font-weight:900;
-      opacity:.9;
+      opacity:.92;
+      white-space:nowrap;
     }
 
-    /* Farbfelder (nur für E) */
+    /* Farbauswahl (nur E) – klein und hübsch */
     .colorRow{
       display:flex;
-      gap:18px;
-      margin-top:14px;
-      margin-bottom:18px; /* mehr Abstand zum Inhaltsfeld */
+      gap:14px;
+      margin-top:12px;
+      margin-bottom:16px; /* Abstand zum Inhaltsfeld */
       align-items:center;
     }
     .colorBox{
-      width:42px;
-      height:42px;
-      border-radius:12px;
+      width:34px;
+      height:34px;
+      border-radius:10px;
       border:2px solid var(--stroke);
-      background:var(--tileBg);
       cursor:pointer;
       -webkit-tap-highlight-color: transparent;
+      background:rgba(0,0,0,.25);
     }
     .colorBox.black{ background:#000; }
     .colorBox.grey{ background:#c0c0c0; }
@@ -176,7 +198,7 @@
       border:2px solid var(--stroke);
       background:var(--tileBg);
       padding:12px;
-      margin-top:0;
+      margin-top:10px; /* Abstand zur Icon-Zeile */
     }
     textarea{
       width:100%;
@@ -184,19 +206,22 @@
       border:none;
       outline:none;
       background:transparent;
-      color:var(--ink);
+      color:var(--text);
       font-size:22px;
       resize:none;
     }
-    textarea::placeholder{ color:rgba(233,238,247,.45); font-weight:700; }
+    textarea::placeholder{
+      color:rgba(233,238,247,.45);
+      font-weight:800;
+    }
 
     .btnRow{
-      display:grid;
-      grid-template-columns:1fr 1fr;
+      display:flex;
       gap:14px;
-      margin-top:16px;
+      margin-top:14px;
     }
     button{
+      flex:1;
       height:72px;
       border-radius:18px;
       border:none;
@@ -206,31 +231,38 @@
       font-weight:900;
     }
 
-    /* ===== Modus je ID ===== */
+    /* ===== Modes ===== */
     .mode-eblack{ background:var(--eBlack); }
-    .mode-eblack .topbar{ background:rgba(255,255,255,.12); }
-
     .mode-egrey{ background:var(--eGrey); }
 
     .mode-k{ background:var(--kCard); color:#111; }
-    .mode-k .topbar{ background:rgba(0,0,0,.12); }
-    .mode-k .input, .mode-k .tile, .mode-k .contentWrap{
-      background:rgba(255,255,255,.25);
-      border-color:rgba(0,0,0,.22);
-      color:#111;
-    }
-    .mode-k textarea, .mode-k .kgTile input{ color:#111; }
-    .mode-k .input::placeholder, .mode-k textarea::placeholder{ color:rgba(0,0,0,.35); }
-
     .mode-t{ background:var(--tCard); color:#111; }
-    .mode-t .topbar{ background:rgba(0,0,0,.12); }
+
+    .mode-k .topbar, .mode-t .topbar{ background:rgba(0,0,0,.12); }
+
+    .mode-k .input, .mode-k .tile, .mode-k .contentWrap,
     .mode-t .input, .mode-t .tile, .mode-t .contentWrap{
-      background:rgba(255,255,255,.35);
+      background:rgba(255,255,255,.30);
       border-color:rgba(0,0,0,.22);
       color:#111;
     }
-    .mode-t textarea, .mode-t .kgTile input{ color:#111; }
-    .mode-t .input::placeholder, .mode-t textarea::placeholder{ color:rgba(0,0,0,.35); }
+    .mode-k textarea, .mode-k .kgTile input,
+    .mode-t textarea, .mode-t .kgTile input{
+      color:#111;
+    }
+    .mode-k .input::placeholder, .mode-k textarea::placeholder,
+    .mode-t .input::placeholder, .mode-t textarea::placeholder{
+      color:rgba(0,0,0,.35);
+    }
+
+    /* iPhone klein: alles leicht reduzieren */
+    @media (max-width: 380px){
+      .title{ font-size:40px; }
+      .rowIcons .iconTile{ width:68px; flex-basis:68px; }
+      .tile{ height:68px; }
+      .kgTile input{ font-size:36px; }
+      .kgTile .unit{ font-size:28px; }
+    }
   </style>
 </head>
 
@@ -238,38 +270,38 @@
   <div class="card mode-egrey" id="card">
     <div class="topbar"></div>
 
-    <h1 id="boxId">E001</h1>
+    <h1 class="title" id="boxId">E001</h1>
     <div class="status" id="status">Gespeichert ✓</div>
 
-    <!-- Zeile 1: ORT + Bezeichnung (wie E022) -->
-    <div class="rowFields">
+    <!-- Zeile 1 -->
+    <div class="row2">
       <input id="ort" class="input" placeholder="ORT" maxlength="6" />
       <input id="bez" class="input" placeholder="Bezeichnung" />
     </div>
 
-    <!-- Zeile 2: 🍷 + 🏋️ + KG (wie E022) -->
+    <!-- Zeile 2 -->
     <div class="rowIcons">
-      <div id="fragile" class="tile btn">🍷</div>
-      <div id="heavy" class="tile btn">🏋️</div>
+      <div id="fragile" class="tile btn iconTile fragile" title="Zerbrechlich">🍷</div>
+      <div id="heavy" class="tile btn iconTile heavy" title="Heavy">🏋️</div>
 
-      <div id="kgTile" class="tile kgTile">
+      <div id="kgTile" class="tile kgTile" title="Gewicht">
         <input id="kg" inputmode="numeric" pattern="[0-9]*" maxlength="2" value="00" />
         <span class="unit">kg</span>
       </div>
     </div>
 
-    <!-- Zeile 3: Farbe nur für E -->
+    <!-- Zeile 3 (nur E) -->
     <div class="colorRow" id="colorRow">
-      <div id="cBlack" class="colorBox black" title="Schwarz"></div>
       <div id="cGrey" class="colorBox grey" title="Grau"></div>
+      <div id="cBlack" class="colorBox black" title="Schwarz"></div>
     </div>
 
-    <!-- Zeile 4: Inhalt -->
+    <!-- Inhalt -->
     <div class="contentWrap">
       <textarea id="content" placeholder="• Inhalt hier eintragen..."></textarea>
     </div>
 
-    <!-- Unten: Buttons -->
+    <!-- Buttons -->
     <div class="btnRow">
       <button id="backupBtn">Backup nach iCloud</button>
       <button id="importBtn">Backup importieren</button>
@@ -277,245 +309,277 @@
   </div>
 
 <script>
-/* ---------------- Helpers ---------------- */
-const $ = (id)=>document.getElementById(id);
-const statusEl = $("status");
-const card = $("card");
+  const $ = (id)=>document.getElementById(id);
 
-const params = new URLSearchParams(location.search);
-const boxId = (params.get("box") || "E001").toUpperCase();
-$("boxId").textContent = boxId;
+  const card = $("card");
+  const statusEl = $("status");
 
-function setStatusSaving(){ statusEl.textContent = "Speichert…"; }
-function setStatusSaved(){ statusEl.textContent = "Gespeichert ✓"; }
-let saveTimer = null;
+  const params = new URLSearchParams(location.search);
+  const boxId = (params.get("box") || "E001").toUpperCase();
+  $("boxId").textContent = boxId;
 
-function getStore(){
-  try { return JSON.parse(localStorage.getItem("euroboxen") || "{}"); }
-  catch { return {}; }
-}
-function setStore(obj){
-  localStorage.setItem("euroboxen", JSON.stringify(obj));
-}
+  const colorRow = $("colorRow");
+  const fragileBtn = $("fragile");
+  const heavyBtn = $("heavy");
+  const kgTile = $("kgTile");
+  const kgInput = $("kg");
 
-/* ---------------- Mode by prefix ---------------- */
-const colorRow = $("colorRow");
+  let saveTimer = null;
 
-function applyMode(mode){
-  card.className = "card " + mode;
-}
-function hideColorPick(){ colorRow.style.display="none"; }
-function showColorPick(){ colorRow.style.display="flex"; }
+  function setStatusSaving(){ statusEl.textContent = "Speichert…"; }
+  function setStatusSaved(){ statusEl.textContent = "Gespeichert ✓"; }
 
-if (boxId.startsWith("K")) { applyMode("mode-k"); hideColorPick(); }
-else if (boxId.startsWith("T")) { applyMode("mode-t"); hideColorPick(); }
-else { applyMode("mode-egrey"); showColorPick(); }
-
-/* ---------------- Load current box ---------------- */
-function loadBox(){
-  const db = getStore();
-  const v = db[boxId] || {};
-
-  $("ort").value = v.ort || "";
-  $("bez").value = v.bez || "";
-  $("content").value = v.content || "";
-
-  // fragile
-  $("fragile").classList.toggle("active", !!v.fragile);
-
-  // kg
-  $("kg").value = (v.kg ?? "00").toString();
-  normalizeKg(false);
-
-  // Eurobox color choice (nur E)
-  if (!boxId.startsWith("K") && !boxId.startsWith("T")){
-    const col = v.color || "grey";
-    setEuroColor(col, false);
+  function getStore(){
+    try { return JSON.parse(localStorage.getItem("euroboxen") || "{}"); }
+    catch { return {}; }
+  }
+  function setStore(obj){
+    localStorage.setItem("euroboxen", JSON.stringify(obj));
   }
 
-  setStatusSaved();
-}
-loadBox();
-
-/* ---------------- Save current box ---------------- */
-function saveBox(){
-  const db = getStore();
-  db[boxId] = db[boxId] || {};
-
-  db[boxId].ort = $("ort").value.trim();
-  db[boxId].bez = $("bez").value.trim();
-  db[boxId].content = $("content").value;
-
-  db[boxId].fragile = $("fragile").classList.contains("active");
-  db[boxId].kg = $("kg").value;
-
-  if (!boxId.startsWith("K") && !boxId.startsWith("T")){
-    db[boxId].color = (card.classList.contains("mode-eblack") ? "black" : "grey");
+  function scheduleSave(){
+    setStatusSaving();
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(()=>{
+      saveBox();
+      setStatusSaved();
+    }, 220);
   }
 
-  setStore(db);
-}
+  function applyMode(mode){
+    card.className = "card " + mode;
+  }
 
-function scheduleSave(){
-  setStatusSaving();
-  clearTimeout(saveTimer);
-  saveTimer = setTimeout(()=>{
-    saveBox();
+  function initMode(){
+    if (boxId.startsWith("K")){
+      applyMode("mode-k");
+      colorRow.style.display = "none";
+    } else if (boxId.startsWith("T")){
+      applyMode("mode-t");
+      colorRow.style.display = "none";
+    } else {
+      // E: default grau
+      applyMode("mode-egrey");
+      colorRow.style.display = "flex";
+    }
+  }
+  initMode();
+
+  function setEuroColor(color, doSave=true){
+    if (boxId.startsWith("K") || boxId.startsWith("T")) return;
+
+    $("cGrey").classList.toggle("active", color==="grey");
+    $("cBlack").classList.toggle("active", color==="black");
+
+    applyMode(color==="black" ? "mode-eblack" : "mode-egrey");
+    if (doSave) scheduleSave();
+  }
+
+  $("cGrey").addEventListener("click", ()=>setEuroColor("grey"));
+  $("cBlack").addEventListener("click", ()=>setEuroColor("black"));
+
+  // Heavy-Logik:
+  // - automatisch an ab 16kg
+  // - zusätzlich manuell klickbar (merkt sich "heavyManual")
+  function computeHeavyActive(kg, heavyManual){
+    return (kg >= 16) || !!heavyManual;
+  }
+
+  function normalizeKgOnBlur(){
+    let s = (kgInput.value || "").replace(/\D/g,"").slice(0,2);
+    if (s.length===0) s="00";
+    if (s.length===1) s="0"+s;
+    kgInput.value = s;
+  }
+
+  function loadBox(){
+    const db = getStore();
+    const v = db[boxId] || {};
+
+    $("ort").value = v.ort || "";
+    $("bez").value = v.bez || "";
+    $("content").value = v.content || "";
+
+    fragileBtn.classList.toggle("active", !!v.fragile);
+
+    // kg
+    kgInput.value = (v.kg ?? "00").toString().replace(/\D/g,"").slice(0,2) || "00";
+    normalizeKgOnBlur();
+
+    const kg = parseInt(kgInput.value, 10) || 0;
+    const heavyActive = computeHeavyActive(kg, v.heavyManual);
+    heavyBtn.classList.toggle("active", heavyActive);
+
+    // E Farbe
+    if (!boxId.startsWith("K") && !boxId.startsWith("T")){
+      setEuroColor(v.color || "grey", false);
+    }
+
     setStatusSaved();
-  }, 250);
-}
+  }
 
-/* ---------------- Euro color selection (only E*) ---------------- */
-function setEuroColor(color, doSave=true){
-  if (boxId.startsWith("K") || boxId.startsWith("T")) return;
+  function saveBox(){
+    const db = getStore();
+    db[boxId] = db[boxId] || {};
+    const v = db[boxId];
 
-  $("cBlack").classList.toggle("active", color==="black");
-  $("cGrey").classList.toggle("active", color==="grey");
-  applyMode(color==="black" ? "mode-eblack" : "mode-egrey");
+    v.ort = $("ort").value.trim();
+    v.bez = $("bez").value.trim();
+    v.content = $("content").value;
 
-  if (doSave) scheduleSave();
-}
-$("cBlack").addEventListener("click", ()=>setEuroColor("black"));
-$("cGrey").addEventListener("click", ()=>setEuroColor("grey"));
+    v.fragile = fragileBtn.classList.contains("active");
+    v.kg = kgInput.value;
 
-/* ---------------- Icon toggles ---------------- */
-$("fragile").addEventListener("click",(e)=>{
-  e.preventDefault(); e.stopPropagation();
-  $("fragile").classList.toggle("active");
-  scheduleSave();
-});
+    // heavyManual wird separat gepflegt
+    // E Farbe speichern
+    if (!boxId.startsWith("K") && !boxId.startsWith("T")){
+      v.color = card.classList.contains("mode-eblack") ? "black" : "grey";
+    }
 
-/* Heavy automatisch ab 16 kg */
-function setHeavyAuto(on){
-  $("heavy").classList.toggle("active", on);
-}
+    setStore(db);
+  }
 
-/* ---------------- KG: iOS-freundlich, 2-stellig ---------------- */
-const kgInput = $("kg");
-const kgTile = $("kgTile");
+  loadBox();
 
-function selectAllKg(){
-  setTimeout(()=>{
+  // Klickbarkeit Icons
+  fragileBtn.addEventListener("click",(e)=>{
+    e.preventDefault(); e.stopPropagation();
+    fragileBtn.classList.toggle("active");
+    scheduleSave();
+  });
+
+  heavyBtn.addEventListener("click",(e)=>{
+    e.preventDefault(); e.stopPropagation();
+    const db = getStore();
+    db[boxId] = db[boxId] || {};
+    db[boxId].heavyManual = !db[boxId].heavyManual;
+    setStore(db);
+
+    const kg = parseInt(kgInput.value,10) || 0;
+    heavyBtn.classList.toggle("active", computeHeavyActive(kg, db[boxId].heavyManual));
+    scheduleSave();
+  });
+
+  // KG: komfortabel -> Klick auf die ganze Kachel fokussiert und markiert alles
+  function focusKgAll(){
     kgInput.focus({preventScroll:true});
     try { kgInput.setSelectionRange(0, kgInput.value.length); } catch {}
-  }, 0);
-}
-
-kgTile.addEventListener("click",(e)=>{
-  e.preventDefault(); e.stopPropagation();
-  selectAllKg();
-});
-
-kgInput.addEventListener("focus", ()=>{
-  selectAllKg();
-});
-
-kgInput.addEventListener("input", ()=>{
-  // beim Tippen nur reinigen, NICHT auffüllen (sonst “nur einstellig”)
-  kgInput.value = kgInput.value.replace(/\D/g,"").slice(0,2);
-  const v = parseInt(kgInput.value || "0", 10);
-  setHeavyAuto(v >= 16);
-  scheduleSave();
-});
-
-kgInput.addEventListener("blur", ()=>{
-  normalizeKg(true);
-  scheduleSave();
-});
-
-function normalizeKg(setSaved){
-  let s = (kgInput.value || "").replace(/\D/g,"").slice(0,2);
-  if (s.length===0) s="00";
-  if (s.length===1) s="0"+s;      // erst beim Verlassen auffüllen
-  kgInput.value = s;
-  const v = parseInt(s,10) || 0;
-  setHeavyAuto(v >= 16);
-  if(setSaved) setStatusSaved();
-}
-
-/* ---------------- Content bullets ---------------- */
-const content = $("content");
-
-content.addEventListener("focus", ()=>{
-  if (content.value.trim()===""){
-    content.value = "• ";
-    setTimeout(()=>content.setSelectionRange(content.value.length, content.value.length), 0);
-  }
-});
-
-content.addEventListener("keydown", (e)=>{
-  if(e.key==="Backspace"){
-    const pos = content.selectionStart;
-    const before = content.value.slice(0,pos);
-    const lineStart = before.lastIndexOf("\n")+1;
-    const line = before.slice(lineStart);
-    if(line === "• "){
-      e.preventDefault();
-      const after = content.value.slice(pos);
-      content.value = content.value.slice(0,lineStart) + after;
-      content.setSelectionRange(lineStart,lineStart);
-      scheduleSave();
-    }
-  }
-  if(e.key==="Enter"){
-    e.preventDefault();
-    const pos = content.selectionStart;
-    const left = content.value.slice(0,pos);
-    const right = content.value.slice(pos);
-    content.value = left + "\n• " + right;
-    const np = pos + 3;
-    content.setSelectionRange(np,np);
-    scheduleSave();
-  }
-});
-
-/* ---------------- Generic autosave for inputs ---------------- */
-["ort","bez"].forEach(id=>{
-  $(id).addEventListener("input", scheduleSave);
-});
-content.addEventListener("input", scheduleSave);
-
-/* ---------------- Backup / Import ---------------- */
-$("backupBtn").addEventListener("click", async ()=>{
-  const data = getStore();
-  const blob = new Blob([JSON.stringify(data,null,2)], {type:"application/json"});
-  const file = new File([blob], "euroboxen.json", {type:"application/json"});
-
-  if (navigator.canShare && navigator.canShare({files:[file]})) {
-    try { await navigator.share({files:[file], title:"Euroboxen Backup"}); return; }
-    catch {}
   }
 
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "euroboxen.json";
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
-});
+  kgTile.addEventListener("click",(e)=>{
+    e.preventDefault(); e.stopPropagation();
+    focusKgAll();
+  });
 
-$("importBtn").addEventListener("click", ()=>{
-  const inp = document.createElement("input");
-  inp.type="file";
-  inp.accept="application/json";
-  inp.onchange = async ()=>{
-    const f = inp.files?.[0];
-    if(!f) return;
-    const txt = await f.text();
-    let incoming = {};
-    try { incoming = JSON.parse(txt); } catch { return; }
+  kgInput.addEventListener("focus", ()=>setTimeout(focusKgAll,0));
+
+  kgInput.addEventListener("input", ()=>{
+    // NICHT automatisch auffüllen beim Tippen, sonst "nur eine Stelle"
+    kgInput.value = (kgInput.value || "").replace(/\D/g,"").slice(0,2);
+
+    const kg = parseInt(kgInput.value || "0", 10) || 0;
 
     const db = getStore();
-    for(const k of Object.keys(incoming)){
-      db[k] = incoming[k];
+    const manual = !!(db[boxId] && db[boxId].heavyManual);
+    heavyBtn.classList.toggle("active", computeHeavyActive(kg, manual));
+
+    scheduleSave();
+  });
+
+  kgInput.addEventListener("blur", ()=>{
+    normalizeKgOnBlur();
+
+    const kg = parseInt(kgInput.value, 10) || 0;
+    const db = getStore();
+    const manual = !!(db[boxId] && db[boxId].heavyManual);
+    heavyBtn.classList.toggle("active", computeHeavyActive(kg, manual));
+
+    scheduleSave();
+  });
+
+  // Autosave Inputs
+  $("ort").addEventListener("input", scheduleSave);
+  $("bez").addEventListener("input", scheduleSave);
+
+  // Bullet-Textarea
+  const content = $("content");
+
+  content.addEventListener("focus", ()=>{
+    if (content.value.trim()===""){
+      content.value = "• ";
+      setTimeout(()=>content.setSelectionRange(content.value.length, content.value.length),0);
     }
-    setStore(db);
-    loadBox();
-  };
-  inp.click();
-});
+  });
+
+  content.addEventListener("keydown", (e)=>{
+    if(e.key==="Backspace"){
+      const pos = content.selectionStart;
+      const before = content.value.slice(0,pos);
+      const lineStart = before.lastIndexOf("\n")+1;
+      const line = before.slice(lineStart);
+      if(line === "• "){
+        e.preventDefault();
+        const after = content.value.slice(pos);
+        content.value = content.value.slice(0,lineStart) + after;
+        content.setSelectionRange(lineStart,lineStart);
+        scheduleSave();
+      }
+    }
+    if(e.key==="Enter"){
+      e.preventDefault();
+      const pos = content.selectionStart;
+      const left = content.value.slice(0,pos);
+      const right = content.value.slice(pos);
+      content.value = left + "\n• " + right;
+      const np = pos + 3;
+      content.setSelectionRange(np,np);
+      scheduleSave();
+    }
+  });
+
+  content.addEventListener("input", scheduleSave);
+
+  // Backup / Import
+  $("backupBtn").addEventListener("click", async ()=>{
+    const data = getStore();
+    const blob = new Blob([JSON.stringify(data,null,2)], {type:"application/json"});
+    const file = new File([blob], "euroboxen.json", {type:"application/json"});
+
+    if (navigator.canShare && navigator.canShare({files:[file]})) {
+      try { await navigator.share({files:[file], title:"Euroboxen Backup"}); return; }
+      catch {}
+    }
+
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "euroboxen.json";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  });
+
+  $("importBtn").addEventListener("click", ()=>{
+    const inp = document.createElement("input");
+    inp.type="file";
+    inp.accept="application/json";
+    inp.onchange = async ()=>{
+      const f = inp.files?.[0];
+      if(!f) return;
+      const txt = await f.text();
+      let incoming = {};
+      try { incoming = JSON.parse(txt); } catch { return; }
+
+      const db = getStore();
+      for(const k of Object.keys(incoming)){
+        db[k] = incoming[k];
+      }
+      setStore(db);
+      loadBox();
+    };
+    inp.click();
+  });
 </script>
 </body>
 </html>
