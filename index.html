@@ -1,192 +1,710 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="de">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Box</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Eurobox / Karton</title>
+  <style>
+    :root{
+      --bg: #071225;            /* Seitenhintergrund */
+      --card: #2b323f;          /* Default Card (E) */
+      --card2: rgba(255,255,255,.06);
+      --stroke: rgba(255,255,255,.14);
+      --stroke2: rgba(255,255,255,.22);
+      --text: rgba(255,255,255,.92);
+      --muted: rgba(255,255,255,.55);
+      --placeholder: rgba(255,255,255,.32);
+      --ok: #27d17e;
 
-<style>
-:root{
-  --dark-bg: linear-gradient(180deg,#0b1328,#05070c);
-  --card-dark: linear-gradient(180deg,#1a233f,#0c1224);
+      /* Eurobox Farben */
+      --eGrey: #C0C0C0;
+      --eBlack: #0b0b0b;
 
-  --karton: #ADAC62;
-  --text-dark: rgba(255,255,255,.92);
-  --text-light: rgba(0,0,0,.88);
+      /* Karton Farbe */
+      --kCard: #ADAC62;
+      --kTop: rgba(0,0,0,.12);    /* leicht dunkler Streifen oben */
+      --kText: rgba(0,0,0,.90);
+      --kMuted: rgba(0,0,0,.55);
+      --kPlaceholder: rgba(0,0,0,.38);
+      --kStroke: rgba(0,0,0,.28);
+      --kStroke2: rgba(0,0,0,.40);
+    }
 
-  --stroke-dark: rgba(255,255,255,.12);
-  --stroke-light: rgba(0,0,0,.18);
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:22px;
+      background:
+        radial-gradient(1200px 700px at 50% -10%, rgba(255,255,255,.08), rgba(255,255,255,0)),
+        radial-gradient(900px 500px at 20% 110%, rgba(255,255,255,.05), rgba(255,255,255,0)),
+        var(--bg);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      color: var(--text);
+    }
 
-  --ok: #39d98a;
-}
+    .card{
+      width:min(720px, 92vw);
+      border-radius: 28px;
+      background: var(--card);
+      box-shadow: 0 24px 60px rgba(0,0,0,.55);
+      padding: 18px 18px 16px;
+      position:relative;
+      overflow:hidden;
+    }
 
-*{box-sizing:border-box}
-body{
-  margin:0;
-  font-family:-apple-system,system-ui,Segoe UI,Roboto,Arial,sans-serif;
-  background: var(--dark-bg);
-  min-height:100vh;
-  display:flex;
-  justify-content:center;
-  padding:16px;
-}
+    /* dünner Streifen oben (Karton / optional) */
+    .topbar{
+      height: 10px;
+      border-radius: 999px;
+      width: 92%;
+      margin: 6px auto 10px;
+      background: rgba(255,255,255,.08);
+      filter: blur(.0px);
+    }
 
-.card{
-  width:100%;
-  max-width:560px;
-  border-radius:28px;
-  padding:20px;
-  border:1px solid var(--stroke-dark);
-  background: var(--card-dark);
-  box-shadow:0 25px 60px rgba(0,0,0,.45);
-  transition:background .25s ease,color .25s ease;
-  color:var(--text-dark);
-}
+    .head{
+      text-align:center;
+      padding: 2px 8px 10px;
+    }
+    .boxId{
+      font-size: 72px;
+      letter-spacing: 2px;
+      line-height: 1;
+      font-weight: 900;
+      margin: 0;
+      text-shadow: 0 6px 22px rgba(0,0,0,.35);
+    }
+    .status{
+      margin-top: 8px;
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--ok);
+    }
 
-.card.karton{
-  background: var(--karton);
-  color: var(--text-light);
-  border-color: var(--stroke-light);
-}
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr 1fr 70px;
+      gap: 12px;
+      margin-top: 14px;
+      align-items: stretch;
+    }
 
-.colorBar{
-  height:10px;
-  border-radius:999px;
-  margin-bottom:14px;
-  background:transparent;
-}
+    .input, .pill, .textareaWrap{
+      border: 2px solid var(--stroke);
+      background: var(--card2);
+      border-radius: 18px;
+      color: var(--text);
+    }
 
-.card.karton .colorBar{
-  background:#8f8e4f;
-}
+    .input{
+      height: 62px;
+      padding: 0 16px;
+      font-size: 22px;
+      outline: none;
+      width:100%;
+    }
+    .input::placeholder{ color: var(--placeholder); }
 
-h1{
-  margin:10px 0 4px;
-  text-align:center;
-  font-size:56px;
-  letter-spacing:.08em;
-}
+    .pillRow{
+      display:grid;
+      grid-template-columns: 70px 70px 1fr;
+      gap: 12px;
+      margin-top: 12px;
+      align-items: stretch;
+    }
 
-.status{
-  text-align:center;
-  color:var(--ok);
-  font-weight:700;
-  margin-bottom:18px;
-}
+    .iconToggle{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      height: 62px;
+      border-radius: 18px;
+      border: 2px solid var(--stroke);
+      background: var(--card2);
+      cursor: pointer;
+      user-select:none;
+      font-size: 28px;
+      transition: transform .05s ease, border-color .15s ease, box-shadow .15s ease;
+    }
+    .iconToggle:active{ transform: scale(.98); }
 
-.row{
-  display:grid;
-  grid-template-columns:1fr 2fr;
-  gap:12px;
-  margin-bottom:12px;
-}
+    .iconToggle.active{
+      border-color: rgba(39,209,126,.85);
+      box-shadow: 0 0 0 4px rgba(39,209,126,.18);
+    }
 
-input{
-  height:54px;
-  border-radius:16px;
-  border:1px solid currentColor;
-  background:transparent;
-  padding:0 14px;
-  font-size:18px;
-  color:inherit;
-}
+    /* Heavy: stärker hervorheben wenn aktiv */
+    .iconToggle.heavy.active{
+      border-color: rgba(255, 90, 90, .95);
+      box-shadow: 0 0 0 5px rgba(255, 90, 90, .22);
+    }
 
-.tools{
-  display:flex;
-  gap:12px;
-  margin-bottom:12px;
-}
+    /* Gewicht Eingabefeld: max 2 Zahlen + "kg" fix rechts */
+    .kgWrap{
+      height: 62px;
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      padding: 0 14px;
+    }
+    .kgInput{
+      flex: 1;
+      height: 100%;
+      border: none;
+      outline:none;
+      background: transparent;
+      color: var(--text);
+      font-size: 24px;
+      font-weight: 800;
+      text-align:center;
+    }
+    .kgUnit{
+      font-size: 24px;
+      font-weight: 900;
+      color: var(--muted);
+      width: 44px;
+      text-align:right;
+    }
 
-.icon{
-  width:56px;
-  height:56px;
-  border-radius:16px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  border:1px solid currentColor;
-  font-size:26px;
-}
+    /* Farbauswahl (kleiner + Abstand zum Inhaltsfeld) */
+    .colorRow{
+      margin-top: 10px;
+      margin-bottom: 14px; /* Abstand zum Inhaltsfeld */
+      display:flex;
+      gap: 10px;
+      align-items:center;
+    }
+    .chip{
+      display:flex;
+      align-items:center;
+      gap: 8px;
+      padding: 8px 12px;        /* 50% kleiner */
+      border-radius: 14px;
+      border: 2px solid var(--stroke);
+      background: var(--card2);
+      cursor:pointer;
+      user-select:none;
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--text);
+    }
+    .chip .dot{
+      width: 16px; height:16px; border-radius: 5px;
+      border: 1px solid rgba(255,255,255,.35);
+      background: #999;
+    }
+    .chip.active{
+      border-color: rgba(39,209,126,.85);
+      box-shadow: 0 0 0 4px rgba(39,209,126,.16);
+    }
 
-.weight{
-  flex:1;
-  display:flex;
-  align-items:center;
-  gap:8px;
-  border:1px solid currentColor;
-  border-radius:16px;
-  padding:0 12px;
-  font-weight:800;
-  font-size:22px;
-}
+    .textareaWrap{
+      margin-top: 0;
+      padding: 12px 12px;
+      border-radius: 20px;
+    }
+    textarea{
+      width:100%;
+      height: 340px;
+      resize: none;
+      outline:none;
+      border:none;
+      background: transparent;
+      color: var(--text);
+      font-size: 22px;
+      line-height: 1.35;
+    }
+    textarea::placeholder{ color: var(--placeholder); }
 
-textarea{
-  width:100%;
-  height:200px;
-  border-radius:18px;
-  border:1px solid currentColor;
-  background:transparent;
-  padding:14px;
-  font-size:16px;
-  resize:none;
-}
+    .btnRow{
+      margin-top: 16px;
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    .btn{
+      border:none;
+      border-radius: 18px;
+      height: 72px;
+      font-size: 22px;
+      font-weight: 900;
+      color: rgba(255,255,255,.92);
+      background: rgba(255,255,255,.10);
+      border: 2px solid rgba(255,255,255,.14);
+      cursor:pointer;
+    }
+    .btn:active{ transform: scale(.99); }
+    .hint{
+      margin-top: 10px;
+      font-size: 14px;
+      color: var(--muted);
+      text-align:left;
+      opacity: .95;
+    }
 
-.buttons{
-  display:flex;
-  gap:14px;
-  margin-top:18px;
-}
+    /* ===== Karton-Theme (Kxxx) ===== */
+    .isK{
+      background: var(--kCard);
+      color: var(--kText);
+      box-shadow: 0 24px 60px rgba(0,0,0,.55);
+    }
+    .isK .topbar{ background: var(--kTop); }
+    .isK .boxId{ color: rgba(0,0,0,.92); text-shadow: none; }
+    .isK .status{ color: var(--ok); } /* bleibt grün */
+    .isK .input,
+    .isK .pill,
+    .isK .textareaWrap{
+      border-color: var(--kStroke);
+      background: rgba(255,255,255,.16);
+      color: var(--kText);
+    }
+    .isK .input::placeholder{ color: var(--kPlaceholder); }
+    .isK textarea{ color: var(--kText); }
+    .isK textarea::placeholder{ color: var(--kPlaceholder); }
+    .isK .kgUnit{ color: var(--kMuted); }
+    .isK .iconToggle{
+      border-color: var(--kStroke);
+      background: rgba(255,255,255,.16);
+    }
+    .isK .iconToggle.active{
+      border-color: rgba(39,209,126,.95);
+      box-shadow: 0 0 0 4px rgba(39,209,126,.20);
+    }
+    .isK .iconToggle.heavy.active{
+      border-color: rgba(255, 90, 90, .95);
+      box-shadow: 0 0 0 5px rgba(255, 90, 90, .22);
+    }
+    .isK .btn{
+      color: rgba(0,0,0,.86);
+      background: rgba(255,255,255,.26);
+      border: 2px solid rgba(0,0,0,.14);
+    }
+    .isK .hint{ color: var(--kMuted); }
 
-button{
-  flex:1;
-  height:56px;
-  border-radius:18px;
-  border:none;
-  font-size:16px;
-  font-weight:700;
-  cursor:pointer;
-}
-</style>
+    /* Auf kleinen Screens */
+    @media (max-width: 520px){
+      .boxId{ font-size: 56px; }
+      .status{ font-size: 22px; }
+      textarea{ height: 280px; font-size: 20px; }
+      .grid{ grid-template-columns: 1fr 1fr 64px; }
+      .pillRow{ grid-template-columns: 64px 64px 1fr; }
+      .iconToggle{ height: 58px; }
+      .input{ height: 58px; font-size: 20px; }
+      .kgWrap{ height: 58px; }
+      .btn{ height: 68px; font-size: 20px; }
+    }
+  </style>
 </head>
 
 <body>
+  <div class="card" id="card">
+    <div class="topbar" id="topbar"></div>
 
-<div class="card" id="card">
-  <div class="colorBar"></div>
-
-  <h1 id="boxId">E000</h1>
-  <div class="status">Gespeichert ✓</div>
-
-  <div class="row">
-    <input placeholder="ORT">
-    <input placeholder="Bezeichnung">
-  </div>
-
-  <div class="tools">
-    <div class="icon">🍷</div>
-    <div class="icon">🏋️</div>
-    <div class="weight">
-      <span>00</span> kg
+    <div class="head">
+      <h1 class="boxId" id="boxIdTitle">E000</h1>
+      <div class="status" id="status">Gespeichert ✓</div>
     </div>
-  </div>
 
-  <textarea placeholder="• Inhalt hier eintragen..."></textarea>
+    <!-- ORT + Bezeichnung + (rechts kleines Feld bleibt leer / nur Abstand) -->
+    <div class="grid">
+      <input class="input" id="ort" placeholder="ORT" maxlength="6" />
+      <input class="input" id="bez" placeholder="Bezeichnung" maxlength="40" />
+      <div class="pill" style="height:62px; display:flex; align-items:center; justify-content:center; opacity:.0; border-color: transparent; background: transparent;"></div>
+    </div>
 
-  <div class="buttons">
-    <button>Backup nach iCloud</button>
-    <button>Backup importieren</button>
+    <!-- Icons + Gewicht -->
+    <div class="pillRow">
+      <!-- Zerbrechlich: du wolltest 🍷 lassen -->
+      <div class="iconToggle" id="fragile" title="Zerbrechlich">🍷</div>
+
+      <!-- Heavy -->
+      <div class="iconToggle heavy" id="heavy" title="Schwer (ab 16 kg)">🏋️</div>
+
+      <!-- Gewicht -->
+      <div class="pill kgWrap" id="kgBox" title="Gewicht in kg (0–99)">
+        <input class="kgInput" id="kg" inputmode="numeric" maxlength="2" placeholder="00" />
+        <div class="kgUnit">kg</div>
+      </div>
+    </div>
+
+    <!-- Farbauswahl (nur für E; für K automatisch) -->
+    <div class="colorRow" id="colorRow">
+      <div class="chip" id="chipGrey" title="Eurobox Grau">
+        <span class="dot" style="background:#C0C0C0"></span> Grau
+      </div>
+      <div class="chip" id="chipBlack" title="Eurobox Schwarz">
+        <span class="dot" style="background:#0b0b0b"></span> Schwarz
+      </div>
+    </div>
+
+    <!-- Inhalt -->
+    <div class="textareaWrap">
+      <textarea id="content" placeholder="• Inhalt hier eintragen..."></textarea>
+    </div>
+
+    <!-- Buttons -->
+    <div class="btnRow">
+      <button class="btn" id="backupBtn">Backup nach iCloud</button>
+      <button class="btn" id="importBtn">Backup importieren</button>
+    </div>
+
+    <div class="hint" id="hint">
+      iPhone: Backup → Teilen → „In Dateien sichern“ → iCloud Drive
+    </div>
+
+    <!-- Hidden file input for import -->
+    <input type="file" id="fileInput" accept="application/json" style="display:none" />
   </div>
-</div>
 
 <script>
-const params = new URLSearchParams(location.search);
-const boxId = (params.get("box") || "E000").toUpperCase();
-document.getElementById("boxId").textContent = boxId;
+(() => {
+  // ===== Helpers =====
+  const $ = (id) => document.getElementById(id);
 
-if(boxId.startsWith("K")){
-  document.getElementById("card").classList.add("karton");
-}
+  // Box-ID aus URL: ?box=E019 / ?box=K017
+  const params = new URLSearchParams(location.search);
+  const boxIdRaw = (params.get("box") || "E000").toUpperCase().trim();
+  const boxId = /^[EK]\d{3}$/.test(boxIdRaw) ? boxIdRaw : "E000";
+  const isK = boxId.startsWith("K");
+
+  const card = $("card");
+  const topbar = $("topbar");
+  $("boxIdTitle").textContent = boxId;
+
+  // Storage Keys
+  const KEY_PREFIX = "eurobox:";
+  const key = KEY_PREFIX + boxId;
+
+  // Default State
+  const defaultState = {
+    id: boxId,
+    ort: "",
+    bez: "",
+    content: "• ",
+    fragile: false,
+    heavy: false,
+    kg: "",
+    color: isK ? "karton" : "grey",     // grey|black|karton
+    updatedAt: 0
+  };
+
+  // Load State
+  function loadState(){
+    try{
+      const raw = localStorage.getItem(key);
+      if(!raw) return { ...defaultState };
+      const obj = JSON.parse(raw);
+      return { ...defaultState, ...obj, id: boxId };
+    }catch(e){
+      return { ...defaultState };
+    }
+  }
+
+  let state = loadState();
+
+  // ===== Theme / Colors =====
+  function applyTheme(){
+    // Karton: automatische Farbe + keine Auswahlchips anzeigen
+    if(isK){
+      card.classList.add("isK");
+      $("colorRow").style.display = "none";
+      state.color = "karton";
+      // Topbar in Karton-Look (leicht dunkler Streifen)
+      topbar.style.background = getComputedStyle(document.documentElement).getPropertyValue("--kTop");
+    }else{
+      card.classList.remove("isK");
+      $("colorRow").style.display = "flex";
+
+      // Eurobox Farbe auf Card anwenden (nicht den Seitenhintergrund!)
+      if(state.color === "black"){
+        card.style.background = "#0b0b0b";
+        topbar.style.background = "rgba(255,255,255,.08)";
+        $("chipBlack").classList.add("active");
+        $("chipGrey").classList.remove("active");
+      }else{
+        // grey = Default Card
+        card.style.background = ""; // CSS default
+        topbar.style.background = "rgba(255,255,255,.08)";
+        state.color = "grey";
+        $("chipGrey").classList.add("active");
+        $("chipBlack").classList.remove("active");
+      }
+    }
+  }
+
+  // ===== Render =====
+  function render(){
+    $("ort").value = state.ort || "";
+    $("bez").value = state.bez || "";
+    $("content").value = (state.content && state.content.length) ? state.content : "• ";
+    $("kg").value = (state.kg ?? "").toString();
+
+    // Fragile Icon
+    $("fragile").classList.toggle("active", !!state.fragile);
+
+    // Heavy (ab 16 kg automatisch)
+    const kgNum = parseInt((state.kg || "").replace(/[^\d]/g,""), 10);
+    const autoHeavy = Number.isFinite(kgNum) && kgNum >= 16;
+    const heavyOn = autoHeavy || !!state.heavy;
+    $("heavy").classList.toggle("active", heavyOn);
+
+    // Chips / Theme
+    applyTheme();
+    updateStatus(true);
+  }
+
+  // ===== Save =====
+  let saveTimer = null;
+
+  function save(){
+    state.updatedAt = Date.now();
+    localStorage.setItem(key, JSON.stringify(state));
+    // zusätzlich ein Index für Suche: Liste aller IDs dieses Geräts
+    try{
+      const idxKey = KEY_PREFIX + "_index";
+      const idx = JSON.parse(localStorage.getItem(idxKey) || "[]");
+      if(!idx.includes(boxId)){
+        idx.push(boxId);
+        idx.sort();
+        localStorage.setItem(idxKey, JSON.stringify(idx));
+      }
+    }catch(e){}
+    updateStatus(false);
+  }
+
+  function scheduleSave(){
+    clearTimeout(saveTimer);
+    updateStatus(true);
+    saveTimer = setTimeout(save, 350);
+  }
+
+  function updateStatus(pending){
+    $("status").textContent = pending ? "Speichert…" : "Gespeichert ✓";
+  }
+
+  // ===== Bullet-Textarea Logic =====
+  // Regeln:
+  // - Erste Zeile startet mit "• "
+  // - Enter: neue Zeile automatisch mit "• "
+  // - Backspace am Zeilenanfang entfernt "• " dieser Zeile
+  function ensureStartsWithBullet(){
+    let v = $("content").value || "";
+    if(!v.startsWith("• ")) v = "• " + v.replace(/^\s+/, "");
+    $("content").value = v;
+  }
+
+  $("content").addEventListener("keydown", (e) => {
+    const ta = e.target;
+    const v = ta.value;
+    const start = ta.selectionStart;
+    const end = ta.selectionEnd;
+
+    // Enter -> neue Zeile mit Bullet
+    if(e.key === "Enter"){
+      e.preventDefault();
+      const insert = "\n• ";
+      ta.setRangeText(insert, start, end, "end");
+      scheduleSave();
+      return;
+    }
+
+    // Backspace am Zeilenanfang -> Bullet entfernen
+    if(e.key === "Backspace" && start === end){
+      // Start der aktuellen Zeile finden
+      const lineStart = v.lastIndexOf("\n", start - 1) + 1;
+      const before = v.slice(lineStart, lineStart + 2);
+      // Wenn Cursor direkt nach "• " steht oder am Zeilenanfang vor Bullet:
+      // Fall A: Cursor steht hinter "• " (lineStart+2)
+      if(start === lineStart + 2 && before === "• "){
+        e.preventDefault();
+        // Bullet entfernen, Cursor bleibt am Zeilenanfang
+        ta.setRangeText("", lineStart, lineStart + 2, "end");
+        ta.selectionStart = ta.selectionEnd = lineStart;
+        scheduleSave();
+        return;
+      }
+      // Fall B: Cursor steht AM Zeilenanfang und da ist Bullet -> entferne Bullet
+      if(start === lineStart && before === "• "){
+        e.preventDefault();
+        ta.setRangeText("", lineStart, lineStart + 2, "end");
+        ta.selectionStart = ta.selectionEnd = lineStart;
+        scheduleSave();
+        return;
+      }
+    }
+  });
+
+  $("content").addEventListener("input", () => {
+    ensureStartsWithBullet();
+    state.content = $("content").value;
+    scheduleSave();
+  });
+
+  // ===== Inputs =====
+  $("ort").addEventListener("input", () => {
+    state.ort = $("ort").value.toUpperCase().slice(0,6);
+    $("ort").value = state.ort;
+    scheduleSave();
+  });
+
+  $("bez").addEventListener("input", () => {
+    state.bez = $("bez").value;
+    scheduleSave();
+  });
+
+  // Gewicht: nur 0-99, max 2 Stellen
+  $("kg").addEventListener("input", () => {
+    let raw = $("kg").value.replace(/[^\d]/g, "").slice(0,2);
+    $("kg").value = raw;
+    state.kg = raw;
+    // Heavy-Status wird in render() automatisch ab 16 gesetzt
+    scheduleSave();
+    render();
+  });
+
+  // ===== Toggle Icons =====
+  $("fragile").addEventListener("click", () => {
+    state.fragile = !state.fragile;
+    scheduleSave();
+    render();
+  });
+
+  // Heavy: manuell toggelbar – aber ab 16kg immer aktiv
+  $("heavy").addEventListener("click", () => {
+    const kgNum = parseInt((state.kg || "").replace(/[^\d]/g,""), 10);
+    if(Number.isFinite(kgNum) && kgNum >= 16){
+      // ab 16 kg kein "aus" möglich (weil automatisch schwer)
+      state.heavy = true;
+    }else{
+      state.heavy = !state.heavy;
+    }
+    scheduleSave();
+    render();
+  });
+
+  // ===== Color Chips (nur E) =====
+  $("chipGrey").addEventListener("click", () => {
+    if(isK) return;
+    state.color = "grey";
+    scheduleSave();
+    render();
+  });
+
+  $("chipBlack").addEventListener("click", () => {
+    if(isK) return;
+    state.color = "black";
+    scheduleSave();
+    render();
+  });
+
+  // ===== Backup / Import =====
+  function collectAllBoxesFromDevice(){
+    const all = {};
+    const idxKey = KEY_PREFIX + "_index";
+    let ids = [];
+    try{ ids = JSON.parse(localStorage.getItem(idxKey) || "[]"); }catch(e){ ids=[]; }
+
+    // Fallback: scan keys
+    if(!ids.length){
+      for(let i=0;i<localStorage.length;i++){
+        const k = localStorage.key(i);
+        if(k && k.startsWith(KEY_PREFIX) && k !== idxKey){
+          const id = k.substring(KEY_PREFIX.length);
+          if(/^[EK]\d{3}$/.test(id)) ids.push(id);
+        }
+      }
+      ids.sort();
+    }
+
+    for(const id of ids){
+      const k = KEY_PREFIX + id;
+      try{
+        const obj = JSON.parse(localStorage.getItem(k) || "null");
+        if(obj) all[id] = obj;
+      }catch(e){}
+    }
+
+    return {
+      schema: "eurobox-backup-v1",
+      createdAt: new Date().toISOString(),
+      count: Object.keys(all).length,
+      boxes: all
+    };
+  }
+
+  function downloadJson(obj, filename){
+    const blob = new Blob([JSON.stringify(obj, null, 2)], {type:"application/json"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  $("backupBtn").addEventListener("click", () => {
+    const data = collectAllBoxesFromDevice();
+    const ts = new Date().toISOString().replace(/[:.]/g,"-");
+    downloadJson(data, `Euroboxen_Backup_${ts}.json`);
+  });
+
+  $("importBtn").addEventListener("click", () => {
+    $("fileInput").value = "";
+    $("fileInput").click();
+  });
+
+  $("fileInput").addEventListener("change", async (e) => {
+    const f = e.target.files && e.target.files[0];
+    if(!f) return;
+    try{
+      const text = await f.text();
+      const data = JSON.parse(text);
+
+      // Erwartet: { schema, boxes: {E001:{...}, K001:{...}} }
+      const boxes = data.boxes || data;
+      let imported = 0;
+
+      for(const [id, obj] of Object.entries(boxes)){
+        if(!/^[EK]\d{3}$/.test(id)) continue;
+        const storageKey = KEY_PREFIX + id;
+        localStorage.setItem(storageKey, JSON.stringify({ ...obj, id }));
+        imported++;
+      }
+
+      // Index updaten
+      const idxKey = KEY_PREFIX + "_index";
+      const ids = Object.keys(boxes).filter(x => /^[EK]\d{3}$/.test(x)).sort();
+      localStorage.setItem(idxKey, JSON.stringify(ids));
+
+      // aktuelle Box neu laden
+      state = loadState();
+      render();
+      alert(`Import fertig. Datensätze: ${imported}`);
+    }catch(err){
+      alert("Import fehlgeschlagen. Bitte eine gültige JSON-Backup-Datei auswählen.");
+    }
+  });
+
+  // ===== Init =====
+  // Inhalt immer mit Bullet starten
+  ensureStartsWithBullet();
+
+  // Karton automatisch Farbe + Headline bleibt hell genug (Text wird über Theme gesetzt)
+  render();
+
+  // Beim ersten Laden: wenn kein Content gespeichert, Bullet setzen
+  if(!localStorage.getItem(key)){
+    state.content = "• ";
+    save();
+    render();
+  }
+})();
 </script>
-
 </body>
 </html>
