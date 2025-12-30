@@ -1,391 +1,457 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="de">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Box</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Euroboxen</title>
 
-<style>
-:root{
-  --bg:#071225;
+  <style>
+    :root{
+      --bg:#071225;
 
-  --eGrey:#C0C0C0;
-  --eBlack:#000000;
-  --kCard:#ADAC62;
-  --tCard:#9FFCFD;
+      /* Eurobox */
+      --eGrey:#2b3447;   /* Card-grau (dunkel, wie Screenshot) */
+      --eBlack:#000000;  /* Card-schwarz */
 
-  --stroke-dark:rgba(0,0,0,.25);
-  --stroke-light:rgba(255,255,255,.22);
+      /* Karton / Tüten */
+      --kCard:#ADAC62;
+      --tCard:#9FFCFD;
 
-  --ok:#27d17e;
-  --greenGlow:rgba(39,209,126,.35);
-  --redGlow:rgba(255,80,80,.45);
-}
+      --ok:#27d17e;
+      --ink:#e9eef7;
 
-*{box-sizing:border-box}
-body{
-  margin:0;
-  min-height:100vh;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  background:var(--bg);
-  font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif;
-}
+      --stroke:rgba(255,255,255,.10);
+      --stroke2:rgba(0,0,0,.55);
 
-/* Card */
-.card{
-  width:min(720px,94vw);
-  padding:18px;
-  border-radius:28px;
-  background:#2b323f;
-  color:#111;
-  box-shadow:0 24px 60px rgba(0,0,0,.55);
-  overflow:hidden;
-}
+      --chip:#0f1a2d;
+      --chip2:#101a2c;
 
-.topbar{
-  height:10px;
-  width:92%;
-  margin:6px auto 12px;
-  border-radius:999px;
-  background:rgba(0,0,0,.15);
-}
+      --glowGreen:rgba(39,209,126,.42);
+      --glowRed:rgba(255,80,80,.45);
+    }
 
-/* Überschrift noch kleiner */
-.boxId{
-  text-align:center;
-  font-size:44px;   /* <-- kleiner */
-  font-weight:900;
-  margin:0;
-}
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      min-height:100vh;
+      display:flex;
+      justify-content:center;
+      align-items:flex-start;
+      padding:22px 12px;
+      background:var(--bg);
+      font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif;
+      color:var(--ink);
+    }
 
-.status{
-  text-align:center;
-  color:var(--ok);
-  font-size:24px;
-  font-weight:800;
-  margin:8px 0 18px;
-}
+    .card{
+      width:min(640px,94vw);
+      border-radius:28px;
+      padding:18px 18px 16px;
+      background:var(--eGrey);
+      box-shadow:0 26px 70px rgba(0,0,0,.55);
+      position:relative;
+      overflow:hidden;
+    }
 
-.grid{
-  display:grid;
-  grid-template-columns:110px 1fr;
-  gap:12px;
-}
+    .topbar{
+      height:10px;
+      width:92%;
+      margin:4px auto 14px;
+      border-radius:999px;
+      background:rgba(255,255,255,.10);
+    }
 
-.input,.pill,.textareaWrap,.kgPill{
-  border:2px solid var(--stroke-dark);
-  border-radius:18px;
-  background:rgba(255,255,255,.35);
-}
+    /* Überschrift kleiner (wie gewünscht) */
+    h1{
+      margin:0;
+      text-align:center;
+      font-size:52px;
+      font-weight:900;
+      letter-spacing:1px;
+    }
 
-.input{
-  height:62px;
-  padding:0 14px;
-  font-size:22px;
-  width:100%;
-}
+    .status{
+      margin-top:6px;
+      text-align:center;
+      font-size:24px;
+      font-weight:900;
+      color:var(--ok);
+    }
 
-.pillRow{
-  display:grid;
-  grid-template-columns:64px 64px 170px;
-  gap:12px;
-  margin-top:14px;
-}
+    .row2{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:14px;
+      margin-top:18px;
+    }
 
-.iconToggle{
-  height:62px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:28px;
-  cursor:pointer;
-  user-select:none;
-  position:relative;
-  z-index:5;
-}
+    .input{
+      height:62px;
+      border-radius:18px;
+      border:2px solid rgba(255,255,255,.12);
+      background:rgba(0,0,0,.18);
+      color:var(--ink);
+      font-size:22px;
+      padding:0 16px;
+      outline:none;
+    }
+    .input::placeholder{ color:rgba(233,238,247,.45); font-weight:700; }
 
-.iconToggle.active{
-  box-shadow:0 0 0 4px var(--greenGlow);
-}
+    .row3{
+      display:grid;
+      grid-template-columns:76px 76px 1fr;
+      gap:14px;
+      margin-top:14px;
+      align-items:stretch;
+    }
 
-.iconToggle.heavy.active{
-  box-shadow:0 0 0 5px var(--redGlow);
-}
+    .tile{
+      height:72px;
+      border-radius:18px;
+      border:2px solid rgba(255,255,255,.12);
+      background:rgba(0,0,0,.18);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:30px;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .tile.btn{
+      cursor:pointer;
+    }
 
-/* kg: ganzer Kasten klickbar + komfortables Editieren */
-.kgPill{
-  height:62px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:12px;
-  padding:0 16px;
-  font-weight:900;
-  cursor:pointer;
-  user-select:none;
-  position:relative;
-  z-index:5;
-}
+    .tile.active.fragile{
+      box-shadow:0 0 0 4px var(--glowGreen);
+    }
+    .tile.active.heavy{
+      box-shadow:0 0 0 4px var(--glowRed);
+    }
 
-.kgPill:active{ transform:scale(.995); }
+    /* kg Tile */
+    .kgTile{
+      justify-content:center;
+      gap:12px;
+      padding:0 14px;
+      cursor:text;
+    }
+    .kgTile input{
+      width:110px;
+      text-align:center;
+      border:none;
+      outline:none;
+      background:transparent;
+      color:var(--ink);
+      font-size:38px;
+      font-weight:900;
+      letter-spacing:1px;
+      padding:0;
+    }
+    .kgTile .unit{
+      font-size:30px;
+      font-weight:900;
+      opacity:.85;
+    }
 
-.kgPill input{
-  width:92px;
-  text-align:center;
-  border:none;
-  background:transparent;
-  font-size:36px;
-  font-weight:900;
-  outline:none;
-  caret-color:#111;
-}
+    /* Farbfelder wie Screenshot: 2 kleine Quadrate, ohne Text */
+    .colorRow{
+      display:flex;
+      gap:18px;
+      margin-top:14px;
+      margin-bottom:14px; /* extra Abstand zum Inhaltsfeld */
+      align-items:center;
+    }
+    .colorBox{
+      width:42px;
+      height:42px;
+      border-radius:12px;
+      border:2px solid rgba(255,255,255,.12);
+      background:rgba(0,0,0,.18);
+      cursor:pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .colorBox.black{ background:#000; }
+    .colorBox.grey{ background:#c0c0c0; }
 
-.kgUnit{
-  font-size:30px;
-  font-weight:900;
-}
+    .colorBox.active{
+      box-shadow:0 0 0 4px var(--glowGreen);
+    }
 
-.colorRow{
-  display:flex;
-  gap:10px;
-  margin:12px 0;
-}
+    .contentWrap{
+      border-radius:22px;
+      border:2px solid rgba(255,255,255,.12);
+      background:rgba(0,0,0,.18);
+      padding:12px;
+      margin-top:6px;
+    }
+    textarea{
+      width:100%;
+      height:320px;
+      border:none;
+      outline:none;
+      background:transparent;
+      color:var(--ink);
+      font-size:22px;
+      resize:none;
+    }
+    textarea::placeholder{ color:rgba(233,238,247,.45); font-weight:700; }
 
-.colorChip{
-  height:34px;
-  padding:0 12px;
-  border-radius:14px;
-  border:2px solid var(--stroke-dark);
-  background:rgba(255,255,255,.45);
-  font-weight:800;
-  cursor:pointer;
-  display:flex;
-  align-items:center;
-  gap:10px;
-}
+    .btnRow{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:14px;
+      margin-top:16px;
+    }
+    button{
+      height:72px;
+      border-radius:18px;
+      border:none;
+      background:#263a5f;
+      color:#fff;
+      font-size:22px;
+      font-weight:900;
+    }
 
-.colorDot{
-  width:14px;
-  height:14px;
-  border-radius:6px;
-  border:2px solid rgba(0,0,0,.3);
-}
+    /* ===== Modus je ID ===== */
+    .mode-eblack{ background:var(--eBlack); }
+    .mode-eblack .topbar{ background:rgba(255,255,255,.12); }
 
-.colorChip.active{
-  box-shadow:0 0 0 4px var(--greenGlow);
-}
+    .mode-egrey{ background:var(--eGrey); }
 
-/* Abstand zum Inhaltsfeld */
-.textareaWrap{
-  padding:12px;
-  margin-top:18px;
-}
+    .mode-k{ background:var(--kCard); color:#111; }
+    .mode-k .topbar{ background:rgba(0,0,0,.12); }
+    .mode-k .input, .mode-k .tile, .mode-k .contentWrap{
+      background:rgba(255,255,255,.25);
+      border-color:rgba(0,0,0,.22);
+      color:#111;
+    }
+    .mode-k textarea, .mode-k .kgTile input{ color:#111; }
+    .mode-k .input::placeholder, .mode-k textarea::placeholder{ color:rgba(0,0,0,.35); }
+    .mode-k .status{ color:var(--ok); }
 
-textarea{
-  width:100%;
-  height:320px;
-  border:none;
-  background:transparent;
-  resize:none;
-  font-size:22px;
-  outline:none;
-}
-
-.btnRow{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:14px;
-  margin-top:16px;
-}
-
-button{
-  height:70px;
-  border-radius:18px;
-  font-size:22px;
-  font-weight:900;
-  border:none;
-  background:#263a5f;
-  color:white;
-}
-
-/* ===== Farbmodi ===== */
-.card.mode-egrey{ background:var(--eGrey); }
-.card.mode-eblack{ background:var(--eBlack); color:#fff; }
-.card.mode-k{ background:var(--kCard); }
-.card.mode-t{ background:var(--tCard); }
-
-/* Dark-Mode innerhalb Card nur bei eblack */
-.card.mode-eblack .input,
-.card.mode-eblack .pill,
-.card.mode-eblack .textareaWrap,
-.card.mode-eblack .kgPill{
-  background:rgba(255,255,255,.10);
-  border-color:var(--stroke-light);
-  color:#fff;
-}
-
-.card.mode-eblack .kgPill input{
-  caret-color:#fff;
-  color:#fff;
-}
-
-.card.mode-eblack textarea{ color:#fff; }
-.card.mode-eblack ::placeholder{ color:rgba(255,255,255,.55); }
-</style>
+    .mode-t{ background:var(--tCard); color:#111; }
+    .mode-t .topbar{ background:rgba(0,0,0,.12); }
+    .mode-t .input, .mode-t .tile, .mode-t .contentWrap{
+      background:rgba(255,255,255,.35);
+      border-color:rgba(0,0,0,.22);
+      color:#111;
+    }
+    .mode-t textarea, .mode-t .kgTile input{ color:#111; }
+    .mode-t .input::placeholder, .mode-t textarea::placeholder{ color:rgba(0,0,0,.35); }
+  </style>
 </head>
 
 <body>
-<div class="card" id="card">
-  <div class="topbar"></div>
+  <div class="card mode-egrey" id="card">
+    <div class="topbar"></div>
 
-  <h1 class="boxId" id="boxId">E001</h1>
-  <div class="status" id="status">Gespeichert ✓</div>
+    <h1 id="boxId">E001</h1>
+    <div class="status" id="status">Gespeichert ✓</div>
 
-  <div class="grid">
-    <input class="input" id="ort" placeholder="ORT" maxlength="6" />
-    <input class="input" id="bez" placeholder="Bezeichnung" />
-  </div>
+    <div class="row2">
+      <input id="ort" class="input" placeholder="ORT" maxlength="6" />
+      <input id="bez" class="input" placeholder="Bezeichnung" />
+    </div>
 
-  <div class="pillRow">
-    <div class="pill iconToggle" id="fragile" title="Zerbrechlich">🍷</div>
-    <div class="pill iconToggle heavy" id="heavy" title="Schwer">🏋️</div>
+    <div class="row3">
+      <div id="fragile" class="tile btn">🍷</div>
+      <div id="heavy" class="tile btn">🏋️</div>
 
-    <div class="kgPill" id="kgTap" title="Gewicht">
-      <input id="kg" inputmode="numeric" autocomplete="off" value="00" maxlength="2" />
-      <span class="kgUnit">kg</span>
+      <div id="kgTile" class="tile kgTile">
+        <input id="kg" inputmode="numeric" pattern="[0-9]*" maxlength="2" value="00" />
+        <span class="unit">kg</span>
+      </div>
+    </div>
+
+    <div class="colorRow" id="colorRow">
+      <div id="cBlack" class="colorBox black" title="Schwarz"></div>
+      <div id="cGrey" class="colorBox grey" title="Grau"></div>
+    </div>
+
+    <div class="contentWrap">
+      <textarea id="content" placeholder="• Inhalt hier eintragen..."></textarea>
+    </div>
+
+    <div class="btnRow">
+      <button id="backupBtn">Backup nach iCloud</button>
+      <button id="importBtn">Backup importieren</button>
     </div>
   </div>
-
-  <div class="colorRow" id="colorRow">
-    <div class="colorChip" id="grey">
-      <span class="colorDot" style="background:#C0C0C0"></span> Grau
-    </div>
-    <div class="colorChip" id="black">
-      <span class="colorDot" style="background:#000"></span> Schwarz
-    </div>
-  </div>
-
-  <div class="textareaWrap">
-    <textarea id="content" placeholder="• Inhalt hier eintragen..."></textarea>
-  </div>
-
-  <div class="btnRow">
-    <button id="backupBtn">Backup nach iCloud</button>
-    <button id="importBtn">Backup importieren</button>
-  </div>
-</div>
 
 <script>
+/* ---------------- Helpers ---------------- */
+const $ = (id)=>document.getElementById(id);
+const statusEl = $("status");
+const card = $("card");
+
 const params = new URLSearchParams(location.search);
 const boxId = (params.get("box") || "E001").toUpperCase();
-document.getElementById("boxId").textContent = boxId;
+$("boxId").textContent = boxId;
 
-const card = document.getElementById("card");
-const colorRow = document.getElementById("colorRow");
+function setStatusSaving(){
+  statusEl.textContent = "Speichert…";
+}
+function setStatusSaved(){
+  statusEl.textContent = "Gespeichert ✓";
+}
+let saveTimer = null;
 
-const fragile = document.getElementById("fragile");
-const heavy   = document.getElementById("heavy");
-const kgTap   = document.getElementById("kgTap");
-const kg      = document.getElementById("kg");
-const content = document.getElementById("content");
+function getStore(){
+  try { return JSON.parse(localStorage.getItem("euroboxen") || "{}"); }
+  catch { return {}; }
+}
+function setStore(obj){
+  localStorage.setItem("euroboxen", JSON.stringify(obj));
+}
 
-/* ---------- Mode / Farben ---------- */
-function setMode(mode){
+/* ---------------- Mode by prefix ---------------- */
+const colorRow = $("colorRow");
+function applyMode(mode){
   card.className = "card " + mode;
-  document.getElementById("grey").classList.toggle("active", mode==="mode-egrey");
-  document.getElementById("black").classList.toggle("active", mode==="mode-eblack");
+}
+function hideColorPick(){ colorRow.style.display="none"; }
+function showColorPick(){ colorRow.style.display="flex"; }
+
+if (boxId.startsWith("K")) { applyMode("mode-k"); hideColorPick(); }
+else if (boxId.startsWith("T")) { applyMode("mode-t"); hideColorPick(); }
+else { applyMode("mode-egrey"); showColorPick(); }
+
+/* ---------------- Load current box ---------------- */
+function loadBox(){
+  const db = getStore();
+  const v = db[boxId] || {};
+
+  $("ort").value = v.ort || "";
+  $("bez").value = v.bez || "";
+  $("content").value = v.content || "";
+
+  // fragile / heavy
+  $("fragile").classList.toggle("active", !!v.fragile);
+
+  // kg
+  $("kg").value = (v.kg ?? "00").toString();
+  normalizeKg(false);
+
+  // Eurobox color choice
+  if (!boxId.startsWith("K") && !boxId.startsWith("T")){
+    const col = v.color || "grey";
+    setEuroColor(col, false);
+  }
+
+  setStatusSaved();
+}
+loadBox();
+
+/* ---------------- Save current box ---------------- */
+function saveBox(){
+  const db = getStore();
+  db[boxId] = db[boxId] || {};
+
+  db[boxId].ort = $("ort").value.trim();
+  db[boxId].bez = $("bez").value.trim();
+  db[boxId].content = $("content").value;
+
+  db[boxId].fragile = $("fragile").classList.contains("active");
+
+  // heavy is auto by kg; we store kg only
+  db[boxId].kg = $("kg").value;
+
+  if (!boxId.startsWith("K") && !boxId.startsWith("T")){
+    db[boxId].color = (card.classList.contains("mode-eblack") ? "black" : "grey");
+  }
+
+  setStore(db);
 }
 
-if (boxId.startsWith("K")) {
-  setMode("mode-k");
-  colorRow.style.display = "none";
-} else if (boxId.startsWith("T")) {
-  setMode("mode-t");
-  colorRow.style.display = "none";
-} else {
-  setMode("mode-egrey");
-  colorRow.style.display = "flex";
+function scheduleSave(){
+  setStatusSaving();
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(()=>{
+    saveBox();
+    setStatusSaved();
+  }, 250);
 }
 
-document.getElementById("grey").addEventListener("click", ()=>setMode("mode-egrey"));
-document.getElementById("black").addEventListener("click", ()=>setMode("mode-eblack"));
+/* ---------------- Euro color selection (only E*) ---------------- */
+function setEuroColor(color, doSave=true){
+  if (boxId.startsWith("K") || boxId.startsWith("T")) return;
 
-/* ---------- Toggle Icons ---------- */
-function toggleActive(el){ el.classList.toggle("active"); }
+  $("cBlack").classList.toggle("active", color==="black");
+  $("cGrey").classList.toggle("active", color==="grey");
+  applyMode(color==="black" ? "mode-eblack" : "mode-egrey");
 
-fragile.addEventListener("click", (e)=>{
+  if (doSave) scheduleSave();
+}
+$("cBlack").addEventListener("click", ()=>setEuroColor("black"));
+$("cGrey").addEventListener("click", ()=>setEuroColor("grey"));
+
+/* ---------------- Icon toggles ---------------- */
+$("fragile").addEventListener("click",(e)=>{
   e.preventDefault(); e.stopPropagation();
-  toggleActive(fragile);
+  $("fragile").classList.toggle("active");
+  scheduleSave();
 });
 
-heavy.addEventListener("click", (e)=>{
-  e.preventDefault(); e.stopPropagation();
-  toggleActive(heavy);
-});
+/* Heavy: NICHT manuell toggeln – nur automatisch ab 16 kg (wie du wolltest) */
+function setHeavyAuto(on){
+  $("heavy").classList.toggle("active", on);
+}
 
-/* ---------- kg Feld: komfortables Überschreiben (beide Stellen) ---------- */
-function selectKgAll(){
-  // iOS braucht oft ein Timeout, sonst markiert er nicht sauber
+/* ---------------- KG: fix “nur einstellig” auf iOS ----------------
+   Lösung: während der Eingabe NICHT auf 00/0x zwingen.
+   - beim Fokus: alles markieren
+   - beim Blur: auf 2-stellig formatieren
+*/
+const kgInput = $("kg");
+const kgTile = $("kgTile");
+
+function selectAllKg(){
+  // iOS braucht oft einen Tick
   setTimeout(()=>{
-    kg.focus({preventScroll:true});
-    try { kg.setSelectionRange(0, kg.value.length); } catch {}
+    kgInput.focus({preventScroll:true});
+    try { kgInput.setSelectionRange(0, kgInput.value.length); } catch {}
   }, 0);
 }
 
-kgTap.addEventListener("click", (e)=>{
+kgTile.addEventListener("click",(e)=>{
   e.preventDefault(); e.stopPropagation();
-  selectKgAll();
+  selectAllKg();
 });
 
-kg.addEventListener("click", (e)=>{ e.stopPropagation(); selectKgAll(); });
-kg.addEventListener("touchstart", (e)=>{ e.stopPropagation(); }, {passive:true});
-
-let kgPrimed = false; // nächster Digit überschreibt komplett, wenn zuvor "00" oder Auswahl
-kg.addEventListener("focus", ()=>{
-  kgPrimed = true;
-  selectKgAll();
+kgInput.addEventListener("focus", ()=>{
+  selectAllKg();
 });
 
-kg.addEventListener("keydown", (e)=>{
-  // Wenn primed und Zahl gedrückt -> überschreiben statt "nur Einerstelle"
-  if(kgPrimed && /^[0-9]$/.test(e.key)){
-    e.preventDefault();
-    kg.value = "0" + e.key;     // erste Eingabe landet sichtbar, z.B. 4 -> 04
-    kgPrimed = false;
-    normalizeKg();
-    // Cursor ans Ende
-    requestAnimationFrame(()=>{ try { kg.setSelectionRange(kg.value.length, kg.value.length); } catch {} });
-  }
-  // Backspace: wenn alles markiert oder "00", bleiben wir komfortabel
-  if(e.key === "Backspace"){
-    // lasse Standard laufen; normalizeKg kümmert sich danach
-    kgPrimed = false;
-  }
+kgInput.addEventListener("input", ()=>{
+  // nur reinigen, NICHT auffüllen -> verhindert “nur Einerstelle”
+  kgInput.value = kgInput.value.replace(/\D/g,"").slice(0,2);
+  const v = parseInt(kgInput.value || "0", 10);
+  setHeavyAuto(v >= 16);
+  scheduleSave();
 });
 
-function normalizeKg(){
-  kg.value = (kg.value || "").replace(/\D/g,"").slice(0,2);
-  if (kg.value.length===0) kg.value="00";
-  if (kg.value.length===1) kg.value = "0"+kg.value;
+kgInput.addEventListener("blur", ()=>{
+  normalizeKg(true);
+  scheduleSave();
+});
 
-  const v = parseInt(kg.value,10) || 0;
-  heavy.classList.toggle("active", v >= 16); // Schwer ab 16 kg
+function normalizeKg(setSaved){
+  let s = (kgInput.value || "").replace(/\D/g,"").slice(0,2);
+  if (s.length===0) s="00";
+  if (s.length===1) s="0"+s;      // erst hier auffüllen
+  kgInput.value = s;
+  const v = parseInt(s,10) || 0;
+  setHeavyAuto(v >= 16);
+  if(setSaved) setStatusSaved();
 }
 
-kg.addEventListener("input", ()=>{
-  kgPrimed = false;
-  normalizeKg();
-});
+/* ---------------- Content bullets ---------------- */
+const content = $("content");
 
-normalizeKg();
-
-/* ---------- Content: Bullet Handling ---------- */
 content.addEventListener("focus", ()=>{
-  if(content.value.trim()===""){
-    content.value="• ";
-    setTimeout(()=>content.setSelectionRange(content.value.length, content.value.length),0);
+  if (content.value.trim()===""){
+    content.value = "• ";
+    setTimeout(()=>content.setSelectionRange(content.value.length, content.value.length), 0);
   }
 });
 
@@ -399,7 +465,8 @@ content.addEventListener("keydown", (e)=>{
       e.preventDefault();
       const after = content.value.slice(pos);
       content.value = content.value.slice(0,lineStart) + after;
-      content.setSelectionRange(lineStart, lineStart);
+      content.setSelectionRange(lineStart,lineStart);
+      scheduleSave();
     }
   }
   if(e.key==="Enter"){
@@ -410,7 +477,59 @@ content.addEventListener("keydown", (e)=>{
     content.value = left + "\n• " + right;
     const np = pos + 3;
     content.setSelectionRange(np,np);
+    scheduleSave();
   }
+});
+
+/* ---------------- Generic autosave for inputs ---------------- */
+["ort","bez"].forEach(id=>{
+  $(id).addEventListener("input", scheduleSave);
+});
+content.addEventListener("input", scheduleSave);
+
+/* ---------------- Backup / Import (funktional) ---------------- */
+$("backupBtn").addEventListener("click", async ()=>{
+  const data = getStore();
+  const blob = new Blob([JSON.stringify(data,null,2)], {type:"application/json"});
+  const file = new File([blob], "euroboxen.json", {type:"application/json"});
+
+  // iOS: Web Share -> “In Dateien sichern” (iCloud Drive)
+  if (navigator.canShare && navigator.canShare({files:[file]})) {
+    try { await navigator.share({files:[file], title:"Euroboxen Backup"}); return; }
+    catch {}
+  }
+
+  // fallback: Download
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "euroboxen.json";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+});
+
+$("importBtn").addEventListener("click", ()=>{
+  const inp = document.createElement("input");
+  inp.type="file";
+  inp.accept="application/json";
+  inp.onchange = async ()=>{
+    const f = inp.files?.[0];
+    if(!f) return;
+    const txt = await f.text();
+    let incoming = {};
+    try { incoming = JSON.parse(txt); } catch { return; }
+
+    const db = getStore();
+    // merge
+    for(const k of Object.keys(incoming)){
+      db[k] = incoming[k];
+    }
+    setStore(db);
+    loadBox();
+  };
+  inp.click();
 });
 </script>
 </body>
