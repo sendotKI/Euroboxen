@@ -1,13 +1,14 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Eurobox / Karton</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Euroboxen</title>
 
 <style>
 :root{
-  --bg:#071225;
+  --page:#071225;
+
   --card:#2b323f;
   --card2:rgba(255,255,255,.06);
   --stroke:rgba(255,255,255,.14);
@@ -21,14 +22,16 @@
 }
 
 *{box-sizing:border-box}
+html,body{height:100%}
 body{
   margin:0;
   min-height:100vh;
   display:flex;
   justify-content:center;
   align-items:center;
-  background:var(--bg);
+  background:var(--page);
   font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif;
+  color:var(--text);
 }
 
 .card{
@@ -39,7 +42,7 @@ body{
   box-shadow:0 24px 60px rgba(0,0,0,.55);
 }
 
-.isK{
+.card.isK{
   background:var(--kCard);
   color:var(--kText);
 }
@@ -57,13 +60,14 @@ body{
   font-size:72px;
   font-weight:900;
   margin:0;
+  letter-spacing:1px;
 }
 
 .status{
   text-align:center;
   color:var(--ok);
   font-size:26px;
-  font-weight:700;
+  font-weight:800;
   margin:8px 0 18px;
 }
 
@@ -75,7 +79,7 @@ body{
 
 .pillRow{
   display:grid;
-  grid-template-columns:64px 64px 120px; /* ⬅️ kg-Kachel breiter */
+  grid-template-columns:64px 64px 140px; /* kg angenehmer */
   gap:12px;
   margin-top:14px;
 }
@@ -86,9 +90,9 @@ body{
   background:var(--card2);
 }
 
-.isK .input,
-.isK .pill,
-.isK .textareaWrap{
+.card.isK .input,
+.card.isK .pill,
+.card.isK .textareaWrap{
   border-color:var(--kStroke);
   background:rgba(255,255,255,.18);
 }
@@ -98,7 +102,11 @@ body{
   padding:0 14px;
   font-size:22px;
   width:100%;
+  color:inherit;
 }
+
+.input::placeholder{color:rgba(255,255,255,.45)}
+.card.isK .input::placeholder{color:rgba(0,0,0,.35)}
 
 .iconToggle{
   height:62px;
@@ -119,15 +127,14 @@ body{
   box-shadow:0 0 0 5px rgba(255,80,80,.35);
 }
 
-/* ✅ kg-Kachel: größer + überall klickbar */
+/* kg-Kachel */
 .kgWrap{
   height:62px;
   display:flex;
   align-items:center;
   justify-content:center;
-  gap:8px;
-  padding:0 12px;                 /* ⬅️ mehr „Touch-Fläche“ */
-  font-size:24px;                 /* ⬅️ kg etwas größer */
+  gap:10px;
+  padding:0 14px;
   font-weight:900;
   cursor:text;
   user-select:none;
@@ -135,14 +142,21 @@ body{
 }
 
 .kgWrap input{
-  width:52px;                     /* ⬅️ Zahl größer */
+  width:60px;
   text-align:center;
   border:none;
   background:transparent;
-  font-size:26px;                 /* ⬅️ Zahl größer */
+  font-size:28px;
   font-weight:900;
   outline:none;
   padding:6px 0;
+  color:inherit;
+}
+
+.kgUnit{
+  font-size:26px;
+  font-weight:900;
+  opacity:.9;
 }
 
 .textareaWrap{
@@ -158,7 +172,11 @@ textarea{
   resize:none;
   font-size:22px;
   outline:none;
+  color:inherit;
 }
+
+textarea::placeholder{color:rgba(255,255,255,.45)}
+.card.isK textarea::placeholder{color:rgba(0,0,0,.35)}
 
 .btnRow{
   display:grid;
@@ -173,59 +191,92 @@ button{
   font-size:22px;
   font-weight:900;
   border:none;
+  background:#263a5f;
+  color:white;
+}
+
+.card.isK button{
+  background:rgba(255,255,255,.75);
+  color:rgba(0,0,0,.85);
 }
 </style>
 </head>
 
 <body>
-<div class="card isK">
-  <div class="topbar"></div>
+  <div class="card" id="card">
+    <div class="topbar"></div>
 
-  <h1 class="boxId">K017</h1>
-  <div class="status">Gespeichert ✓</div>
+    <h1 class="boxId" id="boxIdTitle">E019</h1>
+    <div class="status" id="status">Gespeichert ✓</div>
 
-  <div class="grid">
-    <input class="input" placeholder="ORT" maxlength="6">
-    <input class="input" placeholder="Bezeichnung">
-  </div>
+    <div class="grid">
+      <input class="input" id="ort" placeholder="ORT" maxlength="6" />
+      <input class="input" id="bez" placeholder="Bezeichnung" />
+    </div>
 
-  <div class="pillRow">
-    <div class="pill iconToggle active" id="fragile" title="Zerbrechlich">🍷</div>
-    <div class="pill iconToggle heavy" id="heavy" title="Schwer">🏋️</div>
+    <div class="pillRow">
+      <div class="pill iconToggle" id="fragile" title="Zerbrechlich">🍷</div>
+      <div class="pill iconToggle heavy" id="heavy" title="Schwer">🏋️</div>
 
-    <!-- ✅ Tap auf die ganze Kachel fokussiert das Input -->
-    <div class="pill kgWrap" id="kgTap" title="Gewicht">
-      <input id="kg" maxlength="2" inputmode="numeric" pattern="[0-9]*" value="00">
-      <span>kg</span>
+      <div class="pill kgWrap" id="kgTap" title="Gewicht">
+        <input id="kg" maxlength="2" inputmode="numeric" pattern="[0-9]*" value="00" />
+        <span class="kgUnit">kg</span>
+      </div>
+    </div>
+
+    <div class="textareaWrap">
+      <textarea id="content" placeholder="• Inhalt hier eintragen..."></textarea>
+    </div>
+
+    <div class="btnRow">
+      <button id="backup">Backup nach iCloud</button>
+      <button id="import">Backup importieren</button>
     </div>
   </div>
 
-  <div class="textareaWrap">
-    <textarea placeholder="• Inhalt hier eintragen..."></textarea>
-  </div>
-
-  <div class="btnRow">
-    <button>Backup nach iCloud</button>
-    <button>Backup importieren</button>
-  </div>
-</div>
-
 <script>
-  // ✅ Klick/Tap irgendwo auf die kg-Kachel -> Cursor ins Feld
-  const kgTap = document.getElementById("kgTap");
+  // --- BoxId aus URL ---
+  const params = new URLSearchParams(location.search);
+  const boxId = (params.get("box") || "E019").toUpperCase();
+
+  const card = document.getElementById("card");
+  const title = document.getElementById("boxIdTitle");
+
+  title.textContent = boxId;
+
+  // --- Auto-Farbe ---
+  // K… => Kartonfarbe, E… => Standard (grau/schwarz später)
+  if (boxId.startsWith("K")) {
+    card.classList.add("isK");
+  } else {
+    card.classList.remove("isK");
+  }
+
+  // --- Toggles (optisch) ---
+  const fragile = document.getElementById("fragile");
+  const heavy   = document.getElementById("heavy");
+
+  fragile.addEventListener("click", (e)=>{ e.preventDefault(); e.stopPropagation(); fragile.classList.toggle("active"); });
+  heavy.addEventListener("click",   (e)=>{ e.preventDefault(); e.stopPropagation(); heavy.classList.toggle("active"); });
+
+  // --- ✅ KG: Tap überall -> Fokus ins kg-Input (und NICHT ins Inhaltsfeld) ---
+  const kgTap   = document.getElementById("kgTap");
   const kgInput = document.getElementById("kg");
 
-  kgTap.addEventListener("click", () => {
-    kgInput.focus();
+  function focusKg(e){
+    // SUPER wichtig: damit kein anderer Handler danach das Textfeld fokussiert
+    if (e) { e.preventDefault(); e.stopPropagation(); }
+    kgInput.focus({preventScroll:true});
     kgInput.select();
-  });
+  }
 
-  // iPhone: Tap-Hilfe (manchmal wird click verzögert)
-  kgTap.addEventListener("touchstart", () => {
-    kgInput.focus();
-    kgInput.select();
-  }, {passive:true});
+  // click + touchstart (iOS)
+  kgTap.addEventListener("click", focusKg, true);
+  kgTap.addEventListener("touchstart", focusKg, {passive:false, capture:true});
+
+  // Optional: wenn du irgendwo noch global "card klick => textarea fokus" hast,
+  // bleibt das weiterhin möglich – aber kgTap überschreibt es sauber.
+
 </script>
-
 </body>
 </html>
