@@ -28,9 +28,7 @@ body {
   color: var(--text);
 }
 
-.header {
-  text-align: center;
-}
+.header { text-align: center; }
 
 .header h1 {
   margin: 8px 0 2px;
@@ -45,6 +43,7 @@ body {
 .saved.green { color: #00c26a; }
 .saved.red { color: #ff4b4b; }
 
+/* ---------- ROWS ---------- */
 .row {
   display: flex;
   gap: 12px;
@@ -55,10 +54,11 @@ body {
 .row-ort {
   display: grid;
   grid-template-columns: 0.65fr 46px;
-  gap: 30px;          /* 🍷 weiter nach rechts */
+  gap: 30px;
   margin-top: 16px;
 }
 
+/* Felder */
 .field {
   padding: 10px 14px;
   border-radius: 16px;
@@ -67,13 +67,12 @@ body {
   font-size: 16px;
   height: 46px;
   box-sizing: border-box;
-  color: var(--text);
+  color: inherit;
 }
 
-.field-wide {
-  width: 100%;
-}
+.field-wide { width: 100%; }
 
+/* Icons */
 .icon {
   width: 46px;
   height: 46px;
@@ -106,6 +105,7 @@ body {
   background: rgba(255,59,59,0.25);
 }
 
+/* KG */
 .kg {
   flex: 1;
   height: 46px;
@@ -116,6 +116,7 @@ body {
   font-weight: 700;
 }
 
+/* Farben */
 .colors {
   display: flex;
   gap: 10px;
@@ -130,10 +131,9 @@ body {
   cursor: pointer;
 }
 
-.color.active {
-  border-color: #00d26a;
-}
+.color.active { border-color: #00d26a; }
 
+/* Inhalt */
 .textarea {
   margin-top: 22px;
   padding: 16px;
@@ -142,15 +142,14 @@ body {
   background: var(--field);
   border: 1px solid var(--border);
   font-size: 16px;
-  color: var(--text);
+  color: inherit;
   white-space: pre-wrap;
 }
 
 /* Placeholder-Optik */
-.textarea.placeholder {
-  color: rgba(0,0,0,.45);
-}
+.textarea.placeholder { color: rgba(0,0,0,.45); }
 
+/* Buttons */
 .buttons {
   display: flex;
   gap: 12px;
@@ -165,7 +164,10 @@ button {
   background: #223a66;
   color: #fff;
   font-size: 16px;
+  cursor: pointer;
 }
+
+button:active { transform: scale(0.99); }
 </style>
 </head>
 
@@ -201,77 +203,111 @@ button {
     <div class="color" data-color="#000" style="background:#000" title="Schwarz"></div>
   </div>
 
-  <!-- Inhalt: überschreibbarer Placeholder + Bullet-Automatik -->
+  <!-- Inhalt -->
   <div class="textarea" id="content" contenteditable="true"></div>
 
   <div class="buttons">
-    <button>Backup nach iCloud</button>
-    <button>Backup importieren</button>
+    <button id="btnExport">Backup exportieren</button>
+    <button id="btnImport">Backup importieren</button>
   </div>
 
 </div>
 
-<script>
-/* ---------- Box-ID + Typfarbe ---------- */
-const boxIdVal = new URLSearchParams(location.search).get("box") || "K017";
-document.getElementById("boxId").textContent = boxIdVal;
+<!-- Hidden File Input für Import -->
+<input id="fileInput" type="file" accept="application/json" style="display:none"/>
 
+<script>
+/* =========================
+   Basics + Elemente
+========================= */
+const params = new URLSearchParams(location.search);
+const boxIdVal = (params.get("box") || "K017").toUpperCase();
+
+const elBoxId = document.getElementById("boxId");
 const card = document.getElementById("card");
 const saved = document.getElementById("saved");
 const colors = document.getElementById("colors");
 
-function applyBoxType() {
+const ort = document.getElementById("ort");
+const label = document.getElementById("label");
+const fragile = document.getElementById("fragile");
+const heavy = document.getElementById("heavy");
+const kg = document.getElementById("kg");
+const content = document.getElementById("content");
+
+const btnExport = document.getElementById("btnExport");
+const btnImport = document.getElementById("btnImport");
+const fileInput = document.getElementById("fileInput");
+
+elBoxId.textContent = boxIdVal;
+
+/* =========================
+   Farben je Box-Typ
+========================= */
+function applyBoxTypeDefault() {
   if (boxIdVal.startsWith("K")) {
-    card.style.background = "#ADAC62";
-    card.style.color = "#000";
+    setCardTheme("#ADAC62", "#000");
     colors.style.display = "none";
-    saved.className = "saved green";
-  }
-  if (boxIdVal.startsWith("T")) {
-    card.style.background = "#9FFCFD";
-    card.style.color = "#000";
+    setSavedStyle(false);
+  } else if (boxIdVal.startsWith("T")) {
+    setCardTheme("#9FFCFD", "#000");
     colors.style.display = "none";
-    saved.className = "saved green";
-  }
-  if (boxIdVal.startsWith("E")) {
-    card.style.background = "#6c707a";
-    card.style.color = "#000";
+    setSavedStyle(false);
+  } else { // E
+    setCardTheme("#6c707a", "#000");
     colors.style.display = "flex";
-    saved.className = "saved green";
+    setSavedStyle(false);
+    setActiveColorButton("#6c707a");
   }
 }
-applyBoxType();
 
-/* Farben (nur E) */
+function setCardTheme(bg, fg) {
+  card.style.background = bg;
+  card.style.color = fg;
+}
+
+function setSavedStyle(isBlackTheme) {
+  saved.className = isBlackTheme ? "saved red" : "saved green";
+}
+
+function setActiveColorButton(color) {
+  document.querySelectorAll(".color").forEach(x => x.classList.remove("active"));
+  const btn = [...document.querySelectorAll(".color")].find(x => x.dataset.color === color);
+  if (btn) btn.classList.add("active");
+}
+
+/* E-Farben klicken */
 document.querySelectorAll(".color").forEach(c => {
-  c.onclick = () => {
+  c.addEventListener("click", () => {
     document.querySelectorAll(".color").forEach(x=>x.classList.remove("active"));
     c.classList.add("active");
-    card.style.background = c.dataset.color;
 
-    if (c.dataset.color === "#000") {
-      card.style.color = "#fff";
-      saved.className = "saved red";
+    const bg = c.dataset.color;
+    if (bg === "#000") {
+      setCardTheme("#000", "#fff");
+      setSavedStyle(true);
     } else {
-      card.style.color = "#000";
-      saved.className = "saved green";
+      setCardTheme(bg, "#000");
+      setSavedStyle(false);
     }
-  };
+    markDirtyAndSaveSoon();
+  });
 });
 
-/* ---------- 🍷 Weinglas: anklickbar + rot leuchten ---------- */
-const fragile = document.getElementById("fragile");
+/* =========================
+   Fragile (🍷) Toggle rot
+========================= */
 let fragileActive = false;
-
-fragile.onclick = () => {
+fragile.addEventListener("click", () => {
   fragileActive = !fragileActive;
   fragile.classList.toggle("fragile-active", fragileActive);
-};
+  markDirtyAndSaveSoon();
+});
 
-/* ---------- Gewicht: 16kg gelb, 26kg rot + manuell toggle ---------- */
+/* =========================
+   Heavy: 16kg gelb, 26kg rot (+ manuell toggle)
+========================= */
 let weight = 0;
-const kg = document.getElementById("kg");
-const heavy = document.getElementById("heavy");
 let heavyManual = false;
 
 function refreshHeavy(){
@@ -280,33 +316,31 @@ function refreshHeavy(){
   const shouldShow = (weight >= 16) || heavyManual;
   if (!shouldShow) return;
 
-  if (weight >= 26) {
-    heavy.classList.add("heavy-red");
-  } else {
-    heavy.classList.add("heavy-yellow");
-  }
+  if (weight >= 26) heavy.classList.add("heavy-red");
+  else heavy.classList.add("heavy-yellow");
 }
 
-kg.onclick = () => {
+kg.addEventListener("click", () => {
   weight = (weight + 1) % 100;
   kg.textContent = String(weight).padStart(2,"0") + " kg";
   refreshHeavy();
-};
+  markDirtyAndSaveSoon();
+});
 
-heavy.onclick = () => {
+heavy.addEventListener("click", () => {
   heavyManual = !heavyManual;
   refreshHeavy();
-};
+  markDirtyAndSaveSoon();
+});
 
-refreshHeavy();
-
-/* ---------- Inhalt: überschreibbarer Placeholder + Bullet pro Zeile ---------- */
-const content = document.getElementById("content");
-
+/* =========================
+   Inhalt: Placeholder überschreibbar + Bullet je Zeile
+========================= */
 function setPlaceholder(){
   content.classList.add("placeholder");
   content.innerText = "• Inhalt hier eintragen...";
 }
+
 function placeCursorAtEnd(){
   const range = document.createRange();
   range.selectNodeContents(content);
@@ -315,10 +349,24 @@ function placeCursorAtEnd(){
   sel.removeAllRanges();
   sel.addRange(range);
 }
+
 function clearPlaceholder(){
   content.classList.remove("placeholder");
   content.innerText = "• ";
   placeCursorAtEnd();
+}
+
+function normalizeBullets() {
+  // sorgt dafür, dass JEDE Zeile mit "• " beginnt (außer Placeholder)
+  if (content.classList.contains("placeholder")) return;
+  const lines = content.innerText.replace(/\r/g,"").split("\n");
+  const fixed = lines.map((l, i) => {
+    const t = l.trimEnd();
+    if (i === 0 && t.trim() === "") return "• ";
+    if (t.trim() === "") return "•";
+    return t.startsWith("•") ? t : "• " + t;
+  });
+  content.innerText = fixed.join("\n");
 }
 
 setPlaceholder();
@@ -328,33 +376,193 @@ content.addEventListener("focus", () => {
 });
 
 content.addEventListener("keydown", (e) => {
-  // Enter -> neue Bullet-Zeile
+  if (content.classList.contains("placeholder")) return;
+
   if (e.key === "Enter") {
     e.preventDefault();
     document.execCommand("insertText", false, "\n• ");
     return;
   }
-
-  // Backspace am Zeilenanfang direkt nach "• " -> Bullet entfernen
-  if (e.key === "Backspace") {
-    const sel = window.getSelection();
-    if (!sel.rangeCount) return;
-    const range = sel.getRangeAt(0);
-
-    // Wir arbeiten mit plain text im contenteditable
-    const textBeforeCursor = content.innerText.slice(0, range.startOffset);
-    if (textBeforeCursor.endsWith("• ")) {
-      e.preventDefault();
-      document.execCommand("delete"); // löscht Leerzeichen
-      document.execCommand("delete"); // löscht Bullet
-    }
-  }
 });
 
-// Wenn Feld leer -> Placeholder zurück
 content.addEventListener("input", () => {
-  if (content.innerText.trim() === "") setPlaceholder();
+  if (content.innerText.trim() === "") {
+    setPlaceholder();
+  } else {
+    normalizeBullets();
+  }
+  markDirtyAndSaveSoon();
 });
+
+/* =========================
+   Speichern pro Box (localStorage)
+========================= */
+const STORAGE_PREFIX = "umzug_box_";
+const BACKUP_KEY = "umzug_backup_v1";
+
+function boxStorageKey(id){ return STORAGE_PREFIX + id; }
+
+function getCurrentState(){
+  // Hintergrund/Text speichern (für E schwarz/grau)
+  const bg = card.style.background || "";
+  const fg = card.style.color || "";
+
+  return {
+    id: boxIdVal,
+    ort: ort.value || "",
+    label: label.value || "",
+    fragileActive,
+    weight,
+    heavyManual,
+    content: content.classList.contains("placeholder") ? "" : content.innerText,
+    bg,
+    fg
+  };
+}
+
+function applyState(state){
+  ort.value = state.ort || "";
+  label.value = state.label || "";
+
+  fragileActive = !!state.fragileActive;
+  fragile.classList.toggle("fragile-active", fragileActive);
+
+  weight = Number.isFinite(state.weight) ? state.weight : 0;
+  kg.textContent = String(weight).padStart(2,"0") + " kg";
+
+  heavyManual = !!state.heavyManual;
+  refreshHeavy();
+
+  // Theme wiederherstellen (nur sinnvoll bei E)
+  if (state.bg) {
+    setCardTheme(state.bg, state.fg || "#000");
+    const isBlack = (state.bg === "#000");
+    setSavedStyle(isBlack);
+    if (boxIdVal.startsWith("E")) setActiveColorButton(state.bg);
+  }
+
+  // Inhalt
+  if (state.content && state.content.trim() !== "") {
+    content.classList.remove("placeholder");
+    content.innerText = state.content;
+    normalizeBullets();
+  } else {
+    setPlaceholder();
+  }
+}
+
+function saveBox(){
+  const state = getCurrentState();
+  localStorage.setItem(boxStorageKey(boxIdVal), JSON.stringify(state));
+  flashSaved();
+}
+
+function loadBox(){
+  const raw = localStorage.getItem(boxStorageKey(boxIdVal));
+  if (!raw) return;
+  try {
+    const state = JSON.parse(raw);
+    applyState(state);
+  } catch(e) {}
+}
+
+function flashSaved(){
+  saved.textContent = "Gespeichert ✓";
+  // Style abhängig vom Theme
+  const isBlack = (card.style.background === "#000");
+  setSavedStyle(isBlack);
+}
+
+let saveTimer = null;
+function markDirtyAndSaveSoon(){
+  saved.textContent = "Speichern…";
+  if (saveTimer) clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    saveBox();
+    saveTimer = null;
+  }, 400);
+}
+
+/* Inputs speichern */
+[ort,label].forEach(el => el.addEventListener("input", markDirtyAndSaveSoon));
+
+/* =========================
+   BACKUP Export / Import
+========================= */
+function exportBackup(){
+  const all = {};
+  for (let i=0; i<localStorage.length; i++){
+    const k = localStorage.key(i);
+    if (!k || !k.startsWith(STORAGE_PREFIX)) continue;
+    try {
+      all[k] = JSON.parse(localStorage.getItem(k));
+    } catch(e) {}
+  }
+
+  const payload = {
+    version: 1,
+    createdAt: new Date().toISOString(),
+    data: all
+  };
+
+  const blob = new Blob([JSON.stringify(payload, null, 2)], {type:"application/json"});
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  const stamp = new Date().toISOString().slice(0,10);
+  a.href = url;
+  a.download = `umzug-backup-${stamp}.json`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+function importBackupFile(file){
+  const reader = new FileReader();
+  reader.onload = () => {
+    try{
+      const payload = JSON.parse(reader.result);
+      if (!payload || payload.version !== 1 || !payload.data) {
+        alert("Ungültiges Backup-Format.");
+        return;
+      }
+
+      // schreiben
+      Object.keys(payload.data).forEach(k => {
+        if (k.startsWith(STORAGE_PREFIX)) {
+          localStorage.setItem(k, JSON.stringify(payload.data[k]));
+        }
+      });
+
+      // current reload
+      applyBoxTypeDefault();
+      loadBox();
+      flashSaved();
+      alert("Backup importiert ✓");
+    } catch(e){
+      alert("Backup konnte nicht gelesen werden.");
+    }
+  };
+  reader.readAsText(file);
+}
+
+btnExport.addEventListener("click", exportBackup);
+
+btnImport.addEventListener("click", () => fileInput.click());
+
+fileInput.addEventListener("change", () => {
+  const file = fileInput.files && fileInput.files[0];
+  if (file) importBackupFile(file);
+  fileInput.value = "";
+});
+
+/* =========================
+   Start: Default Theme + Load State
+========================= */
+applyBoxTypeDefault();
+loadBox();
+refreshHeavy();
 </script>
 
 </body>
