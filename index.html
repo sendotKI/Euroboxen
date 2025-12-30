@@ -3,615 +3,519 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>Eurobox</title>
+  <title>Euroboxen</title>
+
   <style>
     :root{
-      --bg1:#05070c;
-      --bg2:#0b1430;
-      --card:#101a2e;
-      --card2:#0f1729;
-      --stroke: rgba(255,255,255,.10);
-      --stroke2: rgba(255,255,255,.14);
-      --text: rgba(255,255,255,.92);
-      --muted: rgba(255,255,255,.55);
-      --good:#39d98a;
-      --warn:#ff4d4d;
+      --bg:#071225;
 
-      --boxGrey:#C0C0C0;
-      --boxBlack:#000000;
-      --boxKarton:#ADAC62;
+      /* E */
+      --eGrey:#2b3447;
+      --eBlack:#000000;
+
+      /* K / T */
+      --kCard:#ADAC62;
+      --tCard:#9FFCFD;
+
+      --ok:#27d17e;
+      --ink:#e9eef7;
+
+      --stroke:rgba(255,255,255,.12);
+      --tileBg:rgba(0,0,0,.18);
+
+      --glowGreen:rgba(39,209,126,.42);
+      --glowRed:rgba(255,80,80,.45);
     }
 
-    *{box-sizing:border-box}
+    *{ box-sizing:border-box; }
     body{
       margin:0;
-      font-family: ui-sans-serif, -apple-system, system-ui, Segoe UI, Roboto, Arial, sans-serif;
-      color:var(--text);
       min-height:100vh;
-      background: radial-gradient(1200px 700px at 50% -200px, #1a2a55 0%, var(--bg1) 35%) ,
-                  radial-gradient(900px 700px at 50% 120%, #0b1a3c 0%, var(--bg1) 45%);
-      padding: 18px 14px 24px;
       display:flex;
-      align-items:flex-start;
       justify-content:center;
-    }
-
-    .wrap{
-      width:min(560px, 100%);
-      margin-top: 8px;
+      align-items:flex-start;
+      padding:22px 12px;
+      background:var(--bg);
+      font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif;
+      color:var(--ink);
     }
 
     .card{
+      width:min(640px,94vw);
+      border-radius:28px;
+      padding:18px 18px 16px;
+      background:var(--eGrey);
+      box-shadow:0 26px 70px rgba(0,0,0,.55);
       position:relative;
-      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
-      border:1px solid var(--stroke);
-      border-radius: 26px;
-      padding: 18px 16px 16px;
-      box-shadow: 0 25px 60px rgba(0,0,0,.45);
       overflow:hidden;
     }
 
-    /* farbiger Balken oben (Karton / Box-Farbe) */
-    .colorBar{
-      position:absolute;
-      top:10px; left:12px; right:12px;
+    .topbar{
       height:10px;
-      border-radius: 999px;
-      opacity:.55;
-      filter: blur(.0px);
-      border:1px solid rgba(255,255,255,.10);
-      display:none;
+      width:92%;
+      margin:4px auto 14px;
+      border-radius:999px;
+      background:rgba(255,255,255,.10);
     }
 
-    .head{
+    /* Überschrift kleiner */
+    h1{
+      margin:0;
       text-align:center;
-      padding-top: 8px;
-    }
-    .boxId{
-      font-weight: 900;
-      letter-spacing: .08em;
-      font-size: 56px;
-      line-height: 1.0;
-      margin: 10px 0 6px;
-      text-shadow: 0 6px 20px rgba(0,0,0,.35);
+      font-size:52px;
+      font-weight:900;
+      letter-spacing:1px;
     }
     .status{
-      font-weight: 700;
-      color: var(--good);
-      margin-bottom: 14px;
+      margin-top:6px;
+      text-align:center;
+      font-size:24px;
+      font-weight:900;
+      color:var(--ok);
     }
-    .status.saving{ color: rgba(255,255,255,.45); }
-    .gridTop{
+
+    /* ====== LAYOUT wie E022 ====== */
+    .rowFields{
       display:grid;
-      grid-template-columns: 1fr 2fr;
-      gap: 12px;
-      margin-top: 8px;
+      grid-template-columns: 1fr 1fr;
+      gap:14px;
+      margin-top:18px;
+    }
+    .rowIcons{
+      display:grid;
+      grid-template-columns: 76px 76px 1fr;
+      gap:14px;
+      margin-top:14px;
+      align-items:stretch;
+    }
+
+    /* falls schmal -> stacken, aber Reihenfolge bleibt */
+    @media (max-width: 380px){
+      .rowFields{ grid-template-columns:1fr; }
+      .rowIcons{ grid-template-columns: 76px 1fr; grid-auto-rows:72px; }
+      .kgTile{ grid-column: 1 / -1; }
     }
 
     .input{
-      width:100%;
-      height: 54px;
-      padding: 0 14px;
-      border-radius: 16px;
-      border:1px solid var(--stroke);
-      background: rgba(0,0,0,.18);
-      color: var(--text);
-      font-size: 18px;
+      height:62px;
+      border-radius:18px;
+      border:2px solid var(--stroke);
+      background:var(--tileBg);
+      color:var(--ink);
+      font-size:22px;
+      padding:0 16px;
       outline:none;
     }
-    .input::placeholder{ color: rgba(255,255,255,.35); }
-    .input:focus{ border-color: rgba(120,160,255,.35); }
+    .input::placeholder{ color:rgba(233,238,247,.45); font-weight:700; }
 
-    .row2{
-      display:grid;
-      grid-template-columns: 58px 58px 1fr;
-      gap: 12px;
-      margin-top: 12px;
-      align-items:center;
-    }
-
-    .chip{
-      width:58px; height:58px;
+    .tile{
+      height:72px;
+      border-radius:18px;
+      border:2px solid var(--stroke);
+      background:var(--tileBg);
       display:flex;
       align-items:center;
       justify-content:center;
-      border-radius: 16px;
-      border:1px solid var(--stroke);
-      background: rgba(0,0,0,.18);
-      cursor:pointer;
+      font-size:30px;
       user-select:none;
-      position:relative;
-      transition: transform .06s ease, box-shadow .15s ease, border-color .15s ease;
-      font-size: 26px;
+      -webkit-tap-highlight-color: transparent;
     }
-    .chip:active{ transform: scale(.98); }
-    .chip.active{
-      border-color: rgba(57,217,138,.65);
-      box-shadow: 0 0 0 3px rgba(57,217,138,.18);
-    }
-    .chip.danger.active{
-      border-color: rgba(255,77,77,.70);
-      box-shadow: 0 0 0 3px rgba(255,77,77,.18);
-    }
+    .tile.btn{ cursor:pointer; }
 
-    /* „zerbrochenes Glas“: kleiner Crash-Spot */
-    .chip.fragile::after{
-      content:"💥";
-      position:absolute;
-      right:6px;
-      bottom:6px;
-      font-size: 14px;
-      opacity: .0;
-      transform: rotate(-10deg);
-      transition: opacity .15s ease;
-      pointer-events:none;
-    }
-    .chip.fragile.active::after{ opacity:.9; }
+    .tile.active.fragile{ box-shadow:0 0 0 4px var(--glowGreen); }
+    .tile.active.heavy{ box-shadow:0 0 0 4px var(--glowRed); }
 
-    .weightWrap{
-      height:58px;
-      border-radius:16px;
-      border:1px solid var(--stroke);
-      background: rgba(0,0,0,.18);
-      display:flex;
-      align-items:center;
-      padding: 0 12px;
-      gap: 10px;
+    /* kg Tile (komfortabel klickbar wie die anderen) */
+    .kgTile{
+      justify-content:center;
+      gap:12px;
+      padding:0 14px;
+      cursor:text;
     }
-    .weightInput{
-      width: 72px;
+    .kgTile input{
+      width:140px;
+      text-align:center;
       border:none;
       outline:none;
-      background: transparent;
-      color: var(--text);
-      font-size: 22px;
-      font-weight: 800;
-      text-align:center;
-      appearance: textfield;
+      background:transparent;
+      color:var(--ink);
+      font-size:40px;
+      font-weight:900;
+      letter-spacing:1px;
+      padding:0;
     }
-    .weightInput::-webkit-outer-spin-button,
-    .weightInput::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0; }
-    .kg{
-      margin-left:auto;
-      color: rgba(255,255,255,.55);
-      font-weight: 800;
-      font-size: 22px;
-      padding-right: 4px;
+    .kgTile .unit{
+      font-size:30px;
+      font-weight:900;
+      opacity:.9;
     }
 
-    /* Farbauswahl (klein, hübsch) */
+    /* Farbfelder (nur für E) */
     .colorRow{
       display:flex;
+      gap:18px;
+      margin-top:14px;
+      margin-bottom:18px; /* mehr Abstand zum Inhaltsfeld */
       align-items:center;
-      gap: 10px;
-      margin-top: 12px;
-      margin-bottom: 14px; /* Abstand zur Inhalt-Box */
     }
-    .swatch{
-      width: 28px; height: 28px;               /* ~50% kleiner */
-      border-radius: 10px;
-      border:1px solid rgba(255,255,255,.22);
-      background: #777;
+    .colorBox{
+      width:42px;
+      height:42px;
+      border-radius:12px;
+      border:2px solid var(--stroke);
+      background:var(--tileBg);
       cursor:pointer;
-      position:relative;
-      flex:0 0 auto;
+      -webkit-tap-highlight-color: transparent;
     }
-    .swatch.active{
-      outline: 3px solid rgba(57,217,138,.35);
-      border-color: rgba(57,217,138,.60);
-    }
-    .swatch.grey{ background: var(--boxGrey); }
-    .swatch.black{ background: #000; }
+    .colorBox.black{ background:#000; }
+    .colorBox.grey{ background:#c0c0c0; }
+    .colorBox.active{ box-shadow:0 0 0 4px var(--glowGreen); }
 
-    .content{
-      margin-top: 0;
-      border-radius: 20px;
-      border:1px solid var(--stroke);
-      background: rgba(0,0,0,.16);
-      padding: 12px;
+    .contentWrap{
+      border-radius:22px;
+      border:2px solid var(--stroke);
+      background:var(--tileBg);
+      padding:12px;
+      margin-top:0;
     }
     textarea{
       width:100%;
-      min-height: 260px;
-      resize: vertical;
+      height:320px;
       border:none;
       outline:none;
-      background: transparent;
-      color: var(--text);
-      font-size: 18px;
-      line-height: 1.4;
+      background:transparent;
+      color:var(--ink);
+      font-size:22px;
+      resize:none;
     }
-    textarea::placeholder{ color: rgba(255,255,255,.30); }
+    textarea::placeholder{ color:rgba(233,238,247,.45); font-weight:700; }
 
     .btnRow{
       display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-top: 14px;
+      grid-template-columns:1fr 1fr;
+      gap:14px;
+      margin-top:16px;
     }
-    .btn{
-      height: 58px;
-      border-radius: 18px;
-      border:1px solid var(--stroke);
-      background: rgba(40,70,140,.22);
-      color: var(--text);
-      font-size: 18px;
-      font-weight: 800;
-      cursor:pointer;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      text-align:center;
-      padding: 0 10px;
-    }
-    .btn:active{ transform: scale(.99); }
-
-    .hint{
-      margin-top: 8px;
-      color: rgba(255,255,255,.40);
-      font-size: 13px;
-      text-align:center;
+    button{
+      height:72px;
+      border-radius:18px;
+      border:none;
+      background:#263a5f;
+      color:#fff;
+      font-size:22px;
+      font-weight:900;
     }
 
-    .hidden{ display:none !important; }
+    /* ===== Modus je ID ===== */
+    .mode-eblack{ background:var(--eBlack); }
+    .mode-eblack .topbar{ background:rgba(255,255,255,.12); }
+
+    .mode-egrey{ background:var(--eGrey); }
+
+    .mode-k{ background:var(--kCard); color:#111; }
+    .mode-k .topbar{ background:rgba(0,0,0,.12); }
+    .mode-k .input, .mode-k .tile, .mode-k .contentWrap{
+      background:rgba(255,255,255,.25);
+      border-color:rgba(0,0,0,.22);
+      color:#111;
+    }
+    .mode-k textarea, .mode-k .kgTile input{ color:#111; }
+    .mode-k .input::placeholder, .mode-k textarea::placeholder{ color:rgba(0,0,0,.35); }
+
+    .mode-t{ background:var(--tCard); color:#111; }
+    .mode-t .topbar{ background:rgba(0,0,0,.12); }
+    .mode-t .input, .mode-t .tile, .mode-t .contentWrap{
+      background:rgba(255,255,255,.35);
+      border-color:rgba(0,0,0,.22);
+      color:#111;
+    }
+    .mode-t textarea, .mode-t .kgTile input{ color:#111; }
+    .mode-t .input::placeholder, .mode-t textarea::placeholder{ color:rgba(0,0,0,.35); }
   </style>
 </head>
+
 <body>
-  <div class="wrap">
-    <div class="card" id="card">
-      <div class="colorBar" id="colorBar"></div>
+  <div class="card mode-egrey" id="card">
+    <div class="topbar"></div>
 
-      <div class="head">
-        <div class="boxId" id="boxId">E000</div>
-        <div class="status" id="status">Gespeichert ✓</div>
+    <h1 id="boxId">E001</h1>
+    <div class="status" id="status">Gespeichert ✓</div>
+
+    <!-- Zeile 1: ORT + Bezeichnung (wie E022) -->
+    <div class="rowFields">
+      <input id="ort" class="input" placeholder="ORT" maxlength="6" />
+      <input id="bez" class="input" placeholder="Bezeichnung" />
+    </div>
+
+    <!-- Zeile 2: 🍷 + 🏋️ + KG (wie E022) -->
+    <div class="rowIcons">
+      <div id="fragile" class="tile btn">🍷</div>
+      <div id="heavy" class="tile btn">🏋️</div>
+
+      <div id="kgTile" class="tile kgTile">
+        <input id="kg" inputmode="numeric" pattern="[0-9]*" maxlength="2" value="00" />
+        <span class="unit">kg</span>
       </div>
+    </div>
 
-      <div class="gridTop">
-        <input class="input" id="ort" maxlength="6" placeholder="ORT" />
-        <input class="input" id="bez" placeholder="Bezeichnung" />
-      </div>
+    <!-- Zeile 3: Farbe nur für E -->
+    <div class="colorRow" id="colorRow">
+      <div id="cBlack" class="colorBox black" title="Schwarz"></div>
+      <div id="cGrey" class="colorBox grey" title="Grau"></div>
+    </div>
 
-      <div class="row2">
-        <div class="chip fragile" id="fragile" title="Zerbrechlich">🍷</div>
-        <div class="chip danger" id="heavy" title="Schwer (ab 16 kg)">🏋️</div>
+    <!-- Zeile 4: Inhalt -->
+    <div class="contentWrap">
+      <textarea id="content" placeholder="• Inhalt hier eintragen..."></textarea>
+    </div>
 
-        <div class="weightWrap">
-          <input class="weightInput" id="kg" inputmode="numeric" pattern="[0-9]*" maxlength="2" placeholder="00" />
-          <div class="kg">kg</div>
-        </div>
-      </div>
-
-      <div class="colorRow" id="colorRow">
-        <div class="swatch grey" id="swGrey" title="Grau"></div>
-        <div class="swatch black" id="swBlack" title="Schwarz"></div>
-      </div>
-
-      <div class="content">
-        <textarea id="text" placeholder="• Inhalt hier eintragen..."></textarea>
-      </div>
-
-      <div class="btnRow">
-        <button class="btn" id="btnBackup">Backup nach iCloud</button>
-        <button class="btn" id="btnImport">Backup importieren</button>
-      </div>
-
-      <div class="hint">iPhone: Backup → Teilen → „In Dateien sichern“ → iCloud Drive</div>
+    <!-- Unten: Buttons -->
+    <div class="btnRow">
+      <button id="backupBtn">Backup nach iCloud</button>
+      <button id="importBtn">Backup importieren</button>
     </div>
   </div>
 
 <script>
-(() => {
-  const STORAGE_KEY = "eurobox_data_v1";
+/* ---------------- Helpers ---------------- */
+const $ = (id)=>document.getElementById(id);
+const statusEl = $("status");
+const card = $("card");
 
-  const $ = (id) => document.getElementById(id);
+const params = new URLSearchParams(location.search);
+const boxId = (params.get("box") || "E001").toUpperCase();
+$("boxId").textContent = boxId;
 
-  const elBoxId = $("boxId");
-  const elStatus = $("status");
-  const elOrt = $("ort");
-  const elBez = $("bez");
-  const elFragile = $("fragile");
-  const elHeavy = $("heavy");
-  const elKg = $("kg");
-  const elText = $("text");
-  const elSwGrey = $("swGrey");
-  const elSwBlack = $("swBlack");
-  const elColorRow = $("colorRow");
-  const elColorBar = $("colorBar");
+function setStatusSaving(){ statusEl.textContent = "Speichert…"; }
+function setStatusSaved(){ statusEl.textContent = "Gespeichert ✓"; }
+let saveTimer = null;
 
-  const btnBackup = $("btnBackup");
-  const btnImport = $("btnImport");
+function getStore(){
+  try { return JSON.parse(localStorage.getItem("euroboxen") || "{}"); }
+  catch { return {}; }
+}
+function setStore(obj){
+  localStorage.setItem("euroboxen", JSON.stringify(obj));
+}
 
-  // --- BoxId aus URL ---
-  const params = new URLSearchParams(location.search);
-  const rawId = (params.get("box") || "E000").toUpperCase().trim();
-  const boxId = /^[EK]\d{3}$/.test(rawId) ? rawId : "E000";
-  elBoxId.textContent = boxId;
-  document.title = boxId;
+/* ---------------- Mode by prefix ---------------- */
+const colorRow = $("colorRow");
 
-  // --- Daten laden/speichern ---
-  function loadAll(){
-    try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}"); }
-    catch { return {}; }
+function applyMode(mode){
+  card.className = "card " + mode;
+}
+function hideColorPick(){ colorRow.style.display="none"; }
+function showColorPick(){ colorRow.style.display="flex"; }
+
+if (boxId.startsWith("K")) { applyMode("mode-k"); hideColorPick(); }
+else if (boxId.startsWith("T")) { applyMode("mode-t"); hideColorPick(); }
+else { applyMode("mode-egrey"); showColorPick(); }
+
+/* ---------------- Load current box ---------------- */
+function loadBox(){
+  const db = getStore();
+  const v = db[boxId] || {};
+
+  $("ort").value = v.ort || "";
+  $("bez").value = v.bez || "";
+  $("content").value = v.content || "";
+
+  // fragile
+  $("fragile").classList.toggle("active", !!v.fragile);
+
+  // kg
+  $("kg").value = (v.kg ?? "00").toString();
+  normalizeKg(false);
+
+  // Eurobox color choice (nur E)
+  if (!boxId.startsWith("K") && !boxId.startsWith("T")){
+    const col = v.color || "grey";
+    setEuroColor(col, false);
   }
-  function saveAll(all){
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
+
+  setStatusSaved();
+}
+loadBox();
+
+/* ---------------- Save current box ---------------- */
+function saveBox(){
+  const db = getStore();
+  db[boxId] = db[boxId] || {};
+
+  db[boxId].ort = $("ort").value.trim();
+  db[boxId].bez = $("bez").value.trim();
+  db[boxId].content = $("content").value;
+
+  db[boxId].fragile = $("fragile").classList.contains("active");
+  db[boxId].kg = $("kg").value;
+
+  if (!boxId.startsWith("K") && !boxId.startsWith("T")){
+    db[boxId].color = (card.classList.contains("mode-eblack") ? "black" : "grey");
   }
 
-  function nowISO(){
-    return new Date().toISOString();
+  setStore(db);
+}
+
+function scheduleSave(){
+  setStatusSaving();
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(()=>{
+    saveBox();
+    setStatusSaved();
+  }, 250);
+}
+
+/* ---------------- Euro color selection (only E*) ---------------- */
+function setEuroColor(color, doSave=true){
+  if (boxId.startsWith("K") || boxId.startsWith("T")) return;
+
+  $("cBlack").classList.toggle("active", color==="black");
+  $("cGrey").classList.toggle("active", color==="grey");
+  applyMode(color==="black" ? "mode-eblack" : "mode-egrey");
+
+  if (doSave) scheduleSave();
+}
+$("cBlack").addEventListener("click", ()=>setEuroColor("black"));
+$("cGrey").addEventListener("click", ()=>setEuroColor("grey"));
+
+/* ---------------- Icon toggles ---------------- */
+$("fragile").addEventListener("click",(e)=>{
+  e.preventDefault(); e.stopPropagation();
+  $("fragile").classList.toggle("active");
+  scheduleSave();
+});
+
+/* Heavy automatisch ab 16 kg */
+function setHeavyAuto(on){
+  $("heavy").classList.toggle("active", on);
+}
+
+/* ---------------- KG: iOS-freundlich, 2-stellig ---------------- */
+const kgInput = $("kg");
+const kgTile = $("kgTile");
+
+function selectAllKg(){
+  setTimeout(()=>{
+    kgInput.focus({preventScroll:true});
+    try { kgInput.setSelectionRange(0, kgInput.value.length); } catch {}
+  }, 0);
+}
+
+kgTile.addEventListener("click",(e)=>{
+  e.preventDefault(); e.stopPropagation();
+  selectAllKg();
+});
+
+kgInput.addEventListener("focus", ()=>{
+  selectAllKg();
+});
+
+kgInput.addEventListener("input", ()=>{
+  // beim Tippen nur reinigen, NICHT auffüllen (sonst “nur einstellig”)
+  kgInput.value = kgInput.value.replace(/\D/g,"").slice(0,2);
+  const v = parseInt(kgInput.value || "0", 10);
+  setHeavyAuto(v >= 16);
+  scheduleSave();
+});
+
+kgInput.addEventListener("blur", ()=>{
+  normalizeKg(true);
+  scheduleSave();
+});
+
+function normalizeKg(setSaved){
+  let s = (kgInput.value || "").replace(/\D/g,"").slice(0,2);
+  if (s.length===0) s="00";
+  if (s.length===1) s="0"+s;      // erst beim Verlassen auffüllen
+  kgInput.value = s;
+  const v = parseInt(s,10) || 0;
+  setHeavyAuto(v >= 16);
+  if(setSaved) setStatusSaved();
+}
+
+/* ---------------- Content bullets ---------------- */
+const content = $("content");
+
+content.addEventListener("focus", ()=>{
+  if (content.value.trim()===""){
+    content.value = "• ";
+    setTimeout(()=>content.setSelectionRange(content.value.length, content.value.length), 0);
+  }
+});
+
+content.addEventListener("keydown", (e)=>{
+  if(e.key==="Backspace"){
+    const pos = content.selectionStart;
+    const before = content.value.slice(0,pos);
+    const lineStart = before.lastIndexOf("\n")+1;
+    const line = before.slice(lineStart);
+    if(line === "• "){
+      e.preventDefault();
+      const after = content.value.slice(pos);
+      content.value = content.value.slice(0,lineStart) + after;
+      content.setSelectionRange(lineStart,lineStart);
+      scheduleSave();
+    }
+  }
+  if(e.key==="Enter"){
+    e.preventDefault();
+    const pos = content.selectionStart;
+    const left = content.value.slice(0,pos);
+    const right = content.value.slice(pos);
+    content.value = left + "\n• " + right;
+    const np = pos + 3;
+    content.setSelectionRange(np,np);
+    scheduleSave();
+  }
+});
+
+/* ---------------- Generic autosave for inputs ---------------- */
+["ort","bez"].forEach(id=>{
+  $(id).addEventListener("input", scheduleSave);
+});
+content.addEventListener("input", scheduleSave);
+
+/* ---------------- Backup / Import ---------------- */
+$("backupBtn").addEventListener("click", async ()=>{
+  const data = getStore();
+  const blob = new Blob([JSON.stringify(data,null,2)], {type:"application/json"});
+  const file = new File([blob], "euroboxen.json", {type:"application/json"});
+
+  if (navigator.canShare && navigator.canShare({files:[file]})) {
+    try { await navigator.share({files:[file], title:"Euroboxen Backup"}); return; }
+    catch {}
   }
 
-  function defaultColorFor(boxId){
-    if (boxId.startsWith("K")) return "karton";
-    return "grey"; // default Eurobox
-  }
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "euroboxen.json";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+});
 
-  function colorToHex(color){
-    if (color === "black") return "#000000";
-    if (color === "karton") return "#ADAC62";
-    return "#C0C0C0";
-  }
+$("importBtn").addEventListener("click", ()=>{
+  const inp = document.createElement("input");
+  inp.type="file";
+  inp.accept="application/json";
+  inp.onchange = async ()=>{
+    const f = inp.files?.[0];
+    if(!f) return;
+    const txt = await f.text();
+    let incoming = {};
+    try { incoming = JSON.parse(txt); } catch { return; }
 
-  let all = loadAll();
-  let item = all[boxId] || {
-    id: boxId,
-    ort: "",
-    bez: "",
-    text: "",
-    fragile: false,
-    weight: 0,
-    color: defaultColorFor(boxId),
-    updatedAt: nowISO()
+    const db = getStore();
+    for(const k of Object.keys(incoming)){
+      db[k] = incoming[k];
+    }
+    setStore(db);
+    loadBox();
   };
-
-  // Wenn K -> automatisch Kartonfarbe erzwingen
-  if (boxId.startsWith("K")) item.color = "karton";
-  if (!item.color) item.color = defaultColorFor(boxId);
-
-  // --- UI render ---
-  function setSaving(saving){
-    if (saving){
-      elStatus.textContent = "Speichern…";
-      elStatus.classList.add("saving");
-    } else {
-      elStatus.textContent = "Gespeichert ✓";
-      elStatus.classList.remove("saving");
-    }
-  }
-
-  function renderColorUI(){
-    const isK = boxId.startsWith("K");
-
-    // Farbleiste oben (immer anzeigen, aber dezent)
-    elColorBar.style.display = "block";
-    elColorBar.style.background = colorToHex(item.color);
-
-    // Für Kartons: Farbauswahl ausblenden
-    if (isK){
-      elColorRow.classList.add("hidden");
-      return;
-    }
-
-    elColorRow.classList.remove("hidden");
-    elSwGrey.classList.toggle("active", item.color === "grey");
-    elSwBlack.classList.toggle("active", item.color === "black");
-  }
-
-  function renderHeavyByWeight(){
-    const w = Number(item.weight || 0);
-    const isHeavy = w >= 16;               // ✅ erst ab 16kg
-    elHeavy.classList.toggle("active", isHeavy);
-  }
-
-  function render(){
-    elOrt.value = item.ort || "";
-    elBez.value = item.bez || "";
-    elText.value = item.text || "";
-    elFragile.classList.toggle("active", !!item.fragile);
-
-    // Weight
-    const w = Number(item.weight || 0);
-    elKg.value = (w ? String(w) : "");
-    renderHeavyByWeight();
-    renderColorUI();
-  }
-
-  // --- Autosave (debounce) ---
-  let t = null;
-  function scheduleSave(){
-    setSaving(true);
-    clearTimeout(t);
-    t = setTimeout(() => {
-      item.updatedAt = nowISO();
-      all[boxId] = item;
-      saveAll(all);
-      setSaving(false);
-    }, 250);
-  }
-
-  // --- Bullets im Textfeld ---
-  function normalizeBullets(text){
-    const lines = text.replace(/\r/g, "").split("\n");
-    const out = lines.map(line => {
-      const trimmed = line.replace(/^\s+/, "");
-      if (trimmed === "") return "";
-      if (trimmed.startsWith("• ")) return "• " + trimmed.slice(2);
-      if (trimmed.startsWith("•")) return "• " + trimmed.slice(1).trimStart();
-      return "• " + trimmed;
-    });
-    return out.join("\n");
-  }
-
-  function caretPos(el){
-    return { start: el.selectionStart, end: el.selectionEnd };
-  }
-
-  function setCaret(el, pos){
-    el.setSelectionRange(pos, pos);
-  }
-
-  elText.addEventListener("keydown", (e) => {
-    // Backspace am Zeilenanfang: Bullet entfernen
-    if (e.key === "Backspace"){
-      const { start, end } = caretPos(elText);
-      if (start !== end) return;
-
-      const value = elText.value;
-      const before = value.slice(0, start);
-      const lineStart = before.lastIndexOf("\n") + 1;
-      const at = start - lineStart;
-      const linePrefix = value.slice(lineStart, lineStart + 2);
-
-      // Cursor direkt nach "• " ?
-      if (at === 2 && linePrefix === "• "){
-        e.preventDefault();
-        elText.value = value.slice(0, lineStart) + value.slice(lineStart + 2);
-        setCaret(elText, start - 2);
-        item.text = normalizeBullets(elText.value);
-        scheduleSave();
-      }
-    }
-  });
-
-  elText.addEventListener("input", () => {
-    const pos = caretPos(elText).start;
-    const oldLen = elText.value.length;
-
-    const normalized = normalizeBullets(elText.value);
-    elText.value = normalized;
-
-    // caret ungefähr erhalten
-    const newLen = elText.value.length;
-    const delta = newLen - oldLen;
-    setCaret(elText, Math.max(0, pos + delta));
-
-    item.text = elText.value;
-    scheduleSave();
-  });
-
-  // --- Inputs ---
-  elOrt.addEventListener("input", () => {
-    item.ort = (elOrt.value || "").toUpperCase().slice(0,6);
-    elOrt.value = item.ort;
-    scheduleSave();
-  });
-
-  elBez.addEventListener("input", () => {
-    item.bez = (elBez.value || "");
-    scheduleSave();
-  });
-
-  elFragile.addEventListener("click", () => {
-    item.fragile = !item.fragile;
-    elFragile.classList.toggle("active", !!item.fragile);
-    scheduleSave();
-  });
-
-  // Heavy wird NICHT mehr manuell getoggelt – nur über Gewicht (ab 16kg)
-  elHeavy.addEventListener("click", () => {
-    // optional: kurzer Hinweis via „blink“
-    elHeavy.style.transform = "scale(.98)";
-    setTimeout(()=> elHeavy.style.transform = "", 80);
-  });
-
-  elKg.addEventListener("input", () => {
-    // max 2 Ziffern
-    let v = (elKg.value || "").replace(/\D/g, "").slice(0,2);
-    elKg.value = v;
-    item.weight = v ? Number(v) : 0;
-    renderHeavyByWeight();
-    scheduleSave();
-  });
-
-  // Eurobox-Farben
-  elSwGrey.addEventListener("click", () => {
-    if (boxId.startsWith("K")) return;
-    item.color = "grey";
-    renderColorUI();
-    scheduleSave();
-  });
-  elSwBlack.addEventListener("click", () => {
-    if (boxId.startsWith("K")) return;
-    item.color = "black";
-    renderColorUI();
-    scheduleSave();
-  });
-
-  // --- Backup Export (iCloud via Teilen/Download) ---
-  function buildBackup(){
-    // neu laden, damit wir sicher alles drin haben
-    const fresh = loadAll();
-    return {
-      version: 1,
-      exportedAt: nowISO(),
-      data: fresh
-    };
-  }
-
-  async function shareOrDownload(filename, blob){
-    // iOS: Web Share, sonst Download
-    if (navigator.canShare && navigator.canShare({ files: [new File([blob], filename, { type: blob.type })] })){
-      try{
-        await navigator.share({ files: [new File([blob], filename, { type: blob.type })], title: filename });
-        return;
-      }catch(e){ /* fallback */ }
-    }
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    setTimeout(()=>URL.revokeObjectURL(url), 2000);
-  }
-
-  btnBackup.addEventListener("click", async () => {
-    const backup = buildBackup();
-    const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
-    const name = `Euroboxen_Backup_${new Date().toISOString().slice(0,10)}.json`;
-    await shareOrDownload(name, blob);
-  });
-
-  // --- Backup Import ---
-  btnImport.addEventListener("click", () => {
-    const inp = document.createElement("input");
-    inp.type = "file";
-    inp.accept = ".json,application/json";
-    inp.addEventListener("change", async () => {
-      const file = inp.files && inp.files[0];
-      if (!file) return;
-      const txt = await file.text();
-      let parsed;
-      try { parsed = JSON.parse(txt); }
-      catch { alert("Ungültige JSON-Datei."); return; }
-
-      const incoming = parsed && parsed.data && typeof parsed.data === "object" ? parsed.data : null;
-      if (!incoming){ alert("Backup-Format nicht erkannt."); return; }
-
-      // Merge: incoming überschreibt
-      const current = loadAll();
-      const merged = { ...current, ...incoming };
-      saveAll(merged);
-      all = merged;
-
-      // aktuelles Item neu laden
-      item = all[boxId] || item;
-      if (boxId.startsWith("K")) item.color = "karton";
-      render();
-      setSaving(false);
-      alert("Backup importiert ✓");
-    });
-    inp.click();
-  });
-
-  // init
-  render();
-  setSaving(false);
-
-  // falls text leer -> placeholder bullet sichtbar lassen
-  if (!elText.value.trim()) elText.value = "";
-})();
+  inp.click();
+});
 </script>
 </body>
 </html>
