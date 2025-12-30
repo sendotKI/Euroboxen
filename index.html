@@ -60,8 +60,6 @@ body {
   margin-top: 16px;
 }
 
-}
-
 /* Felder */
 .field {
   padding: 10px 14px;
@@ -100,10 +98,16 @@ body {
   background: rgba(255, 80, 80, 0.25);
 }
 
-/* 💪/🏋️ rot leuchten (Heavy) */
-.icon.heavy-active{
-  box-shadow: 0 0 0 2px #ff3b3b, 0 0 10px rgba(255,59,59,0.7);
-  background: rgba(255, 80, 80, 0.25);
+/* Heavy GELB (ab 16kg oder manuell an) */
+.icon.heavy-yellow{
+  box-shadow: 0 0 0 2px #f4c430, 0 0 10px rgba(244,196,48,0.75);
+  background: rgba(244,196,48,0.25);
+}
+
+/* Heavy ROT (ab 26kg) */
+.icon.heavy-red{
+  box-shadow: 0 0 0 2px #ff3b3b, 0 0 10px rgba(255,59,59,0.75);
+  background: rgba(255,59,59,0.25);
 }
 
 /* KG */
@@ -273,9 +277,14 @@ let heavyManual = false;
 function refreshHeavy(){
   heavy.classList.remove("heavy-yellow","heavy-red");
 
+  // Manual an -> mindestens gelb (außer ab 26 rot)
+  const shouldShow = (weight >= 16) || heavyManual;
+
+  if (!shouldShow) return;
+
   if (weight >= 26) {
     heavy.classList.add("heavy-red");
-  } else if (weight >= 16) {
+  } else {
     heavy.classList.add("heavy-yellow");
   }
 }
