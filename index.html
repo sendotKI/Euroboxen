@@ -1,244 +1,217 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Eurobox</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Box</title>
 
 <style>
-:root{
-  --bg-dark:#0b1220;
-  --card:#3f4654;
-  --border:rgba(0,0,0,.25);
+:root {
+  --card-bg: #ADAC62;
+  --text: #000;
+  --field: rgba(255,255,255,0.35);
+  --border: rgba(0,0,0,0.25);
 }
 
-body{
-  margin:0;
-  background:linear-gradient(#08101f,#000);
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
-  display:flex;
-  justify-content:center;
-  padding:16px;
+body {
+  margin: 0;
+  background: radial-gradient(#0c1630, #050a16);
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
-.card{
-  width:100%;
-  max-width:420px;
-  border-radius:28px;
-  padding:18px;
-  box-sizing:border-box;
-  transition:background .2s;
+.card {
+  max-width: 420px;
+  margin: 20px auto;
+  padding: 18px;
+  border-radius: 28px;
+  background: var(--card-bg);
+  color: var(--text);
 }
 
-.topbar{
-  height:8px;
-  border-radius:8px;
-  opacity:.35;
-  margin-bottom:10px;
+.header {
+  text-align: center;
 }
 
-h1{
-  margin:6px 0 0;
-  text-align:center;
-  font-size:28px;
-  font-weight:700;
-  color:#000;
+.header h1 {
+  margin: 8px 0 2px;
+  font-size: 34px;
 }
 
-.status{
-  text-align:center;
-  font-weight:600;
-  color:#c81e1e;
-  margin-bottom:14px;
+.saved {
+  font-size: 16px;
+  font-weight: 600;
 }
 
-.row{
-  display:flex;
-  gap:10px;
-  margin-bottom:12px;
+.saved.green { color: #00c26a; }
+.saved.red { color: #ff4b4b; }
+
+.row {
+  display: flex;
+  gap: 12px;
+  margin-top: 14px;
 }
 
-input, .pill, textarea{
-  background:rgba(255,255,255,.35);
-  border:2px solid var(--border);
-  border-radius:16px;
-  padding:12px;
-  font-size:16px;
-  box-sizing:border-box;
-  color:#000;
+.field {
+  flex: 1;
+  padding: 14px;
+  border-radius: 16px;
+  background: var(--field);
+  border: 1px solid var(--border);
+  font-size: 16px;
 }
 
-input{flex:1}
-
-.ort{max-width:110px}
-
-.bez{flex:1}
-
-.icon{
-  width:54px;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  font-size:22px;
-  cursor:pointer;
+.icon {
+  width: 58px;
+  height: 58px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
 }
 
-.icon.active{
-  outline:3px solid #2ecc71;
+.kg {
+  flex: 1;
+  font-size: 28px;
+  font-weight: 700;
+  text-align: center;
 }
 
-.weight{
-  display:flex;
-  align-items:center;
-  gap:8px;
-  flex:1;
-  cursor:text;
+.colors {
+  display: flex;
+  gap: 10px;
+  margin: 14px 0;
 }
 
-.weight input{
-  width:60px;
-  text-align:right;
-  font-weight:700;
-  font-size:18px;
-  border:none;
-  background:transparent;
-  outline:none;
+.color {
+  width: 42px;
+  height: 32px;
+  border-radius: 10px;
+  border: 2px solid transparent;
 }
 
-textarea{
-  width:100%;
-  height:180px;
-  resize:none;
-  margin-top:14px;
-  line-height:1.5;
+.color.active {
+  border-color: #00d26a;
 }
 
-.buttons{
-  display:flex;
-  gap:12px;
-  margin-top:18px;
+.textarea {
+  margin-top: 18px;
+  padding: 16px;
+  min-height: 160px;
+  border-radius: 18px;
+  background: var(--field);
+  border: 1px solid var(--border);
+  font-size: 16px;
 }
 
-button{
-  flex:1;
-  border:none;
-  border-radius:18px;
-  padding:14px;
-  font-size:16px;
-  font-weight:600;
-  background:#243a5e;
-  color:#fff;
+.buttons {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
 }
 
-.colorRow{
-  display:flex;
-  gap:10px;
-  margin-top:6px;
-}
-
-.colorBtn{
-  width:44px;
-  height:30px;
-  border-radius:10px;
-  border:2px solid #0003;
-}
-
-.colorBtn.active{
-  outline:3px solid #2ecc71;
+button {
+  flex: 1;
+  padding: 14px;
+  border-radius: 18px;
+  border: none;
+  background: #223a66;
+  color: #fff;
+  font-size: 16px;
 }
 </style>
 </head>
 
 <body>
+
 <div class="card" id="card">
-  <div class="topbar" id="topbar"></div>
 
-  <h1 id="boxId"></h1>
-  <div class="status">Gespeichert ✓</div>
-
-  <div class="row">
-    <input class="ort" placeholder="ORT" id="ort">
-    <input class="bez" placeholder="Bezeichnung" id="bez">
-    <div class="icon" id="fragile">🍷</div>
+  <div class="header">
+    <h1 id="boxId">K017</h1>
+    <div id="saved" class="saved green">Gespeichert ✓</div>
   </div>
 
   <div class="row">
-    <div class="icon" id="heavy">💪</div>
-    <div class="weight">
-      <input id="kg" maxlength="2" inputmode="numeric"> kg
-    </div>
+    <input class="field" placeholder="ORT">
   </div>
 
-  <!-- Farbauswahl NUR für E -->
-  <div class="colorRow" id="colorRow">
-    <div class="colorBtn" id="grey" style="background:#C0C0C0"></div>
-    <div class="colorBtn" id="black" style="background:#000"></div>
+  <div class="row">
+    <input class="field" placeholder="Bezeichnung">
+    <div class="field icon" id="fragile">🍷</div>
   </div>
 
-  <textarea id="content" placeholder="• Inhalt hier eintragen…"></textarea>
+  <div class="row">
+    <div class="field icon" id="heavy">💪</div>
+    <div class="field kg" id="kg">00 kg</div>
+  </div>
+
+  <div class="colors" id="colors">
+    <div class="color active" data-color="#6c707a" style="background:#6c707a"></div>
+    <div class="color" data-color="#000" style="background:#000"></div>
+  </div>
+
+  <div class="textarea" contenteditable="true">• Inhalt hier eintragen...</div>
 
   <div class="buttons">
     <button>Backup nach iCloud</button>
     <button>Backup importieren</button>
   </div>
+
 </div>
 
 <script>
-const params = new URLSearchParams(location.search);
-const id = params.get("box") || "E001";
-boxId.textContent = id;
+const boxId = new URLSearchParams(location.search).get("box") || "K017";
+document.getElementById("boxId").textContent = boxId;
 
 const card = document.getElementById("card");
-const topbar = document.getElementById("topbar");
-const colorRow = document.getElementById("colorRow");
+const saved = document.getElementById("saved");
 
-function applyColor(type){
-  if(type==="K"){
-    card.style.background="#ADAC62";
-    topbar.style.background="#ADAC62";
-    colorRow.style.display="none";
-  }else if(type==="T"){
-    card.style.background="#9FFCFD";
-    topbar.style.background="#9FFCFD";
-    colorRow.style.display="none";
-  }else{
-    setGrey();
-    colorRow.style.display="flex";
+function applyBoxType() {
+  if (boxId.startsWith("K")) {
+    card.style.background = "#ADAC62";
+    document.getElementById("colors").style.display = "none";
+    saved.className = "saved green";
+  }
+  if (boxId.startsWith("T")) {
+    card.style.background = "#9FFCFD";
+    document.getElementById("colors").style.display = "none";
+    saved.className = "saved green";
+  }
+  if (boxId.startsWith("E")) {
+    card.style.background = "#6c707a";
+    saved.className = "saved green";
   }
 }
+applyBoxType();
 
-function setGrey(){
-  card.style.background="#3f4654";
-  topbar.style.background="#3f4654";
-  grey.classList.add("active");
-  black.classList.remove("active");
-}
-function setBlack(){
-  card.style.background="#000";
-  topbar.style.background="#000";
-  black.classList.add("active");
-  grey.classList.remove("active");
-}
-
-grey.onclick=setGrey;
-black.onclick=setBlack;
-
-applyColor(id[0]);
-
-fragile.onclick=()=>fragile.classList.toggle("active");
-heavy.onclick=()=>heavy.classList.toggle("active");
-
-kg.addEventListener("input",()=>{
-  const v=parseInt(kg.value||0);
-  heavy.classList.toggle("active",v>=16);
-});
-
-content.addEventListener("keydown",e=>{
-  if(e.key==="Enter"){
-    e.preventDefault();
-    document.execCommand("insertText",false,"\n• ");
+/* Farben */
+document.querySelectorAll(".color").forEach(c => {
+  c.onclick = () => {
+    document.querySelectorAll(".color").forEach(x=>x.classList.remove("active"));
+    c.classList.add("active");
+    card.style.background = c.dataset.color;
+    if (c.dataset.color === "#000") {
+      card.style.color = "#fff";
+      saved.className = "saved red";
+    } else {
+      card.style.color = "#000";
+      saved.className = "saved green";
+    }
   }
 });
+
+/* Gewicht */
+let weight = 0;
+document.getElementById("kg").onclick = () => {
+  weight = (weight + 1) % 100;
+  document.getElementById("kg").textContent = String(weight).padStart(2,"0") + " kg";
+  document.getElementById("heavy").style.opacity = weight >= 16 ? "1" : "0.4";
+};
+
+document.getElementById("heavy").onclick = () => {
+  document.getElementById("heavy").style.opacity =
+    document.getElementById("heavy").style.opacity === "1" ? "0.4" : "1";
+};
 </script>
+
 </body>
 </html>
