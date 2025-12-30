@@ -9,11 +9,9 @@
     :root{
       --page:#071225;
 
-      /* E Farben */
       --eGrey:#2b3447;
       --eBlack:#000000;
 
-      /* K / T */
       --kCard:#ADAC62;
       --tCard:#9FFCFD;
 
@@ -56,16 +54,16 @@
     .topbar{
       height:10px;
       width:92%;
-      margin:4px auto 12px;
+      margin:4px auto 10px;
       border-radius:999px;
       background:rgba(255,255,255,.10);
     }
 
-    /* Überschrift kleiner (wie du willst) */
+    /* ===== Titel kleiner ===== */
     .title{
       margin:0;
       text-align:center;
-      font-size:44px;       /* <-- kleiner */
+      font-size:40px;          /* vorher 44 */
       font-weight:900;
       letter-spacing:1px;
       line-height:1.0;
@@ -73,69 +71,65 @@
     .status{
       margin-top:6px;
       text-align:center;
-      font-size:22px;
+      font-size:20px;
       font-weight:900;
       color:var(--ok);
     }
 
-    /* ===== Layout exakt wie E022 =====
-       1) Zeile: ORT | Bezeichnung
-       2) Zeile: 🍷 | 🏋️ | KG
-       3) Zeile (nur E): Farbauswahl
-       4) Inhalt
-    */
+    /* ===== Zeilen ===== */
     .row2{
       display:flex;
-      gap:14px;
-      margin-top:16px;
+      gap:12px;                /* etwas enger */
+      margin-top:14px;
       width:100%;
     }
     .row2 > *{
       flex:1;
-      min-width:0; /* verhindert Overflow */
+      min-width:0;
     }
 
     .rowIcons{
       display:flex;
-      gap:14px;
-      margin-top:14px;
+      gap:12px;                /* etwas enger */
+      margin-top:12px;
       width:100%;
       align-items:stretch;
     }
-    .rowIcons .iconTile{
-      width:74px;
-      flex:0 0 74px;
-    }
-    .rowIcons .kgTile{
-      flex:1;
-      min-width:0;
-    }
 
+    /* ===== Inputs ===== */
     .input{
-      height:62px;
+      height:58px;             /* etwas kleiner */
       border-radius:var(--tileRadius);
       border:2px solid var(--stroke);
       background:var(--tileBg);
       color:var(--text);
       font-size:22px;
-      padding:0 16px;
+      font-weight:800;
+      padding:0 14px;
       outline:none;
       width:100%;
+      min-width:0;
     }
     .input::placeholder{
       color:rgba(233,238,247,.45);
-      font-weight:800;
+      font-weight:900;
     }
 
+    /* Wichtig: Text darf nicht "komisch" abgeschnitten wirken */
+    #bez{
+      font-size:21px;          /* minimal kleiner -> mehr Zeichen sichtbar */
+      letter-spacing:.2px;
+    }
+
+    /* ===== Tiles ===== */
     .tile{
-      height:72px;
+      height:68px;             /* vorher 72 -> kompakter wie E022 */
       border-radius:var(--tileRadius);
       border:2px solid var(--stroke);
       background:var(--tileBg);
       display:flex;
       align-items:center;
       justify-content:center;
-      font-size:30px;
       user-select:none;
       -webkit-tap-highlight-color: transparent;
       width:100%;
@@ -145,10 +139,18 @@
     .tile.active.fragile{ box-shadow:0 0 0 4px var(--glowGreen); }
     .tile.active.heavy{ box-shadow:0 0 0 4px var(--glowRed); }
 
-    /* KG Tile: groß, komfortabel */
+    .iconTile{
+      width:70px;
+      flex:0 0 70px;           /* vorher 74 */
+      font-size:30px;
+    }
+
+    /* ===== KG Tile (schlanker & schöner) ===== */
     .kgTile{
+      flex:1;
+      min-width:0;
       justify-content:center;
-      gap:12px;
+      gap:10px;
       padding:0 14px;
       cursor:text;
     }
@@ -159,30 +161,30 @@
       outline:none;
       background:transparent;
       color:var(--text);
-      font-size:40px;
+      font-size:38px;          /* etwas kleiner */
       font-weight:900;
       letter-spacing:1px;
-      text-align:center;
+      text-align:right;        /* wirkt wie im Beispiel: Zahl rechts „sauber“ */
       padding:0;
     }
     .kgTile .unit{
-      font-size:32px;
+      font-size:28px;          /* kg nicht riesig */
       font-weight:900;
       opacity:.92;
       white-space:nowrap;
     }
 
-    /* Farbauswahl (nur E) – klein und hübsch */
+    /* Farbauswahl nur E */
     .colorRow{
       display:flex;
-      gap:14px;
-      margin-top:12px;
-      margin-bottom:16px; /* Abstand zum Inhaltsfeld */
+      gap:12px;
+      margin-top:10px;
+      margin-bottom:16px;      /* Abstand zum Inhaltsfeld */
       align-items:center;
     }
     .colorBox{
-      width:34px;
-      height:34px;
+      width:30px;
+      height:30px;
       border-radius:10px;
       border:2px solid var(--stroke);
       cursor:pointer;
@@ -193,12 +195,13 @@
     .colorBox.grey{ background:#c0c0c0; }
     .colorBox.active{ box-shadow:0 0 0 4px var(--glowGreen); }
 
+    /* ===== Inhalt ===== */
     .contentWrap{
       border-radius:22px;
       border:2px solid var(--stroke);
       background:var(--tileBg);
       padding:12px;
-      margin-top:10px; /* Abstand zur Icon-Zeile */
+      margin-top:14px;         /* Abstand zur Icon-Zeile (wieder sichtbar) */
     }
     textarea{
       width:100%;
@@ -212,9 +215,10 @@
     }
     textarea::placeholder{
       color:rgba(233,238,247,.45);
-      font-weight:800;
+      font-weight:900;
     }
 
+    /* ===== Buttons ===== */
     .btnRow{
       display:flex;
       gap:14px;
@@ -255,13 +259,15 @@
       color:rgba(0,0,0,.35);
     }
 
-    /* iPhone klein: alles leicht reduzieren */
+    /* iPhone klein */
     @media (max-width: 380px){
-      .title{ font-size:40px; }
-      .rowIcons .iconTile{ width:68px; flex-basis:68px; }
-      .tile{ height:68px; }
+      .title{ font-size:36px; }
+      .status{ font-size:18px; }
+      .input{ height:56px; }
+      .iconTile{ width:66px; flex-basis:66px; }
+      .tile{ height:66px; }
       .kgTile input{ font-size:36px; }
-      .kgTile .unit{ font-size:28px; }
+      .kgTile .unit{ font-size:26px; }
     }
   </style>
 </head>
@@ -273,13 +279,11 @@
     <h1 class="title" id="boxId">E001</h1>
     <div class="status" id="status">Gespeichert ✓</div>
 
-    <!-- Zeile 1 -->
     <div class="row2">
       <input id="ort" class="input" placeholder="ORT" maxlength="6" />
       <input id="bez" class="input" placeholder="Bezeichnung" />
     </div>
 
-    <!-- Zeile 2 -->
     <div class="rowIcons">
       <div id="fragile" class="tile btn iconTile fragile" title="Zerbrechlich">🍷</div>
       <div id="heavy" class="tile btn iconTile heavy" title="Heavy">🏋️</div>
@@ -290,18 +294,15 @@
       </div>
     </div>
 
-    <!-- Zeile 3 (nur E) -->
     <div class="colorRow" id="colorRow">
       <div id="cGrey" class="colorBox grey" title="Grau"></div>
       <div id="cBlack" class="colorBox black" title="Schwarz"></div>
     </div>
 
-    <!-- Inhalt -->
     <div class="contentWrap">
       <textarea id="content" placeholder="• Inhalt hier eintragen..."></textarea>
     </div>
 
-    <!-- Buttons -->
     <div class="btnRow">
       <button id="backupBtn">Backup nach iCloud</button>
       <button id="importBtn">Backup importieren</button>
@@ -358,7 +359,6 @@
       applyMode("mode-t");
       colorRow.style.display = "none";
     } else {
-      // E: default grau
       applyMode("mode-egrey");
       colorRow.style.display = "flex";
     }
@@ -378,9 +378,6 @@
   $("cGrey").addEventListener("click", ()=>setEuroColor("grey"));
   $("cBlack").addEventListener("click", ()=>setEuroColor("black"));
 
-  // Heavy-Logik:
-  // - automatisch an ab 16kg
-  // - zusätzlich manuell klickbar (merkt sich "heavyManual")
   function computeHeavyActive(kg, heavyManual){
     return (kg >= 16) || !!heavyManual;
   }
@@ -402,7 +399,6 @@
 
     fragileBtn.classList.toggle("active", !!v.fragile);
 
-    // kg
     kgInput.value = (v.kg ?? "00").toString().replace(/\D/g,"").slice(0,2) || "00";
     normalizeKgOnBlur();
 
@@ -410,7 +406,6 @@
     const heavyActive = computeHeavyActive(kg, v.heavyManual);
     heavyBtn.classList.toggle("active", heavyActive);
 
-    // E Farbe
     if (!boxId.startsWith("K") && !boxId.startsWith("T")){
       setEuroColor(v.color || "grey", false);
     }
@@ -430,8 +425,6 @@
     v.fragile = fragileBtn.classList.contains("active");
     v.kg = kgInput.value;
 
-    // heavyManual wird separat gepflegt
-    // E Farbe speichern
     if (!boxId.startsWith("K") && !boxId.startsWith("T")){
       v.color = card.classList.contains("mode-eblack") ? "black" : "grey";
     }
@@ -441,7 +434,6 @@
 
   loadBox();
 
-  // Klickbarkeit Icons
   fragileBtn.addEventListener("click",(e)=>{
     e.preventDefault(); e.stopPropagation();
     fragileBtn.classList.toggle("active");
@@ -460,7 +452,6 @@
     scheduleSave();
   });
 
-  // KG: komfortabel -> Klick auf die ganze Kachel fokussiert und markiert alles
   function focusKgAll(){
     kgInput.focus({preventScroll:true});
     try { kgInput.setSelectionRange(0, kgInput.value.length); } catch {}
@@ -474,11 +465,9 @@
   kgInput.addEventListener("focus", ()=>setTimeout(focusKgAll,0));
 
   kgInput.addEventListener("input", ()=>{
-    // NICHT automatisch auffüllen beim Tippen, sonst "nur eine Stelle"
     kgInput.value = (kgInput.value || "").replace(/\D/g,"").slice(0,2);
 
     const kg = parseInt(kgInput.value || "0", 10) || 0;
-
     const db = getStore();
     const manual = !!(db[boxId] && db[boxId].heavyManual);
     heavyBtn.classList.toggle("active", computeHeavyActive(kg, manual));
@@ -488,20 +477,16 @@
 
   kgInput.addEventListener("blur", ()=>{
     normalizeKgOnBlur();
-
     const kg = parseInt(kgInput.value, 10) || 0;
     const db = getStore();
     const manual = !!(db[boxId] && db[boxId].heavyManual);
     heavyBtn.classList.toggle("active", computeHeavyActive(kg, manual));
-
     scheduleSave();
   });
 
-  // Autosave Inputs
   $("ort").addEventListener("input", scheduleSave);
   $("bez").addEventListener("input", scheduleSave);
 
-  // Bullet-Textarea
   const content = $("content");
 
   content.addEventListener("focus", ()=>{
@@ -539,7 +524,6 @@
 
   content.addEventListener("input", scheduleSave);
 
-  // Backup / Import
   $("backupBtn").addEventListener("click", async ()=>{
     const data = getStore();
     const blob = new Blob([JSON.stringify(data,null,2)], {type:"application/json"});
