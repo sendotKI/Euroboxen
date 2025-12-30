@@ -67,17 +67,15 @@ body{
   margin:8px 0 18px;
 }
 
-/* 🔧 FIX 1: ORT + Bezeichnung */
 .grid{
   display:grid;
   grid-template-columns:110px 1fr;
   gap:12px;
 }
 
-/* 🔧 FIX 2: Icons + Gewicht */
 .pillRow{
   display:grid;
-  grid-template-columns:64px 64px 96px;
+  grid-template-columns:64px 64px 120px; /* ⬅️ kg-Kachel breiter */
   gap:12px;
   margin-top:14px;
 }
@@ -109,6 +107,8 @@ body{
   justify-content:center;
   font-size:28px;
   cursor:pointer;
+  user-select:none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .iconToggle.active{
@@ -119,22 +119,30 @@ body{
   box-shadow:0 0 0 5px rgba(255,80,80,.35);
 }
 
+/* ✅ kg-Kachel: größer + überall klickbar */
 .kgWrap{
   height:62px;
   display:flex;
   align-items:center;
   justify-content:center;
-  font-size:22px;
-  font-weight:800;
+  gap:8px;
+  padding:0 12px;                 /* ⬅️ mehr „Touch-Fläche“ */
+  font-size:24px;                 /* ⬅️ kg etwas größer */
+  font-weight:900;
+  cursor:text;
+  user-select:none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .kgWrap input{
-  width:36px;
+  width:52px;                     /* ⬅️ Zahl größer */
   text-align:center;
   border:none;
   background:transparent;
-  font-size:22px;
-  font-weight:800;
+  font-size:26px;                 /* ⬅️ Zahl größer */
+  font-weight:900;
+  outline:none;
+  padding:6px 0;
 }
 
 .textareaWrap{
@@ -149,6 +157,7 @@ textarea{
   background:transparent;
   resize:none;
   font-size:22px;
+  outline:none;
 }
 
 .btnRow{
@@ -175,31 +184,48 @@ button{
   <h1 class="boxId">K017</h1>
   <div class="status">Gespeichert ✓</div>
 
-  <!-- ORT + Bezeichnung -->
   <div class="grid">
     <input class="input" placeholder="ORT" maxlength="6">
     <input class="input" placeholder="Bezeichnung">
   </div>
 
-  <!-- Icons + Gewicht -->
   <div class="pillRow">
-    <div class="pill iconToggle active">🍷</div>
-    <div class="pill iconToggle heavy">🏋️</div>
-    <div class="pill kgWrap">
-      <input maxlength="2" value="00">kg
+    <div class="pill iconToggle active" id="fragile" title="Zerbrechlich">🍷</div>
+    <div class="pill iconToggle heavy" id="heavy" title="Schwer">🏋️</div>
+
+    <!-- ✅ Tap auf die ganze Kachel fokussiert das Input -->
+    <div class="pill kgWrap" id="kgTap" title="Gewicht">
+      <input id="kg" maxlength="2" inputmode="numeric" pattern="[0-9]*" value="00">
+      <span>kg</span>
     </div>
   </div>
 
-  <!-- Inhalt -->
   <div class="textareaWrap">
     <textarea placeholder="• Inhalt hier eintragen..."></textarea>
   </div>
 
-  <!-- Backup -->
   <div class="btnRow">
     <button>Backup nach iCloud</button>
     <button>Backup importieren</button>
   </div>
 </div>
+
+<script>
+  // ✅ Klick/Tap irgendwo auf die kg-Kachel -> Cursor ins Feld
+  const kgTap = document.getElementById("kgTap");
+  const kgInput = document.getElementById("kg");
+
+  kgTap.addEventListener("click", () => {
+    kgInput.focus();
+    kgInput.select();
+  });
+
+  // iPhone: Tap-Hilfe (manchmal wird click verzögert)
+  kgTap.addEventListener("touchstart", () => {
+    kgInput.focus();
+    kgInput.select();
+  }, {passive:true});
+</script>
+
 </body>
 </html>
