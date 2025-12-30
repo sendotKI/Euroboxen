@@ -34,7 +34,7 @@ body {
 
 .header h1 {
   margin: 8px 0 2px;
-  font-size: 28px; /* kleiner */
+  font-size: 28px;
 }
 
 .saved {
@@ -45,7 +45,6 @@ body {
 .saved.green { color: #00c26a; }
 .saved.red { color: #ff4b4b; }
 
-/* ---------- ROWS ---------- */
 .row {
   display: flex;
   gap: 12px;
@@ -60,7 +59,6 @@ body {
   margin-top: 16px;
 }
 
-/* Felder */
 .field {
   padding: 10px 14px;
   border-radius: 16px;
@@ -72,12 +70,10 @@ body {
   color: var(--text);
 }
 
-/* Bezeichnung – extra lang */
 .field-wide {
   width: 100%;
 }
 
-/* Icons */
 .icon {
   width: 46px;
   height: 46px;
@@ -110,7 +106,6 @@ body {
   background: rgba(255,59,59,0.25);
 }
 
-/* KG */
 .kg {
   flex: 1;
   height: 46px;
@@ -121,7 +116,6 @@ body {
   font-weight: 700;
 }
 
-/* Farben */
 .colors {
   display: flex;
   gap: 10px;
@@ -140,7 +134,6 @@ body {
   border-color: #00d26a;
 }
 
-/* Inhalt */
 .textarea {
   margin-top: 22px;
   padding: 16px;
@@ -150,12 +143,14 @@ body {
   border: 1px solid var(--border);
   font-size: 16px;
   color: var(--text);
+  white-space: pre-wrap;
 }
+
+/* Placeholder-Optik */
 .textarea.placeholder {
   color: rgba(0,0,0,.45);
 }
 
-/* Buttons */
 .buttons {
   display: flex;
   gap: 12px;
@@ -206,7 +201,8 @@ button {
     <div class="color" data-color="#000" style="background:#000" title="Schwarz"></div>
   </div>
 
-  <div class="textarea" id="content" contenteditable="true">• Inhalt hier eintragen...</div>
+  <!-- Inhalt: überschreibbarer Placeholder + Bullet-Automatik -->
+  <div class="textarea" id="content" contenteditable="true"></div>
 
   <div class="buttons">
     <button>Backup nach iCloud</button>
@@ -216,70 +212,150 @@ button {
 </div>
 
 <script>
-const content = document.getElementById("content");
+/* ---------- Box-ID + Typfarbe ---------- */
+const boxIdVal = new URLSearchParams(location.search).get("box") || "K017";
+document.getElementById("boxId").textContent = boxIdVal;
 
-function isPlaceholder() {
-  return content.classList.contains("placeholder");
+const card = document.getElementById("card");
+const saved = document.getElementById("saved");
+const colors = document.getElementById("colors");
+
+function applyBoxType() {
+  if (boxIdVal.startsWith("K")) {
+    card.style.background = "#ADAC62";
+    card.style.color = "#000";
+    colors.style.display = "none";
+    saved.className = "saved green";
+  }
+  if (boxIdVal.startsWith("T")) {
+    card.style.background = "#9FFCFD";
+    card.style.color = "#000";
+    colors.style.display = "none";
+    saved.className = "saved green";
+  }
+  if (boxIdVal.startsWith("E")) {
+    card.style.background = "#6c707a";
+    card.style.color = "#000";
+    colors.style.display = "flex";
+    saved.className = "saved green";
+  }
+}
+applyBoxType();
+
+/* Farben (nur E) */
+document.querySelectorAll(".color").forEach(c => {
+  c.onclick = () => {
+    document.querySelectorAll(".color").forEach(x=>x.classList.remove("active"));
+    c.classList.add("active");
+    card.style.background = c.dataset.color;
+
+    if (c.dataset.color === "#000") {
+      card.style.color = "#fff";
+      saved.className = "saved red";
+    } else {
+      card.style.color = "#000";
+      saved.className = "saved green";
+    }
+  };
+});
+
+/* ---------- 🍷 Weinglas: anklickbar + rot leuchten ---------- */
+const fragile = document.getElementById("fragile");
+let fragileActive = false;
+
+fragile.onclick = () => {
+  fragileActive = !fragileActive;
+  fragile.classList.toggle("fragile-active", fragileActive);
+};
+
+/* ---------- Gewicht: 16kg gelb, 26kg rot + manuell toggle ---------- */
+let weight = 0;
+const kg = document.getElementById("kg");
+const heavy = document.getElementById("heavy");
+let heavyManual = false;
+
+function refreshHeavy(){
+  heavy.classList.remove("heavy-yellow","heavy-red");
+
+  const shouldShow = (weight >= 16) || heavyManual;
+  if (!shouldShow) return;
+
+  if (weight >= 26) {
+    heavy.classList.add("heavy-red");
+  } else {
+    heavy.classList.add("heavy-yellow");
+  }
 }
 
-function setPlaceholder() {
+kg.onclick = () => {
+  weight = (weight + 1) % 100;
+  kg.textContent = String(weight).padStart(2,"0") + " kg";
+  refreshHeavy();
+};
+
+heavy.onclick = () => {
+  heavyManual = !heavyManual;
+  refreshHeavy();
+};
+
+refreshHeavy();
+
+/* ---------- Inhalt: überschreibbarer Placeholder + Bullet pro Zeile ---------- */
+const content = document.getElementById("content");
+
+function setPlaceholder(){
   content.classList.add("placeholder");
   content.innerText = "• Inhalt hier eintragen...";
 }
-
-function clearPlaceholder() {
+function placeCursorAtEnd(){
+  const range = document.createRange();
+  range.selectNodeContents(content);
+  range.collapse(false);
+  const sel = window.getSelection();
+  sel.removeAllRanges();
+  sel.addRange(range);
+}
+function clearPlaceholder(){
   content.classList.remove("placeholder");
   content.innerText = "• ";
   placeCursorAtEnd();
 }
 
-function placeCursorAtEnd() {
-  const range = document.createRange();
-  const sel = window.getSelection();
-  range.selectNodeContents(content);
-  range.collapse(false);
-  sel.removeAllRanges();
-  sel.addRange(range);
-}
-
-/* Initial */
 setPlaceholder();
 
-/* Klick / Fokus */
 content.addEventListener("focus", () => {
-  if (isPlaceholder()) clearPlaceholder();
+  if (content.classList.contains("placeholder")) clearPlaceholder();
 });
 
-/* Enter → neue Bullet-Zeile */
 content.addEventListener("keydown", (e) => {
+  // Enter -> neue Bullet-Zeile
   if (e.key === "Enter") {
     e.preventDefault();
     document.execCommand("insertText", false, "\n• ");
+    return;
   }
 
-  /* Backspace am Zeilenanfang → Bullet entfernen */
+  // Backspace am Zeilenanfang direkt nach "• " -> Bullet entfernen
   if (e.key === "Backspace") {
     const sel = window.getSelection();
+    if (!sel.rangeCount) return;
     const range = sel.getRangeAt(0);
-    const text = content.innerText;
-    const pos = range.startOffset;
 
-    if (text.slice(pos - 2, pos) === "• ") {
+    // Wir arbeiten mit plain text im contenteditable
+    const textBeforeCursor = content.innerText.slice(0, range.startOffset);
+    if (textBeforeCursor.endsWith("• ")) {
       e.preventDefault();
-      document.execCommand("delete");
-      document.execCommand("delete");
+      document.execCommand("delete"); // löscht Leerzeichen
+      document.execCommand("delete"); // löscht Bullet
     }
   }
 });
 
-/* Wenn komplett leer → Placeholder zurück */
+// Wenn Feld leer -> Placeholder zurück
 content.addEventListener("input", () => {
-  if (content.innerText.trim() === "") {
-    setPlaceholder();
-  }
+  if (content.innerText.trim() === "") setPlaceholder();
 });
 </script>
-
 
 </body>
 </html>
