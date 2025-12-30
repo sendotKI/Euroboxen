@@ -42,7 +42,6 @@ body {
 .saved.green { color: #00c26a; }
 .saved.red { color: #ff4b4b; }
 
-/* ---------- ROWS ---------- */
 .row {
   display: flex;
   gap: 12px;
@@ -57,7 +56,6 @@ body {
   margin-top: 16px;
 }
 
-/* Felder */
 .field {
   padding: 10px 14px;
   border-radius: 16px;
@@ -71,7 +69,6 @@ body {
 
 .field-wide { width: 100%; }
 
-/* Icons */
 .icon {
   width: 46px;
   height: 46px;
@@ -148,7 +145,7 @@ body {
 }
 .color.active { border-color: #00d26a; }
 
-/* Inhalt */
+/* Inhalt als echtes textarea */
 .textarea {
   margin-top: 22px;
   padding: 16px;
@@ -158,13 +155,13 @@ body {
   border: 1px solid var(--border);
   font-size: 16px;
   color: inherit;
-  white-space: pre-wrap;
+  width: 100%;
+  box-sizing: border-box;
+  resize: none;
   outline: none;
-  cursor: text;
+  line-height: 1.35;
+  font-family: inherit;
 }
-
-/* Placeholder-Optik */
-.textarea.placeholder { color: rgba(0,0,0,.45); }
 
 /* Buttons */
 .buttons {
@@ -224,7 +221,7 @@ button:active { transform: scale(0.99); }
   </div>
 
   <!-- Inhalt -->
-  <div class="textarea" id="content" contenteditable="true"></div>
+  <textarea class="textarea" id="content" placeholder="• Inhalt hier eintragen..."></textarea>
 
   <div class="buttons">
     <button id="btnExport">Backup exportieren</button>
@@ -265,17 +262,11 @@ const fileInput = document.getElementById("fileInput");
 elBoxId.textContent = boxIdVal;
 
 /* =========================
-   Farben je Box-Typ
+   Theme je Box-Typ
 ========================= */
 function setCardTheme(bg, fg) {
   card.style.background = bg;
   card.style.color = fg;
-  // Placeholder-Farbe passt sich an: schwarz -> hell
-  if (content.classList.contains("placeholder")) {
-    content.style.color = (fg === "#fff") ? "rgba(255,255,255,.55)" : "rgba(0,0,0,.45)";
-  } else {
-    content.style.color = "inherit";
-  }
 }
 
 function setSavedStyle(isBlackTheme) {
@@ -305,7 +296,7 @@ function applyBoxTypeDefault() {
   }
 }
 
-/* E-Farben klicken */
+/* E-Farben */
 document.querySelectorAll(".color").forEach(c => {
   c.addEventListener("click", () => {
     document.querySelectorAll(".color").forEach(x=>x.classList.remove("active"));
@@ -334,7 +325,7 @@ fragile.addEventListener("click", () => {
 });
 
 /* =========================
-   Heavy: 16kg gelb, 26kg rot (+ manuell toggle)
+   Heavy: 16kg gelb, 26kg rot
 ========================= */
 let weight = 0;
 let heavyManual = false;
@@ -345,7 +336,6 @@ function setKgText(){
 
 function refreshHeavy(){
   heavy.classList.remove("heavy-yellow","heavy-red");
-
   const shouldShow = (weight >= 16) || heavyManual;
   if (!shouldShow) return;
 
@@ -371,81 +361,76 @@ heavy.addEventListener("click", () => {
 });
 
 /* =========================
-   Inhalt: wieder editierbar + Bullet je Zeile
+   Inhalt: Bullet-Logik (Textarea)
 ========================= */
-function placeCursorAtEnd(){
-  const range = document.createRange();
-  range.selectNodeContents(content);
-  range.collapse(false);
-  const sel = window.getSelection();
-  sel.removeAllRanges();
-  sel.addRange(range);
-}
+function ensureBulletsPreserveCursor() {
+  const start = content.selectionStart;
+  const end = content.selectionEnd;
 
-function setPlaceholder(){
-  content.classList.add("placeholder");
-  content.innerText = "• Inhalt hier eintragen...";
-  // Farbe abhängig vom Theme
-  content.style.color = (card.style.color === "#fff") ? "rgba(255,255,255,.55)" : "rgba(0,0,0,.45)";
-}
+  const before = content.value;
+  const lines = before.replace(/\r/g,"").split("\n");
 
-function clearPlaceholder(){
-  content.classList.remove("placeholder");
-  content.style.color = "inherit";
-  content.innerText = "• ";
-  placeCursorAtEnd();
-}
-
-function normalizeBullets() {
-  if (content.classList.contains("placeholder")) return;
-
-  const raw = content.innerText.replace(/\r/g,"");
-  const lines = raw.split("\n");
-
-  const fixed = lines.map((l, i) => {
+  // Jede Zeile: wenn nicht leer -> "• " davor; wenn leer -> "" lassen
+  const fixedLines = lines.map((l) => {
     const t = l.replace(/\s+$/,""); // trimEnd
-    if (i === 0 && t.trim() === "") return "• ";
-    if (t.trim() === "") return "•";
-    return t.startsWith("•") ? t : "• " + t;
+    if (t === "") return "";
+    return t.startsWith("•") ? t : ("• " + t);
   });
 
-  const next = fixed.join("\n");
-  if (next !== raw) {
-    // Wenn wir korrigieren, Cursor ans Ende (simple & stabil auf iOS)
-    content.innerText = next;
-    placeCursorAtEnd();
+  let fixed = fixedLines.join("\n");
+
+  // Wenn Text existiert und NICHT mit Bullet startet -> fix
+  if (fixed.trim() !== "" && !fixed.trimStart().startsWith("•")) {
+    // (sollte durch mapping ohnehin passen)
+  }
+
+  if (fixed !== before) {
+    // Cursor möglichst gut nachziehen:
+    // Wir schätzen die Differenz durch hinzugefügte "• " vor Cursor-Position.
+    const beforeUpToCursor = before.slice(0, start);
+    const beforeLines = beforeUpToCursor.replace(/\r/g,"").split("\n");
+
+    let added = 0;
+    for (let i=0; i<beforeLines.length; i++){
+      const line = beforeLines[i];
+      const trimmed = line.replace(/\s+$/,"");
+      if (trimmed !== "" && !trimmed.startsWith("•")) added += 2; // "• "
+    }
+
+    content.value = fixed;
+    const newPos = Math.min(content.value.length, start + added);
+    content.setSelectionRange(newPos, newPos);
   }
 }
 
-/* Start */
-setPlaceholder();
-
-content.addEventListener("pointerdown", () => {
-  // iOS: manchmal braucht es einen "kick", damit der Cursor wirklich ins Feld geht
-  if (content.classList.contains("placeholder")) return;
-  // nichts weiter
-});
-
+// Beim ersten Fokus: wenn leer -> direkt "• " setzen
 content.addEventListener("focus", () => {
-  if (content.classList.contains("placeholder")) clearPlaceholder();
+  if (content.value.trim() === "") {
+    content.value = "• ";
+    content.setSelectionRange(content.value.length, content.value.length);
+  }
 });
 
+// Enter: neue Zeile mit Bullet
 content.addEventListener("keydown", (e) => {
-  if (content.classList.contains("placeholder")) return;
-
   if (e.key === "Enter") {
     e.preventDefault();
-    document.execCommand("insertText", false, "\n• ");
-    return;
+    const start = content.selectionStart;
+    const end = content.selectionEnd;
+    const v = content.value;
+
+    const insert = "\n• ";
+    content.value = v.slice(0,start) + insert + v.slice(end);
+    const pos = start + insert.length;
+    content.setSelectionRange(pos, pos);
+    markDirtyAndSaveSoon();
   }
 });
 
+// Paste / Tippfehler / mehrere Zeilen: immer wieder bullets glätten
 content.addEventListener("input", () => {
-  if (content.innerText.trim() === "") {
-    setPlaceholder();
-  } else {
-    normalizeBullets();
-  }
+  if (content.value.trim() === "") return;
+  ensureBulletsPreserveCursor();
   markDirtyAndSaveSoon();
 });
 
@@ -456,9 +441,6 @@ const STORAGE_PREFIX = "umzug_box_";
 function boxStorageKey(id){ return STORAGE_PREFIX + id; }
 
 function getCurrentState(){
-  const bg = card.style.background || "";
-  const fg = card.style.color || "";
-
   return {
     id: boxIdVal,
     ort: ort.value || "",
@@ -466,9 +448,9 @@ function getCurrentState(){
     fragileActive,
     weight,
     heavyManual,
-    content: content.classList.contains("placeholder") ? "" : content.innerText,
-    bg,
-    fg
+    content: content.value || "",
+    bg: card.style.background || "",
+    fg: card.style.color || ""
   };
 }
 
@@ -492,14 +474,8 @@ function applyState(state){
     if (boxIdVal.startsWith("E")) setActiveColorButton(state.bg);
   }
 
-  if (state.content && state.content.trim() !== "") {
-    content.classList.remove("placeholder");
-    content.style.color = "inherit";
-    content.innerText = state.content;
-    normalizeBullets();
-  } else {
-    setPlaceholder();
-  }
+  content.value = state.content || "";
+  if (content.value.trim() !== "") ensureBulletsPreserveCursor();
 }
 
 function saveBox(){
