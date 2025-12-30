@@ -52,10 +52,10 @@ body{
   background:rgba(0,0,0,.15);
 }
 
-/* Überschrift kleiner machen */
+/* Überschrift noch kleiner */
 .boxId{
   text-align:center;
-  font-size:58px;   /* kleiner als vorher */
+  font-size:44px;   /* <-- kleiner */
   font-weight:900;
   margin:0;
 }
@@ -63,7 +63,7 @@ body{
 .status{
   text-align:center;
   color:var(--ok);
-  font-size:26px;
+  font-size:24px;
   font-weight:800;
   margin:8px 0 18px;
 }
@@ -103,7 +103,7 @@ body{
   cursor:pointer;
   user-select:none;
   position:relative;
-  z-index:5; /* wichtig: klickbar bleiben */
+  z-index:5;
 }
 
 .iconToggle.active{
@@ -114,7 +114,7 @@ body{
   box-shadow:0 0 0 5px var(--redGlow);
 }
 
-/* kg wie ein richtiges Feld: ganzer Kasten ist klickbar */
+/* kg: ganzer Kasten klickbar + komfortables Editieren */
 .kgPill{
   height:62px;
   display:flex;
@@ -132,18 +132,18 @@ body{
 .kgPill:active{ transform:scale(.995); }
 
 .kgPill input{
-  width:90px;
+  width:92px;
   text-align:center;
   border:none;
   background:transparent;
-  font-size:34px;   /* kg etwas größer */
+  font-size:36px;
   font-weight:900;
   outline:none;
   caret-color:#111;
 }
 
 .kgUnit{
-  font-size:30px;   /* kg Einheit größer */
+  font-size:30px;
   font-weight:900;
 }
 
@@ -177,10 +177,10 @@ body{
   box-shadow:0 0 0 4px var(--greenGlow);
 }
 
-/* Mehr Abstand zum Inhaltsfeld */
+/* Abstand zum Inhaltsfeld */
 .textareaWrap{
   padding:12px;
-  margin-top:16px;   /* <-- extra Abstand */
+  margin-top:18px;
 }
 
 textarea{
@@ -252,7 +252,6 @@ button{
     <div class="pill iconToggle" id="fragile" title="Zerbrechlich">🍷</div>
     <div class="pill iconToggle heavy" id="heavy" title="Schwer">🏋️</div>
 
-    <!-- kg: kompletter Kasten klickbar -->
     <div class="kgPill" id="kgTap" title="Gewicht">
       <input id="kg" inputmode="numeric" autocomplete="off" value="00" maxlength="2" />
       <span class="kgUnit">kg</span>
@@ -295,7 +294,6 @@ const content = document.getElementById("content");
 /* ---------- Mode / Farben ---------- */
 function setMode(mode){
   card.className = "card " + mode;
-  // aktive Markierung nur für E-Farben
   document.getElementById("grey").classList.toggle("active", mode==="mode-egrey");
   document.getElementById("black").classList.toggle("active", mode==="mode-eblack");
 }
@@ -315,34 +313,57 @@ document.getElementById("grey").addEventListener("click", ()=>setMode("mode-egre
 document.getElementById("black").addEventListener("click", ()=>setMode("mode-eblack"));
 
 /* ---------- Toggle Icons ---------- */
-function toggleActive(el){
-  el.classList.toggle("active");
-}
+function toggleActive(el){ el.classList.toggle("active"); }
 
 fragile.addEventListener("click", (e)=>{
-  e.preventDefault();
-  e.stopPropagation();
+  e.preventDefault(); e.stopPropagation();
   toggleActive(fragile);
 });
 
 heavy.addEventListener("click", (e)=>{
-  e.preventDefault();
-  e.stopPropagation();
+  e.preventDefault(); e.stopPropagation();
   toggleActive(heavy);
 });
 
-/* ---------- kg Feld komfortabel ---------- */
-/* klick auf Kasten -> fokussiert IMMER kg, nie Inhalt */
+/* ---------- kg Feld: komfortables Überschreiben (beide Stellen) ---------- */
+function selectKgAll(){
+  // iOS braucht oft ein Timeout, sonst markiert er nicht sauber
+  setTimeout(()=>{
+    kg.focus({preventScroll:true});
+    try { kg.setSelectionRange(0, kg.value.length); } catch {}
+  }, 0);
+}
+
 kgTap.addEventListener("click", (e)=>{
-  e.preventDefault();
-  e.stopPropagation();
-  kg.focus({ preventScroll:true });
-  kg.setSelectionRange(0, kg.value.length);
+  e.preventDefault(); e.stopPropagation();
+  selectKgAll();
 });
 
-/* verhindert, dass iOS das "content" als nächstes fokussiert */
-kg.addEventListener("mousedown", (e)=>e.stopPropagation());
-kg.addEventListener("touchstart", (e)=>e.stopPropagation(), {passive:true});
+kg.addEventListener("click", (e)=>{ e.stopPropagation(); selectKgAll(); });
+kg.addEventListener("touchstart", (e)=>{ e.stopPropagation(); }, {passive:true});
+
+let kgPrimed = false; // nächster Digit überschreibt komplett, wenn zuvor "00" oder Auswahl
+kg.addEventListener("focus", ()=>{
+  kgPrimed = true;
+  selectKgAll();
+});
+
+kg.addEventListener("keydown", (e)=>{
+  // Wenn primed und Zahl gedrückt -> überschreiben statt "nur Einerstelle"
+  if(kgPrimed && /^[0-9]$/.test(e.key)){
+    e.preventDefault();
+    kg.value = "0" + e.key;     // erste Eingabe landet sichtbar, z.B. 4 -> 04
+    kgPrimed = false;
+    normalizeKg();
+    // Cursor ans Ende
+    requestAnimationFrame(()=>{ try { kg.setSelectionRange(kg.value.length, kg.value.length); } catch {} });
+  }
+  // Backspace: wenn alles markiert oder "00", bleiben wir komfortabel
+  if(e.key === "Backspace"){
+    // lasse Standard laufen; normalizeKg kümmert sich danach
+    kgPrimed = false;
+  }
+});
 
 function normalizeKg(){
   kg.value = (kg.value || "").replace(/\D/g,"").slice(0,2);
@@ -350,14 +371,17 @@ function normalizeKg(){
   if (kg.value.length===1) kg.value = "0"+kg.value;
 
   const v = parseInt(kg.value,10) || 0;
-  heavy.classList.toggle("active", v >= 16);  // Schwer erst ab 16 kg
+  heavy.classList.toggle("active", v >= 16); // Schwer ab 16 kg
 }
 
-kg.addEventListener("input", normalizeKg);
+kg.addEventListener("input", ()=>{
+  kgPrimed = false;
+  normalizeKg();
+});
+
 normalizeKg();
 
-/* ---------- Content: Bullet-Handling (minimal, stabil) ---------- */
-/* wenn leer und Nutzer tippt: Bullet bleibt */
+/* ---------- Content: Bullet Handling ---------- */
 content.addEventListener("focus", ()=>{
   if(content.value.trim()===""){
     content.value="• ";
@@ -365,15 +389,12 @@ content.addEventListener("focus", ()=>{
   }
 });
 
-/* Backspace am Zeilenanfang: Bullet löschen */
 content.addEventListener("keydown", (e)=>{
   if(e.key==="Backspace"){
     const pos = content.selectionStart;
     const before = content.value.slice(0,pos);
     const lineStart = before.lastIndexOf("\n")+1;
     const line = before.slice(lineStart);
-
-    // wenn Cursor direkt hinter "• " steht, lösche Bullet sauber
     if(line === "• "){
       e.preventDefault();
       const after = content.value.slice(pos);
@@ -381,8 +402,6 @@ content.addEventListener("keydown", (e)=>{
       content.setSelectionRange(lineStart, lineStart);
     }
   }
-
-  // Enter erzeugt automatisch neuen Bullet
   if(e.key==="Enter"){
     e.preventDefault();
     const pos = content.selectionStart;
