@@ -1,64 +1,53 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Euroboxen</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Box</title>
 
 <style>
 :root{
-  --page:#071225;
+  --bg:#071225;
 
-  /* Default Card (E) */
-  --card:#2b323f;
-  --card2:rgba(255,255,255,.06);
-  --stroke:rgba(255,255,255,.14);
-  --text:rgba(255,255,255,.92);
-  --muted:rgba(255,255,255,.55);
-
-  --ok:#27d17e;
-
-  /* E Farben */
   --eGrey:#C0C0C0;
   --eBlack:#000000;
-
-  /* K Karton */
   --kCard:#ADAC62;
+  --tCard:#E0E0E0;
 
-  /* Active glows */
-  --greenGlow: rgba(39,209,126,.35);
-  --redGlow: rgba(255,80,80,.40);
+  --stroke-dark:rgba(0,0,0,.25);
+  --stroke-light:rgba(255,255,255,.2);
+
+  --ok:#27d17e;
+  --greenGlow:rgba(39,209,126,.35);
+  --redGlow:rgba(255,80,80,.45);
 }
 
 *{box-sizing:border-box}
-html,body{height:100%}
 body{
   margin:0;
   min-height:100vh;
   display:flex;
   justify-content:center;
   align-items:center;
-  background:var(--page);
+  background:var(--bg);
   font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif;
-  color:var(--text);
 }
 
 .card{
   width:min(720px,94vw);
   padding:18px;
   border-radius:28px;
-  background:var(--card);
+  background:#2b323f;
+  color:#111;
   box-shadow:0 24px 60px rgba(0,0,0,.55);
-  transition: background .2s ease;
 }
 
-/* top bar (subtle) */
 .topbar{
   height:10px;
   width:92%;
   margin:6px auto 12px;
   border-radius:999px;
-  background:rgba(0,0,0,.18);
+  background:rgba(0,0,0,.15);
 }
 
 .boxId{
@@ -66,7 +55,6 @@ body{
   font-size:72px;
   font-weight:900;
   margin:0;
-  letter-spacing:1px;
 }
 
 .status{
@@ -83,53 +71,10 @@ body{
   gap:12px;
 }
 
-.pillRow{
-  display:grid;
-  grid-template-columns:64px 64px 160px; /* kg komfortabel */
-  gap:12px;
-  margin-top:14px;
-}
-
-/* Farbauswahl kleiner + Abstand zum Textfeld */
-.colorRow{
-  display:flex;
-  gap:10px;
-  margin-top:10px;
-  margin-bottom:12px; /* Abstand zum Inhaltsfeld */
-  align-items:center;
-}
-
-.colorChip{
-  height:34px;              /* 50% kleiner als vorher */
-  padding:0 12px;
-  border-radius:14px;
-  border:2px solid var(--stroke);
-  background:rgba(255,255,255,.05);
-  display:flex;
-  align-items:center;
-  gap:10px;
-  font-weight:800;
-  cursor:pointer;
-  user-select:none;
-  -webkit-tap-highlight-color: transparent;
-  font-size:14px;
-}
-
-.colorDot{
-  width:14px;
-  height:14px;
-  border-radius:6px;
-  border:2px solid rgba(255,255,255,.25);
-}
-
-.colorChip.active{
-  box-shadow:0 0 0 4px var(--greenGlow);
-}
-
 .input,.pill,.textareaWrap{
-  border:2px solid var(--stroke);
+  border:2px solid var(--stroke-dark);
   border-radius:18px;
-  background:var(--card2);
+  background:rgba(255,255,255,.35);
 }
 
 .input{
@@ -137,10 +82,14 @@ body{
   padding:0 14px;
   font-size:22px;
   width:100%;
-  color:inherit;
 }
 
-.input::placeholder{color:rgba(255,255,255,.45)}
+.pillRow{
+  display:grid;
+  grid-template-columns:64px 64px 170px;
+  gap:12px;
+  margin-top:14px;
+}
 
 .iconToggle{
   height:62px;
@@ -150,7 +99,6 @@ body{
   font-size:28px;
   cursor:pointer;
   user-select:none;
-  -webkit-tap-highlight-color: transparent;
 }
 
 .iconToggle.active{
@@ -161,40 +109,62 @@ body{
   box-shadow:0 0 0 5px var(--redGlow);
 }
 
-/* kg-Kachel */
 .kgWrap{
   height:62px;
   display:flex;
   align-items:center;
   justify-content:center;
   gap:10px;
-  padding:0 14px;
+  padding:0 16px;
   font-weight:900;
   cursor:text;
-  user-select:none;
-  -webkit-tap-highlight-color: transparent;
 }
 
 .kgWrap input{
-  width:70px;
+  width:80px;
   text-align:center;
   border:none;
   background:transparent;
   font-size:30px;
   font-weight:900;
   outline:none;
-  padding:6px 0;
-  color:inherit;
 }
 
 .kgUnit{
-  font-size:28px; /* etwas größer */
-  font-weight:900;
-  opacity:.95;
+  font-size:28px;
+}
+
+.colorRow{
+  display:flex;
+  gap:10px;
+  margin:12px 0;
+}
+
+.colorChip{
+  height:34px;
+  padding:0 12px;
+  border-radius:14px;
+  border:2px solid var(--stroke-dark);
+  background:rgba(255,255,255,.45);
+  font-weight:800;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.colorDot{
+  width:14px;
+  height:14px;
+  border-radius:6px;
+  border:2px solid rgba(0,0,0,.3);
+}
+
+.colorChip.active{
+  box-shadow:0 0 0 4px var(--greenGlow);
 }
 
 .textareaWrap{
-  margin-top:0;
   padding:12px;
 }
 
@@ -206,10 +176,7 @@ textarea{
   resize:none;
   font-size:22px;
   outline:none;
-  color:inherit;
 }
-
-textarea::placeholder{color:rgba(255,255,255,.45)}
 
 .btnRow{
   display:grid;
@@ -228,205 +195,103 @@ button{
   color:white;
 }
 
-/* ---------- E Farbmodi (Card-Hintergrund) ---------- */
-.card.mode-egrey{
-  background:var(--eGrey);
-  color:rgba(0,0,0,.92);
-}
-.card.mode-egrey .input,
-.card.mode-egrey .pill,
-.card.mode-egrey .textareaWrap,
-.card.mode-egrey .colorChip{
-  border-color:rgba(0,0,0,.28);
-  background:rgba(255,255,255,.35);
-}
-.card.mode-egrey .input::placeholder,
-.card.mode-egrey textarea::placeholder{
-  color:rgba(0,0,0,.35);
-}
-.card.mode-egrey .topbar{ background:rgba(0,0,0,.15); }
+/* ===== Farbmodi ===== */
 
-.card.mode-eblack{
-  background:#000;
-  color:rgba(255,255,255,.92);
-}
-.card.mode-eblack .topbar{ background:rgba(255,255,255,.12); }
+.card.mode-egrey{ background:var(--eGrey); }
+.card.mode-eblack{ background:var(--eBlack); color:#fff; }
+.card.mode-k{ background:var(--kCard); }
+.card.mode-t{ background:var(--tCard); }
 
-/* ---------- K Mode (automatisch) ---------- */
-.card.mode-k{
-  background:var(--kCard);
-  color:rgba(0,0,0,.92);
-}
-.card.mode-k .input,
-.card.mode-k .pill,
-.card.mode-k .textareaWrap{
-  border-color:rgba(0,0,0,.28);
-  background:rgba(255,255,255,.30);
-}
-.card.mode-k .input::placeholder,
-.card.mode-k textarea::placeholder{
-  color:rgba(0,0,0,.35);
-}
-.card.mode-k .topbar{ background:rgba(0,0,0,.15); }
-
-.card.mode-k button{
-  background:rgba(255,255,255,.75);
-  color:rgba(0,0,0,.85);
-}
-.card.mode-egrey button{
-  background:rgba(255,255,255,.75);
-  color:rgba(0,0,0,.85);
+.card.mode-eblack .input,
+.card.mode-eblack .pill,
+.card.mode-eblack .textareaWrap{
+  background:rgba(255,255,255,.1);
+  border-color:var(--stroke-light);
+  color:#fff;
 }
 </style>
 </head>
 
 <body>
-  <div class="card" id="card">
-    <div class="topbar"></div>
+<div class="card" id="card">
+  <div class="topbar"></div>
 
-    <h1 class="boxId" id="boxIdTitle">E019</h1>
-    <div class="status" id="status">Gespeichert ✓</div>
+  <h1 class="boxId" id="boxId">E001</h1>
+  <div class="status">Gespeichert ✓</div>
 
-    <div class="grid">
-      <input class="input" id="ort" placeholder="ORT" maxlength="6" />
-      <input class="input" id="bez" placeholder="Bezeichnung" />
-    </div>
+  <div class="grid">
+    <input class="input" placeholder="ORT" maxlength="6">
+    <input class="input" placeholder="Bezeichnung">
+  </div>
 
-    <div class="pillRow">
-      <div class="pill iconToggle" id="fragile" title="Zerbrechlich">🍷</div>
-      <div class="pill iconToggle heavy" id="heavy" title="Schwer">🏋️</div>
-
-      <div class="pill kgWrap" id="kgTap" title="Gewicht">
-        <input id="kg" maxlength="2" inputmode="numeric" pattern="[0-9]*" value="00" />
-        <span class="kgUnit">kg</span>
-      </div>
-    </div>
-
-    <!-- Farbauswahl nur für E -->
-    <div class="colorRow" id="colorRow">
-      <div class="colorChip" id="chipGrey" title="Grau">
-        <span class="colorDot" style="background:#C0C0C0"></span>
-        Grau
-      </div>
-      <div class="colorChip" id="chipBlack" title="Schwarz">
-        <span class="colorDot" style="background:#000"></span>
-        Schwarz
-      </div>
-    </div>
-
-    <div class="textareaWrap">
-      <textarea id="content" placeholder="• Inhalt hier eintragen..."></textarea>
-    </div>
-
-    <div class="btnRow">
-      <button id="backup">Backup nach iCloud</button>
-      <button id="import">Backup importieren</button>
+  <div class="pillRow">
+    <div class="pill iconToggle" id="fragile">🍷</div>
+    <div class="pill iconToggle heavy" id="heavy">🏋️</div>
+    <div class="pill kgWrap" id="kgTap">
+      <input id="kg" value="00" maxlength="2">
+      <span class="kgUnit">kg</span>
     </div>
   </div>
 
+  <div class="colorRow" id="colorRow">
+    <div class="colorChip" id="grey">
+      <span class="colorDot" style="background:#C0C0C0"></span> Grau
+    </div>
+    <div class="colorChip" id="black">
+      <span class="colorDot" style="background:#000"></span> Schwarz
+    </div>
+  </div>
+
+  <div class="textareaWrap">
+    <textarea placeholder="• Inhalt hier eintragen..."></textarea>
+  </div>
+
+  <div class="btnRow">
+    <button>Backup nach iCloud</button>
+    <button>Backup importieren</button>
+  </div>
+</div>
+
 <script>
-  // --- BoxId aus URL ---
-  const params = new URLSearchParams(location.search);
-  const boxId = (params.get("box") || "E019").toUpperCase();
+const params = new URLSearchParams(location.search);
+const boxId = (params.get("box") || "E001").toUpperCase();
+document.getElementById("boxId").textContent = boxId;
 
-  const card = document.getElementById("card");
-  const title = document.getElementById("boxIdTitle");
-  const colorRow = document.getElementById("colorRow");
+const card = document.getElementById("card");
+const colorRow = document.getElementById("colorRow");
 
-  title.textContent = boxId;
+function setMode(m){
+  card.className = "card " + m;
+}
 
-  // Helpers: CSS-Modus setzen
-  function setMode(mode){
-    card.classList.remove("mode-egrey","mode-eblack","mode-k");
-    card.classList.add(mode);
-  }
+if(boxId.startsWith("K")){
+  setMode("mode-k");
+  colorRow.style.display="none";
+}
+else if(boxId.startsWith("T")){
+  setMode("mode-t");
+  colorRow.style.display="none";
+}
+else{
+  setMode("mode-egrey");
+}
 
-  // --- Auto-Farbe ---
-  // K… => Kartonfarbe automatisch (#ADAC62) und Farbauswahl ausblenden
-  // E… => Farbauswahl anzeigen + default grau
-  const isK = boxId.startsWith("K");
+document.getElementById("grey").onclick=()=>setMode("mode-egrey");
+document.getElementById("black").onclick=()=>setMode("mode-eblack");
 
-  if (isK){
-    setMode("mode-k");
-    colorRow.style.display = "none";
-  } else {
-    colorRow.style.display = "flex";
-    // Default für E: Grau
-    setMode("mode-egrey");
-  }
+const heavy=document.getElementById("heavy");
+const kg=document.getElementById("kg");
 
-  // --- E Farbauswahl ---
-  const chipGrey = document.getElementById("chipGrey");
-  const chipBlack = document.getElementById("chipBlack");
+function updateHeavy(){
+  heavy.classList.toggle("active", parseInt(kg.value||0)>=16);
+}
 
-  function setEColor(which){
-    if (isK) return;
-    chipGrey.classList.toggle("active", which==="grey");
-    chipBlack.classList.toggle("active", which==="black");
-    setMode(which==="grey" ? "mode-egrey" : "mode-eblack");
-    // Optional: merken pro Box
-    localStorage.setItem("color_"+boxId, which);
-  }
+kg.oninput=()=>{
+  kg.value=kg.value.replace(/\D/g,"").slice(0,2)||"00";
+  updateHeavy();
+};
 
-  // gespeicherte Farbe laden (nur E)
-  if (!isK){
-    const saved = localStorage.getItem("color_"+boxId) || "grey";
-    setEColor(saved);
-  }
-
-  chipGrey.addEventListener("click", (e)=>{ e.preventDefault(); e.stopPropagation(); setEColor("grey"); });
-  chipBlack.addEventListener("click", (e)=>{ e.preventDefault(); e.stopPropagation(); setEColor("black"); });
-
-  // --- Toggles (Fragile manuel, Heavy automatisch + manuell möglich) ---
-  const fragile = document.getElementById("fragile");
-  const heavy   = document.getElementById("heavy");
-
-  fragile.addEventListener("click", (e)=>{
-    e.preventDefault(); e.stopPropagation();
-    fragile.classList.toggle("active");
-  });
-
-  // Heavy: manuell togglen erlaubt, aber "Auto ab 16kg" soll immer greifen:
-  // => wenn >=16: immer an, wenn <16: an/aus darf manuell? Du wolltest "Schwer ab 16".
-  // Ich setze: <16 => AUS, >=16 => AN (erzwingt Zustand).
-  heavy.addEventListener("click", (e)=>{
-    e.preventDefault(); e.stopPropagation();
-    // nur um "gefühltes klicken" zu erlauben - Zustand wird gleich durch updateHeavy() bestimmt
-    updateHeavyFromKg();
-  });
-
-  // --- KG: Tap überall -> Fokus ins kg-Input (und NICHT ins Inhaltsfeld) ---
-  const kgTap   = document.getElementById("kgTap");
-  const kgInput = document.getElementById("kg");
-
-  function focusKg(e){
-    if (e) { e.preventDefault(); e.stopPropagation(); }
-    kgInput.focus({preventScroll:true});
-    kgInput.select();
-  }
-  kgTap.addEventListener("click", focusKg, true);
-  kgTap.addEventListener("touchstart", focusKg, {passive:false, capture:true});
-
-  // --- Heavy automatisch ab 16 kg ---
-  function parseKg(){
-    const v = (kgInput.value || "").replace(/\D/g,"");
-    return v ? parseInt(v,10) : 0;
-  }
-
-  function updateHeavyFromKg(){
-    const kg = parseKg();
-    const shouldBeHeavy = kg >= 16;
-    heavy.classList.toggle("active", shouldBeHeavy);
-  }
-
-  kgInput.addEventListener("input", ()=>{
-    // nur Ziffern, max 2
-    kgInput.value = kgInput.value.replace(/\D/g,"").slice(0,2) || "00";
-    updateHeavyFromKg();
-  });
-
-  // initial
-  updateHeavyFromKg();
+updateHeavy();
 </script>
 </body>
 </html>
