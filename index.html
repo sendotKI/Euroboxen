@@ -1,663 +1,212 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Eurobox</title>
-  <style>
-    :root{
-      --bg: #070b16;
-      --cardBg: #2b2f3a;
-      --barBg: rgba(255,255,255,.12);
-      --fieldBg: rgba(255,255,255,.06);
-      --fieldBorder: rgba(255,255,255,.12);
-      --text: rgba(255,255,255,.92);
-      --muted: rgba(255,255,255,.55);
-      --ok: #2dd56f;
-      --glow: rgba(46, 255, 144, .55);
-      --radius: 28px;
-      --gap: 14px;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sendotki</title>
 
-    *{ box-sizing:border-box; }
-    body{
-      margin:0;
-      min-height:100vh;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      background: radial-gradient(1200px 800px at 50% -100px, rgba(80,120,255,.18), transparent 70%),
-                  linear-gradient(180deg, #050814, #040611 40%, #02030b);
-      color: var(--text);
-      display:flex;
-      align-items:flex-start;
-      justify-content:center;
-      padding: 26px 14px 40px;
-    }
+<style>
+:root{
+  --card-bg:#B9BA73;          /* Kartonfarbe */
+  --border:rgba(0,0,0,.25);
+  --text:#000;
+  --ok:#1f9d55;
+}
 
-    .card{
-      width: min(430px, 100%);
-      border-radius: var(--radius);
-      background: var(--cardBg);
-      box-shadow: 0 22px 60px rgba(0,0,0,.55);
-      padding: 18px 18px 20px;
-      position: relative;
-      overflow:hidden;
-    }
+*{box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial;}
 
-    .topbar{
-      height: 10px;
-      border-radius: 999px;
-      background: var(--barBg);
-      opacity: .55;
-      margin-bottom: 10px;
-    }
+body{
+  margin:0;
+  background:radial-gradient(circle at top,#0b1325,#000);
+  padding:24px 12px;
+  color:var(--text);
+}
 
-    h1{
-      margin: 2px 0 0;
-      text-align:center;
-      letter-spacing: .06em;
-      font-weight: 900;
-      font-size: 48px;         /* kleiner als vorher */
-      line-height: 1.05;
-      color: rgba(255,255,255,.92);
-      text-shadow: 0 6px 22px rgba(0,0,0,.35);
-    }
+.card{
+  max-width:420px;
+  margin:0 auto;
+  background:var(--card-bg);
+  border-radius:28px;
+  padding:22px 18px 24px;
+}
 
-    .status{
-      margin-top: 6px;
-      text-align:center;
-      font-size: 26px;
-      font-weight: 800;
-      color: var(--ok);
-      opacity: .95;
-    }
+/* obere Leiste */
+.topbar{
+  height:10px;
+  width:100%;
+  border-radius:10px;
+  background:rgba(0,0,0,.15);
+  margin-bottom:14px;
+}
 
-    .grid{
-      margin-top: 14px;
-      display:flex;
-      flex-direction: column;
-      gap: var(--gap);
-    }
+/* Überschrift */
+h1{
+  margin:0;
+  text-align:center;
+  font-size:34px;
+  font-weight:800;
+  letter-spacing:.05em;
+  color:#000;
+}
 
-    .row{
-      display:flex;
-      gap: var(--gap);
-      align-items: stretch;
-    }
+.status{
+  text-align:center;
+  margin-top:4px;
+  font-size:18px;
+  font-weight:700;
+  color:var(--ok);
+}
 
-    .field, .chip, .weightBox{
-      border-radius: 18px;
-      background: var(--fieldBg);
-      border: 2px solid var(--fieldBorder);
-      box-shadow: inset 0 0 0 1px rgba(0,0,0,.08);
-      color: var(--text);
-    }
+/* Felder */
+.row{
+  display:flex;
+  gap:12px;
+  margin-top:16px;
+}
 
-    .field{
-      height: 62px;
-      padding: 0 16px;
-      font-size: 26px;
-      font-weight: 800;
-      outline:none;
-      width: 100%;
-    }
-    .field::placeholder{ color: rgba(255,255,255,.42); }
+.field{
+  flex:1;
+  height:56px;
+  border-radius:18px;
+  border:2px solid var(--border);
+  background:rgba(255,255,255,.18);
+  padding:0 14px;
+  font-size:20px;
+  font-weight:600;
+  color:#000;
+}
 
-    /* ORT alleine */
-    .rowOrt .field{ width:100%; }
+.field::placeholder{
+  color:rgba(0,0,0,.45);
+}
 
-    /* Bezeichnung breit + Glas rechts */
-    .rowBez .field{ flex: 1; min-width: 0; }
-    .chip{
-      width: 78px;
-      height: 62px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size: 30px;
-      cursor:pointer;
-      user-select:none;
-      transition: transform .05s ease, box-shadow .15s ease, border-color .15s ease;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .chip:active{ transform: scale(.98); }
+/* Icon-Buttons */
+.icon{
+  width:56px;
+  height:56px;
+  border-radius:18px;
+  border:2px solid var(--border);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:26px;
+  background:rgba(255,255,255,.18);
+  cursor:pointer;
+}
 
-    .chip.active{
-      border-color: rgba(45,213,111,.75);
-      box-shadow: 0 0 0 4px rgba(45,213,111,.18), 0 0 30px rgba(45,213,111,.18);
-    }
+.icon.active{
+  border-color:var(--ok);
+  box-shadow:0 0 0 3px rgba(31,157,85,.25);
+}
 
-    /* Heavy links + KG rechts */
-    .rowWeight .chip{ width: 78px; }
+/* Gewicht */
+.weight{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  font-size:28px;
+  font-weight:700;
+}
 
-    .weightBox{
-      flex: 1;
-      min-width: 0;
-      height: 62px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      gap: 10px;
-      font-weight: 900;
-      cursor: text;
-      position: relative;
-    }
-    .weightDigits{
-      font-size: 40px;
-      letter-spacing: .06em;
-      color: rgba(255,255,255,.92);
-      min-width: 70px;
-      text-align:center;
-    }
-    .weightUnit{
-      font-size: 34px; /* wieder größer und besser lesbar */
-      font-weight: 900;
-      color: rgba(255,255,255,.78);
-    }
-    .weightInput{
-      position:absolute;
-      inset:0;
-      opacity:0;
-      width:100%;
-      height:100%;
-      border:0;
-      background:transparent;
-      color:transparent;
-      caret-color:transparent;
-      outline:none;
-    }
+.weight span{
+  font-size:22px;
+  font-weight:600;
+  opacity:.7;
+}
 
-    /* Farbwahl nur für E */
-    .colors{
-      display:none;
-      gap: 10px;
-      align-items:center;
-      margin-top: 2px;
-      margin-bottom: 6px; /* Abstand vorm Inhaltsfeld */
-    }
-    .swatch{
-      display:flex;
-      align-items:center;
-      gap: 8px;
-      padding: 10px 12px;
-      border-radius: 999px;
-      border: 2px solid rgba(255,255,255,.14);
-      background: rgba(0,0,0,.10);
-      color: rgba(255,255,255,.75);
-      font-weight: 800;
-      cursor:pointer;
-      user-select:none;
-      font-size: 16px;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .swatchDot{
-      width: 14px; height: 14px;
-      border-radius: 4px;
-      border: 2px solid rgba(255,255,255,.20);
-      background: #C0C0C0;
-    }
-    .swatch.black .swatchDot{ background: #050505; }
-    .swatch.active{
-      border-color: rgba(45,213,111,.75);
-      box-shadow: 0 0 0 4px rgba(45,213,111,.18);
-    }
+/* Textfeld */
+textarea{
+  width:100%;
+  margin-top:22px;
+  height:260px;
+  resize:none;
+  border-radius:22px;
+  border:2px solid var(--border);
+  background:rgba(255,255,255,.18);
+  padding:18px;
+  font-size:20px;
+  font-weight:500;
+  color:#000;
+}
 
-    textarea{
-      width: 100%;
-      min-height: 330px;
-      resize: vertical;
-      padding: 16px 16px;
-      border-radius: 22px;
-      background: rgba(255,255,255,.04);
-      border: 2px solid rgba(255,255,255,.12);
-      color: rgba(255,255,255,.86);
-      font-size: 22px;
-      line-height: 1.35;
-      outline:none;
-    }
-    textarea::placeholder{ color: rgba(255,255,255,.38); }
+textarea::placeholder{
+  color:rgba(0,0,0,.4);
+}
 
-    .buttons{
-      margin-top: 18px;
-      display:flex;
-      gap: 14px;
-    }
-    .btn{
-      flex: 1;
-      height: 74px;
-      border-radius: 18px;
-      border: 0;
-      background: #1f355d;
-      color: rgba(255,255,255,.94);
-      font-weight: 900;
-      font-size: 22px;
-      box-shadow: 0 12px 25px rgba(0,0,0,.35);
-      cursor:pointer;
-    }
-    .btn:active{ transform: scale(.99); }
+/* Buttons */
+.actions{
+  display:flex;
+  gap:14px;
+  margin-top:24px;
+}
 
-    .hint{
-      margin-top: 8px;
-      font-size: 13px;
-      opacity: .6;
-      text-align:center;
-    }
-
-    @media (max-width: 360px){
-      h1{ font-size: 42px; }
-      .status{ font-size: 22px; }
-      .field{ font-size: 22px; height: 58px; }
-      .chip{ width: 72px; height: 58px; }
-      .weightBox{ height: 58px; }
-      .weightDigits{ font-size: 36px; }
-      .weightUnit{ font-size: 30px; }
-      textarea{ font-size: 20px; }
-      .btn{ font-size: 20px; }
-    }
-  </style>
+.btn{
+  flex:1;
+  height:56px;
+  border-radius:18px;
+  border:none;
+  background:#243a5e;
+  color:#fff;
+  font-size:18px;
+  font-weight:700;
+}
+</style>
 </head>
 
 <body>
-  <div class="card" id="card">
-    <div class="topbar" id="topbar"></div>
 
-    <h1 id="title">E000</h1>
-    <div class="status" id="status">Gespeichert ✓</div>
+<div class="card">
 
-    <div class="grid">
+  <div class="topbar"></div>
 
-      <!-- ORT alleine -->
-      <div class="row rowOrt">
-        <input id="ort" class="field" maxlength="6" placeholder="ORT" autocomplete="off" />
-      </div>
+  <h1>K017</h1>
+  <div class="status">Gespeichert ✓</div>
 
-      <!-- Bezeichnung breit + Glas rechts -->
-      <div class="row rowBez">
-        <input id="bez" class="field" placeholder="Bezeichnung" autocomplete="off" />
-        <div class="chip" id="fragile" title="Zerbrechlich">🍷</div>
-      </div>
+  <div class="row">
+    <input class="field" placeholder="ORT">
+  </div>
 
-      <!-- Heavy links + KG rechts -->
-      <div class="row rowWeight">
-        <div class="chip" id="heavy" title="Heavy">🏋️</div>
+  <div class="row">
+    <input class="field" placeholder="Bezeichnung">
+    <div class="icon" id="fragile">🍷</div>
+  </div>
 
-        <div class="weightBox" id="weightBox" title="Gewicht">
-          <div class="weightDigits" id="weightDigits">00</div>
-          <div class="weightUnit">kg</div>
-          <input id="weight" class="weightInput" inputmode="numeric" pattern="[0-9]*" maxlength="2" />
-        </div>
-      </div>
-
-      <!-- Farbauswahl (nur E) -->
-      <div class="colors" id="colors">
-        <div class="swatch grey" id="cGrey"><span class="swatchDot"></span>Grau</div>
-        <div class="swatch black" id="cBlack"><span class="swatchDot"></span>Schwarz</div>
-      </div>
-
-      <textarea id="content" placeholder="• Inhalt hier eintragen..."></textarea>
-
-      <div class="buttons">
-        <button class="btn" id="backupBtn">Backup nach iCloud</button>
-        <button class="btn" id="importBtn">Backup importieren</button>
-      </div>
-
-      <div class="hint" id="hint"></div>
+  <div class="row">
+    <div class="icon" id="heavy">🏋️</div>
+    <div class="field weight" id="weightField">
+      <span id="kgValue">00</span><span>kg</span>
     </div>
   </div>
 
+  <textarea placeholder="• Inhalt hier eintragen..."></textarea>
+
+  <div class="actions">
+    <button class="btn">Backup nach iCloud</button>
+    <button class="btn">Backup importieren</button>
+  </div>
+
+</div>
+
 <script>
-(() => {
-  const $ = (id) => document.getElementById(id);
+/* Icon Toggle */
+document.querySelectorAll('.icon').forEach(icon=>{
+  icon.addEventListener('click',()=>icon.classList.toggle('active'));
+});
 
-  const titleEl = $("title");
-  const statusEl = $("status");
-  const cardEl = $("card");
-  const topbarEl = $("topbar");
+/* Gewicht bearbeiten */
+const kgSpan=document.getElementById('kgValue');
+document.getElementById('weightField').addEventListener('click',()=>{
+  let v=prompt("Gewicht in kg (0–99):",kgSpan.textContent);
+  if(v===null) return;
+  v=parseInt(v,10);
+  if(isNaN(v)||v<0||v>99) return;
+  kgSpan.textContent=String(v).padStart(2,'0');
 
-  const ortEl = $("ort");
-  const bezEl = $("bez");
-  const fragileEl = $("fragile");
-  const heavyEl = $("heavy");
-
-  const weightBoxEl = $("weightBox");
-  const weightEl = $("weight");
-  const weightDigitsEl = $("weightDigits");
-
-  const colorsEl = $("colors");
-  const cGreyEl = $("cGrey");
-  const cBlackEl = $("cBlack");
-
-  const contentEl = $("content");
-
-  const backupBtn = $("backupBtn");
-  const importBtn = $("importBtn");
-  const hintEl = $("hint");
-
-  const params = new URLSearchParams(location.search);
-  const boxId = (params.get("box") || "E000").toUpperCase();
-  titleEl.textContent = boxId;
-  document.title = boxId + " – Eurobox";
-
-  const STORE_KEY = "euroboxenData_v1";
-
-  const getAll = () => {
-    try { return JSON.parse(localStorage.getItem(STORE_KEY) || "{}"); }
-    catch { return {}; }
-  };
-  const setAll = (obj) => localStorage.setItem(STORE_KEY, JSON.stringify(obj));
-
-  const nowISO = () => new Date().toISOString();
-
-  const typePrefix = boxId.slice(0,1);
-  const COLORS = {
-    E_GREY: "#C0C0C0",
-    E_BLACK: "#0A0A0A",
-    K_CARTON: "#ADAC62",
-    T_BAG: "#9FFCFD"
-  };
-
-  function clampInt(n, min, max){
-    n = Number.isFinite(n) ? n : parseInt(String(n||"0"),10);
-    if (!Number.isFinite(n)) n = 0;
-    return Math.max(min, Math.min(max, n));
-  }
-
-  function twoDigits(n){
-    n = clampInt(n, 0, 99);
-    return String(n).padStart(2, "0");
-  }
-
-  function autoBaseColor(rec){
-    if (typePrefix === "K") return COLORS.K_CARTON;
-    if (typePrefix === "T") return COLORS.T_BAG;
-    // E: wählbar
-    const c = rec?.color || "grey";
-    return (c === "black") ? COLORS.E_BLACK : COLORS.E_GREY;
-  }
-
-  function setTheme(baseHex){
-    // Card = base, Topbar etwas dunkler/transparent
-    cardEl.style.background = baseHex;
-    topbarEl.style.background = "rgba(0,0,0,.12)";
-    // Borders etc bleiben wie vorher, wirkt auf hellen Karten wie im Screenshot
-    // Textfarbe: auf hellen Karten schwarz
-    const isLight = isHexLight(baseHex);
-    document.documentElement.style.setProperty("--text", isLight ? "rgba(0,0,0,.88)" : "rgba(255,255,255,.92)");
-    document.documentElement.style.setProperty("--muted", isLight ? "rgba(0,0,0,.55)" : "rgba(255,255,255,.55)");
-    document.documentElement.style.setProperty("--fieldBg", isLight ? "rgba(255,255,255,.28)" : "rgba(255,255,255,.06)");
-    document.documentElement.style.setProperty("--fieldBorder", isLight ? "rgba(0,0,0,.18)" : "rgba(255,255,255,.12)");
-  }
-
-  function isHexLight(hex){
-    const h = hex.replace("#","");
-    const r = parseInt(h.slice(0,2),16);
-    const g = parseInt(h.slice(2,4),16);
-    const b = parseInt(h.slice(4,6),16);
-    const luminance = (0.299*r + 0.587*g + 0.114*b) / 255;
-    return luminance > 0.62;
-  }
-
-  function normalizeBullets(text){
-    const lines = text.replace(/\r\n/g,"\n").split("\n");
-    const out = lines.map(l => {
-      const t = l.replace(/^\s*[•\-–]\s?/,"").trimEnd();
-      if (t === "") return "";
-      return "• " + t;
-    });
-    // Entferne führende leere Zeilen
-    while (out.length && out[0] === "") out.shift();
-    return out.join("\n");
-  }
-
-  function setSaved(ok){
-    statusEl.textContent = ok ? "Gespeichert ✓" : "Speichert…";
-  }
-
-  function loadRecord(){
-    const all = getAll();
-    const rec = all[boxId] || {
-      ort: "",
-      bez: "",
-      content: "",
-      fragile: false,
-      weight: 0,
-      heavyManual: false,
-      color: "grey",
-      updatedAt: null
-    };
-    return { all, rec };
-  }
-
-  function saveRecord(rec){
-    const all = getAll();
-    rec.updatedAt = nowISO();
-    all[boxId] = rec;
-    setAll(all);
-  }
-
-  function applyUI(rec){
-    // Inhalte
-    ortEl.value = rec.ort || "";
-    bezEl.value = rec.bez || "";
-    contentEl.value = rec.content || "";
-
-    // Icons
-    fragileEl.classList.toggle("active", !!rec.fragile);
-
-    // Gewicht
-    const w = clampInt(rec.weight, 0, 99);
-    weightDigitsEl.textContent = twoDigits(w);
-    // Heavy: automatisch ab 16kg oder manuell aktiviert
-    const heavyOn = (w >= 16) || !!rec.heavyManual;
-    heavyEl.classList.toggle("active", heavyOn);
-
-    // Farblogik
-    if (typePrefix === "E"){
-      colorsEl.style.display = "flex";
-      const c = rec.color === "black" ? "black" : "grey";
-      cGreyEl.classList.toggle("active", c === "grey");
-      cBlackEl.classList.toggle("active", c === "black");
-    } else {
-      colorsEl.style.display = "none";
-    }
-
-    setTheme(autoBaseColor(rec));
-  }
-
-  function currentRecord(){
-    const { rec } = loadRecord();
-    return rec;
-  }
-
-  // --- Events ---
-  let saveTimer = null;
-  function scheduleSave(){
-    setSaved(false);
-    clearTimeout(saveTimer);
-    saveTimer = setTimeout(() => {
-      const rec = currentRecord();
-
-      rec.ort = ortEl.value.trim().slice(0,6);
-      rec.bez = bezEl.value.trim();
-      rec.content = normalizeBullets(contentEl.value);
-      // weight + toggles werden in ihren Handlern gepflegt
-      saveRecord(rec);
-
-      // nach normalisieren Text ggf. zurücksetzen (ohne Cursor-Jump zu hart)
-      if (contentEl.value !== rec.content) {
-        const pos = contentEl.selectionStart;
-        contentEl.value = rec.content;
-        contentEl.selectionStart = contentEl.selectionEnd = Math.min(pos, contentEl.value.length);
-      }
-      setSaved(true);
-    }, 250);
-  }
-
-  ortEl.addEventListener("input", scheduleSave);
-  bezEl.addEventListener("input", scheduleSave);
-
-  // Bullets: beim Tippen automatisch bullets
-  contentEl.addEventListener("input", () => {
-    // sanft normalisieren
-    const before = contentEl.value;
-    const after = normalizeBullets(before);
-    if (after !== before) {
-      const pos = contentEl.selectionStart;
-      contentEl.value = after;
-      contentEl.selectionStart = contentEl.selectionEnd = Math.min(pos, after.length);
-    }
-    scheduleSave();
-  });
-
-  // Backspace am Zeilenanfang: Bullet entfernen
-  contentEl.addEventListener("keydown", (e) => {
-    if (e.key !== "Backspace") return;
-    const v = contentEl.value;
-    const s = contentEl.selectionStart;
-    const epos = contentEl.selectionEnd;
-    if (s !== epos) return;
-
-    const lineStart = v.lastIndexOf("\n", s-1) + 1;
-    const beforeCaret = v.slice(lineStart, s);
-    // Wenn am Anfang direkt nach "• " oder "•" -> Bullet entfernen
-    if (beforeCaret === "• " || beforeCaret === "•") {
-      e.preventDefault();
-      const newV = v.slice(0, lineStart) + v.slice(s);
-      contentEl.value = newV;
-      contentEl.selectionStart = contentEl.selectionEnd = lineStart;
-      scheduleSave();
-    }
-  });
-
-  fragileEl.addEventListener("click", () => {
-    const rec = currentRecord();
-    rec.fragile = !rec.fragile;
-    saveRecord(rec);
-    applyUI(rec);
-    setSaved(true);
-  });
-
-  heavyEl.addEventListener("click", () => {
-    const rec = currentRecord();
-    // manuelles Heavy toggeln (zusätzlich zur Automatik ab 16)
-    rec.heavyManual = !rec.heavyManual;
-    saveRecord(rec);
-    applyUI(rec);
-    setSaved(true);
-  });
-
-  // KG: kompletter Bereich klickbar und fokussiert NUR das Weight-Input
-  weightBoxEl.addEventListener("click", (ev) => {
-    ev.preventDefault();
-    ev.stopPropagation();
-    weightEl.focus({ preventScroll: true });
-    // alles markieren -> zweistellig bequem überschreiben
-    setTimeout(() => weightEl.setSelectionRange(0, weightEl.value.length), 0);
-  });
-
-  // verhindere, dass Klick auf Weight irgendwas anderes fokussiert
-  weightEl.addEventListener("mousedown", (ev)=> ev.preventDefault());
-
-  weightEl.addEventListener("focus", () => {
-    // current digits in input
-    const rec = currentRecord();
-    weightEl.value = twoDigits(rec.weight || 0);
-    setTimeout(() => weightEl.setSelectionRange(0, weightEl.value.length), 0);
-  });
-
-  weightEl.addEventListener("input", () => {
-    let raw = (weightEl.value || "").replace(/\D/g,"").slice(0,2);
-    if (raw === "") raw = "0";
-    const w = clampInt(parseInt(raw,10), 0, 99);
-
-    const rec = currentRecord();
-    rec.weight = w;
-    saveRecord(rec);
-    applyUI(rec);
-    setSaved(true);
-  });
-
-  // Farbwahl nur E
-  cGreyEl.addEventListener("click", () => {
-    const rec = currentRecord();
-    rec.color = "grey";
-    saveRecord(rec);
-    applyUI(rec);
-    setSaved(true);
-  });
-  cBlackEl.addEventListener("click", () => {
-    const rec = currentRecord();
-    rec.color = "black";
-    saveRecord(rec);
-    applyUI(rec);
-    setSaved(true);
-  });
-
-  // Backup: JSON export (iOS -> Teilen -> In Dateien -> iCloud Drive)
-  backupBtn.addEventListener("click", async () => {
-    const all = getAll();
-    const blob = new Blob([JSON.stringify(all, null, 2)], { type: "application/json" });
-    const filename = "Euroboxen.json";
-
-    // iOS Safari: navigator.share mit files
-    if (navigator.canShare && navigator.canShare({ files: [new File([blob], filename, {type:"application/json"})] })) {
-      const file = new File([blob], filename, { type: "application/json" });
-      try{
-        await navigator.share({ files: [file], title: filename, text: "Euroboxen Backup" });
-        hintEl.textContent = "Backup: Teilen → In Dateien sichern (iCloud Drive).";
-      }catch(e){
-        hintEl.textContent = "Backup abgebrochen.";
-      }
-      return;
-    }
-
-    // Fallback: Download
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    setTimeout(() => {
-      URL.revokeObjectURL(a.href);
-      a.remove();
-    }, 2000);
-    hintEl.textContent = "Backup heruntergeladen (Euroboxen.json).";
-  });
-
-  // Import: JSON auswählen
-  importBtn.addEventListener("click", async () => {
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = "application/json";
-    input.onchange = async () => {
-      const file = input.files?.[0];
-      if (!file) return;
-      try{
-        const txt = await file.text();
-        const obj = JSON.parse(txt);
-        if (!obj || typeof obj !== "object") throw new Error("ungültig");
-        setAll(obj);
-        const { rec } = loadRecord();
-        applyUI(rec);
-        hintEl.textContent = "Backup importiert.";
-        setSaved(true);
-      }catch(e){
-        hintEl.textContent = "Import fehlgeschlagen (keine gültige JSON).";
-      }
-    };
-    input.click();
-  });
-
-  // --- Init ---
-  const { rec } = loadRecord();
-  applyUI(rec);
-  // Content initial normalisieren
-  const norm = normalizeBullets(rec.content || "");
-  if (norm !== (rec.content||"")) {
-    rec.content = norm;
-    saveRecord(rec);
-    applyUI(rec);
-  }
-})();
+  /* Heavy automatisch ab 16kg */
+  document.getElementById('heavy').classList.toggle('active',v>=16);
+});
 </script>
+
 </body>
 </html>
