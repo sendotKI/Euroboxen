@@ -32,14 +32,13 @@ body {
 
 .header h1 {
   margin: 8px 0 2px;
-  font-size: 32px;
+  font-size: 28px;
 }
 
 .saved {
   font-size: 15px;
   font-weight: 600;
 }
-
 .saved.green { color: #00c26a; }
 .saved.red { color: #ff4b4b; }
 
@@ -50,7 +49,7 @@ body {
   margin-top: 14px;
 }
 
-/* Zeile 1: ORT + 🍷 (ORT ~ 1/3 kleiner) */
+/* Zeile 1: ORT + 🍷 */
 .row-ort {
   display: grid;
   grid-template-columns: 0.65fr 46px;
@@ -87,28 +86,46 @@ body {
   transition: box-shadow 0.2s ease, background 0.2s ease;
 }
 
-/* 🍷 rot leuchten, wenn aktiv */
+/* 🍷 rot leuchten */
 .icon.fragile-active{
   box-shadow: 0 0 0 2px #ff3b3b, 0 0 10px rgba(255,59,59,0.7);
   background: rgba(255, 80, 80, 0.25);
 }
 
-/* Heavy GELB (ab 16kg oder manuell an) */
+/* Heavy GELB / ROT */
 .icon.heavy-yellow{
   box-shadow: 0 0 0 2px #f4c430, 0 0 10px rgba(244,196,48,0.75);
   background: rgba(244,196,48,0.25);
 }
-
-/* Heavy ROT (ab 26kg) */
 .icon.heavy-red{
   box-shadow: 0 0 0 2px #ff3b3b, 0 0 10px rgba(255,59,59,0.75);
   background: rgba(255,59,59,0.25);
 }
 
-/* KG */
-.kg {
+/* KG + Pfeile */
+.kg-wrap{
   flex: 1;
   height: 46px;
+  display: grid;
+  grid-template-columns: 44px 1fr 44px;
+  align-items: center;
+  padding: 0;
+  overflow: hidden;
+}
+
+.kg-btn{
+  height: 46px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.kg-value{
   display:flex;
   align-items:center;
   justify-content:center;
@@ -122,7 +139,6 @@ body {
   gap: 10px;
   margin: 14px 0;
 }
-
 .color {
   width: 42px;
   height: 32px;
@@ -130,12 +146,11 @@ body {
   border: 2px solid transparent;
   cursor: pointer;
 }
-
 .color.active { border-color: #00d26a; }
 
 /* Inhalt */
 .textarea {
-  margin-top: 26px;
+  margin-top: 22px;
   padding: 16px;
   min-height: 160px;
   border-radius: 18px;
@@ -144,6 +159,8 @@ body {
   font-size: 16px;
   color: inherit;
   white-space: pre-wrap;
+  outline: none;
+  cursor: text;
 }
 
 /* Placeholder-Optik */
@@ -155,7 +172,6 @@ body {
   gap: 12px;
   margin-top: 20px;
 }
-
 button {
   flex: 1;
   padding: 14px;
@@ -166,7 +182,6 @@ button {
   font-size: 16px;
   cursor: pointer;
 }
-
 button:active { transform: scale(0.99); }
 </style>
 </head>
@@ -186,7 +201,7 @@ button:active { transform: scale(0.99); }
     <div class="field icon" id="fragile" title="Zerbrechlich">🍷</div>
   </div>
 
-  <!-- ZEILE 2: BEZEICHNUNG (lang) -->
+  <!-- ZEILE 2: BEZEICHNUNG -->
   <div class="row">
     <input id="label" class="field field-wide" placeholder="Bezeichnung">
   </div>
@@ -194,7 +209,12 @@ button:active { transform: scale(0.99); }
   <!-- ZEILE 3: HEAVY + KG -->
   <div class="row">
     <div class="field icon" id="heavy" title="Heavy">🏋️</div>
-    <div class="field kg" id="kg">00 kg</div>
+
+    <div class="field kg-wrap" id="kgWrap" title="Gewicht">
+      <div class="kg-btn" id="kgDown" aria-label="Gewicht runter">◀︎</div>
+      <div class="kg-value" id="kgValue">00 kg</div>
+      <div class="kg-btn" id="kgUp" aria-label="Gewicht rauf">▶︎</div>
+    </div>
   </div>
 
   <!-- Farben (nur E-Boxen sichtbar) -->
@@ -213,7 +233,6 @@ button:active { transform: scale(0.99); }
 
 </div>
 
-<!-- Hidden File Input für Import -->
 <input id="fileInput" type="file" accept="application/json" style="display:none"/>
 
 <script>
@@ -232,7 +251,11 @@ const ort = document.getElementById("ort");
 const label = document.getElementById("label");
 const fragile = document.getElementById("fragile");
 const heavy = document.getElementById("heavy");
-const kg = document.getElementById("kg");
+
+const kgDown = document.getElementById("kgDown");
+const kgUp = document.getElementById("kgUp");
+const kgValue = document.getElementById("kgValue");
+
 const content = document.getElementById("content");
 
 const btnExport = document.getElementById("btnExport");
@@ -244,26 +267,15 @@ elBoxId.textContent = boxIdVal;
 /* =========================
    Farben je Box-Typ
 ========================= */
-function applyBoxTypeDefault() {
-  if (boxIdVal.startsWith("K")) {
-    setCardTheme("#ADAC62", "#000");
-    colors.style.display = "none";
-    setSavedStyle(false);
-  } else if (boxIdVal.startsWith("T")) {
-    setCardTheme("#9FFCFD", "#000");
-    colors.style.display = "none";
-    setSavedStyle(false);
-  } else { // E
-    setCardTheme("#6c707a", "#000");
-    colors.style.display = "flex";
-    setSavedStyle(false);
-    setActiveColorButton("#6c707a");
-  }
-}
-
 function setCardTheme(bg, fg) {
   card.style.background = bg;
   card.style.color = fg;
+  // Placeholder-Farbe passt sich an: schwarz -> hell
+  if (content.classList.contains("placeholder")) {
+    content.style.color = (fg === "#fff") ? "rgba(255,255,255,.55)" : "rgba(0,0,0,.45)";
+  } else {
+    content.style.color = "inherit";
+  }
 }
 
 function setSavedStyle(isBlackTheme) {
@@ -274,6 +286,23 @@ function setActiveColorButton(color) {
   document.querySelectorAll(".color").forEach(x => x.classList.remove("active"));
   const btn = [...document.querySelectorAll(".color")].find(x => x.dataset.color === color);
   if (btn) btn.classList.add("active");
+}
+
+function applyBoxTypeDefault() {
+  if (boxIdVal.startsWith("K")) {
+    colors.style.display = "none";
+    setCardTheme("#ADAC62", "#000");
+    setSavedStyle(false);
+  } else if (boxIdVal.startsWith("T")) {
+    colors.style.display = "none";
+    setCardTheme("#9FFCFD", "#000");
+    setSavedStyle(false);
+  } else { // E
+    colors.style.display = "flex";
+    setCardTheme("#6c707a", "#000");
+    setSavedStyle(false);
+    setActiveColorButton("#6c707a");
+  }
 }
 
 /* E-Farben klicken */
@@ -310,6 +339,10 @@ fragile.addEventListener("click", () => {
 let weight = 0;
 let heavyManual = false;
 
+function setKgText(){
+  kgValue.textContent = String(weight).padStart(2,"0") + " kg";
+}
+
 function refreshHeavy(){
   heavy.classList.remove("heavy-yellow","heavy-red");
 
@@ -320,12 +353,16 @@ function refreshHeavy(){
   else heavy.classList.add("heavy-yellow");
 }
 
-kg.addEventListener("click", () => {
-  weight = (weight + 1) % 100;
-  kg.textContent = String(weight).padStart(2,"0") + " kg";
+function changeWeight(delta){
+  weight = (weight + delta) % 100;
+  if (weight < 0) weight += 100;
+  setKgText();
   refreshHeavy();
   markDirtyAndSaveSoon();
-});
+}
+
+kgUp.addEventListener("click", (e) => { e.stopPropagation(); changeWeight(+1); });
+kgDown.addEventListener("click", (e) => { e.stopPropagation(); changeWeight(-1); });
 
 heavy.addEventListener("click", () => {
   heavyManual = !heavyManual;
@@ -334,13 +371,8 @@ heavy.addEventListener("click", () => {
 });
 
 /* =========================
-   Inhalt: Placeholder überschreibbar + Bullet je Zeile
+   Inhalt: wieder editierbar + Bullet je Zeile
 ========================= */
-function setPlaceholder(){
-  content.classList.add("placeholder");
-  content.innerText = "• Inhalt hier eintragen...";
-}
-
 function placeCursorAtEnd(){
   const range = document.createRange();
   range.selectNodeContents(content);
@@ -350,26 +382,49 @@ function placeCursorAtEnd(){
   sel.addRange(range);
 }
 
+function setPlaceholder(){
+  content.classList.add("placeholder");
+  content.innerText = "• Inhalt hier eintragen...";
+  // Farbe abhängig vom Theme
+  content.style.color = (card.style.color === "#fff") ? "rgba(255,255,255,.55)" : "rgba(0,0,0,.45)";
+}
+
 function clearPlaceholder(){
   content.classList.remove("placeholder");
+  content.style.color = "inherit";
   content.innerText = "• ";
   placeCursorAtEnd();
 }
 
 function normalizeBullets() {
-  // sorgt dafür, dass JEDE Zeile mit "• " beginnt (außer Placeholder)
   if (content.classList.contains("placeholder")) return;
-  const lines = content.innerText.replace(/\r/g,"").split("\n");
+
+  const raw = content.innerText.replace(/\r/g,"");
+  const lines = raw.split("\n");
+
   const fixed = lines.map((l, i) => {
-    const t = l.trimEnd();
+    const t = l.replace(/\s+$/,""); // trimEnd
     if (i === 0 && t.trim() === "") return "• ";
     if (t.trim() === "") return "•";
     return t.startsWith("•") ? t : "• " + t;
   });
-  content.innerText = fixed.join("\n");
+
+  const next = fixed.join("\n");
+  if (next !== raw) {
+    // Wenn wir korrigieren, Cursor ans Ende (simple & stabil auf iOS)
+    content.innerText = next;
+    placeCursorAtEnd();
+  }
 }
 
+/* Start */
 setPlaceholder();
+
+content.addEventListener("pointerdown", () => {
+  // iOS: manchmal braucht es einen "kick", damit der Cursor wirklich ins Feld geht
+  if (content.classList.contains("placeholder")) return;
+  // nichts weiter
+});
 
 content.addEventListener("focus", () => {
   if (content.classList.contains("placeholder")) clearPlaceholder();
@@ -398,12 +453,9 @@ content.addEventListener("input", () => {
    Speichern pro Box (localStorage)
 ========================= */
 const STORAGE_PREFIX = "umzug_box_";
-const BACKUP_KEY = "umzug_backup_v1";
-
 function boxStorageKey(id){ return STORAGE_PREFIX + id; }
 
 function getCurrentState(){
-  // Hintergrund/Text speichern (für E schwarz/grau)
   const bg = card.style.background || "";
   const fg = card.style.color || "";
 
@@ -428,12 +480,11 @@ function applyState(state){
   fragile.classList.toggle("fragile-active", fragileActive);
 
   weight = Number.isFinite(state.weight) ? state.weight : 0;
-  kg.textContent = String(weight).padStart(2,"0") + " kg";
+  setKgText();
 
   heavyManual = !!state.heavyManual;
   refreshHeavy();
 
-  // Theme wiederherstellen (nur sinnvoll bei E)
   if (state.bg) {
     setCardTheme(state.bg, state.fg || "#000");
     const isBlack = (state.bg === "#000");
@@ -441,9 +492,9 @@ function applyState(state){
     if (boxIdVal.startsWith("E")) setActiveColorButton(state.bg);
   }
 
-  // Inhalt
   if (state.content && state.content.trim() !== "") {
     content.classList.remove("placeholder");
+    content.style.color = "inherit";
     content.innerText = state.content;
     normalizeBullets();
   } else {
@@ -468,7 +519,6 @@ function loadBox(){
 
 function flashSaved(){
   saved.textContent = "Gespeichert ✓";
-  // Style abhängig vom Theme
   const isBlack = (card.style.background === "#000");
   setSavedStyle(isBlack);
 }
@@ -480,10 +530,9 @@ function markDirtyAndSaveSoon(){
   saveTimer = setTimeout(() => {
     saveBox();
     saveTimer = null;
-  }, 400);
+  }, 350);
 }
 
-/* Inputs speichern */
 [ort,label].forEach(el => el.addEventListener("input", markDirtyAndSaveSoon));
 
 /* =========================
@@ -494,16 +543,10 @@ function exportBackup(){
   for (let i=0; i<localStorage.length; i++){
     const k = localStorage.key(i);
     if (!k || !k.startsWith(STORAGE_PREFIX)) continue;
-    try {
-      all[k] = JSON.parse(localStorage.getItem(k));
-    } catch(e) {}
+    try { all[k] = JSON.parse(localStorage.getItem(k)); } catch(e) {}
   }
 
-  const payload = {
-    version: 1,
-    createdAt: new Date().toISOString(),
-    data: all
-  };
+  const payload = { version: 1, createdAt: new Date().toISOString(), data: all };
 
   const blob = new Blob([JSON.stringify(payload, null, 2)], {type:"application/json"});
   const url = URL.createObjectURL(blob);
@@ -528,14 +571,12 @@ function importBackupFile(file){
         return;
       }
 
-      // schreiben
       Object.keys(payload.data).forEach(k => {
         if (k.startsWith(STORAGE_PREFIX)) {
           localStorage.setItem(k, JSON.stringify(payload.data[k]));
         }
       });
 
-      // current reload
       applyBoxTypeDefault();
       loadBox();
       flashSaved();
@@ -548,9 +589,7 @@ function importBackupFile(file){
 }
 
 btnExport.addEventListener("click", exportBackup);
-
 btnImport.addEventListener("click", () => fileInput.click());
-
 fileInput.addEventListener("change", () => {
   const file = fileInput.files && fileInput.files[0];
   if (file) importBackupFile(file);
@@ -558,10 +597,11 @@ fileInput.addEventListener("change", () => {
 });
 
 /* =========================
-   Start: Default Theme + Load State
+   Start
 ========================= */
 applyBoxTypeDefault();
 loadBox();
+setKgText();
 refreshHeavy();
 </script>
 
