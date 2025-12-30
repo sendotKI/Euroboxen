@@ -34,26 +34,35 @@ body {
 
 .header h1 {
   margin: 8px 0 2px;
-  font-size: 34px;
+  font-size: 28px; /* kleiner */
 }
 
 .saved {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 600;
 }
 
 .saved.green { color: #00c26a; }
 .saved.red { color: #ff4b4b; }
 
+/* ---------- ROWS ---------- */
 .row {
   display: flex;
   gap: 12px;
   margin-top: 14px;
 }
 
+/* Zeile 1: ORT + 🍷 */
+.row-ort {
+  display: grid;
+  grid-template-columns: 1fr 46px;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+/* Felder */
 .field {
-  flex: 1;
-  padding: 10px;
+  padding: 10px 14px;
   border-radius: 16px;
   background: var(--field);
   border: 1px solid var(--border);
@@ -62,6 +71,12 @@ body {
   box-sizing: border-box;
 }
 
+/* Bezeichnung – extra lang */
+.field-wide {
+  width: 100%;
+}
+
+/* Icons */
 .icon {
   width: 46px;
   height: 46px;
@@ -69,22 +84,21 @@ body {
   display:flex;
   align-items:center;
   justify-content:center;
-  font-size: 22px;
+  font-size: 20px;
 }
 
+/* KG */
 .kg {
   flex: 1;
-   height: 46px;
-  line-height: 26px;
+  height: 46px;
   display:flex;   
   align-items:center;
   justify-content:center;
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 700;
-  text-align: center;
-  padding: 0 14px;   
 }
 
+/* Farben */
 .colors {
   display: flex;
   gap: 10px;
@@ -102,8 +116,9 @@ body {
   border-color: #00d26a;
 }
 
+/* Inhalt */
 .textarea {
-  margin-top: 18px;
+  margin-top: 22px;
   padding: 16px;
   min-height: 160px;
   border-radius: 18px;
@@ -112,6 +127,7 @@ body {
   font-size: 16px;
 }
 
+/* Buttons */
 .buttons {
   display: flex;
   gap: 12px;
@@ -139,20 +155,24 @@ button {
     <div id="saved" class="saved green">Gespeichert ✓</div>
   </div>
 
-<div class="row labelRow">
-  <input id="label" class="field" placeholder="Bezeichnung">
-</div>
-
-  <div class="row">
-    <input class="field" placeholder="Bezeichnung">
+  <!-- ZEILE 1: ORT + 🍷 -->
+  <div class="row-ort">
+    <input id="ort" class="field" placeholder="ORT">
     <div class="field icon" id="fragile">🍷</div>
   </div>
 
+  <!-- ZEILE 2: BEZEICHNUNG (lang) -->
   <div class="row">
-    <div class="field icon" id="heavy">🏋️</div>
+    <input id="label" class="field field-wide" placeholder="Bezeichnung">
+  </div>
+
+  <!-- ZEILE 3: HEAVY + KG -->
+  <div class="row">
+    <div class="field icon" id="heavy" style="opacity:0.4">🏋️</div>
     <div class="field kg" id="kg">00 kg</div>
   </div>
 
+  <!-- Farben (nur E-Boxen sichtbar) -->
   <div class="colors" id="colors">
     <div class="color active" data-color="#6c707a" style="background:#6c707a"></div>
     <div class="color" data-color="#000" style="background:#000"></div>
@@ -173,20 +193,22 @@ document.getElementById("boxId").textContent = boxId;
 
 const card = document.getElementById("card");
 const saved = document.getElementById("saved");
+const colors = document.getElementById("colors");
 
 function applyBoxType() {
   if (boxId.startsWith("K")) {
     card.style.background = "#ADAC62";
-    document.getElementById("colors").style.display = "none";
+    colors.style.display = "none";
     saved.className = "saved green";
   }
   if (boxId.startsWith("T")) {
     card.style.background = "#9FFCFD";
-    document.getElementById("colors").style.display = "none";
+    colors.style.display = "none";
     saved.className = "saved green";
   }
   if (boxId.startsWith("E")) {
     card.style.background = "#6c707a";
+    colors.style.display = "flex";
     saved.className = "saved green";
   }
 }
@@ -210,15 +232,17 @@ document.querySelectorAll(".color").forEach(c => {
 
 /* Gewicht */
 let weight = 0;
-document.getElementById("kg").onclick = () => {
+const kg = document.getElementById("kg");
+const heavy = document.getElementById("heavy");
+
+kg.onclick = () => {
   weight = (weight + 1) % 100;
-  document.getElementById("kg").textContent = String(weight).padStart(2,"0") + " kg";
-  document.getElementById("heavy").style.opacity = weight >= 16 ? "1" : "0.4";
+  kg.textContent = String(weight).padStart(2,"0") + " kg";
+  heavy.style.opacity = weight >= 16 ? "1" : "0.4";
 };
 
-document.getElementById("heavy").onclick = () => {
-  document.getElementById("heavy").style.opacity =
-    document.getElementById("heavy").style.opacity === "1" ? "0.4" : "1";
+heavy.onclick = () => {
+  heavy.style.opacity = heavy.style.opacity === "1" ? "0.4" : "1";
 };
 </script>
 
