@@ -7,57 +7,60 @@
 
 <style>
 :root{
-  --card-bg:#B9BA73;          /* Kartonfarbe */
+  --karton:#B9BA73;
+  --euro:#3b4252;
+  --tuete:#9FFCFD;
+
   --border:rgba(0,0,0,.25);
   --text:#000;
+
   --ok:#1f9d55;
+  --alert:#c62828; /* ROT */
 }
 
-*{box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial;}
+*{
+  box-sizing:border-box;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial;
+}
 
 body{
   margin:0;
   background:radial-gradient(circle at top,#0b1325,#000);
   padding:24px 12px;
-  color:var(--text);
 }
 
 .card{
   max-width:420px;
   margin:0 auto;
-  background:var(--card-bg);
   border-radius:28px;
   padding:22px 18px 24px;
+  background:var(--karton);
+  color:var(--text);
 }
 
-/* obere Leiste */
 .topbar{
   height:10px;
-  width:100%;
   border-radius:10px;
   background:rgba(0,0,0,.15);
   margin-bottom:14px;
 }
 
-/* Überschrift */
 h1{
   margin:0;
   text-align:center;
-  font-size:34px;
+  font-size:28px; /* kleiner */
   font-weight:800;
   letter-spacing:.05em;
-  color:#000;
 }
 
 .status{
   text-align:center;
   margin-top:4px;
-  font-size:18px;
+  font-size:16px;
   font-weight:700;
   color:var(--ok);
 }
 
-/* Felder */
 .row{
   display:flex;
   gap:12px;
@@ -71,7 +74,7 @@ h1{
   border:2px solid var(--border);
   background:rgba(255,255,255,.18);
   padding:0 14px;
-  font-size:20px;
+  font-size:18px;
   font-weight:600;
   color:#000;
 }
@@ -80,7 +83,6 @@ h1{
   color:rgba(0,0,0,.45);
 }
 
-/* Icon-Buttons */
 .icon{
   width:56px;
   height:56px;
@@ -95,27 +97,25 @@ h1{
 }
 
 .icon.active{
-  border-color:var(--ok);
-  box-shadow:0 0 0 3px rgba(31,157,85,.25);
+  border-color:var(--alert);
+  box-shadow:0 0 0 3px rgba(198,40,40,.3); /* ROTER Glow */
 }
 
-/* Gewicht */
 .weight{
   display:flex;
   align-items:center;
   justify-content:center;
   gap:6px;
-  font-size:28px;
+  font-size:26px;
   font-weight:700;
 }
 
 .weight span{
-  font-size:22px;
+  font-size:20px;
   font-weight:600;
-  opacity:.7;
+  opacity:.8;
 }
 
-/* Textfeld */
 textarea{
   width:100%;
   margin-top:22px;
@@ -125,16 +125,10 @@ textarea{
   border:2px solid var(--border);
   background:rgba(255,255,255,.18);
   padding:18px;
-  font-size:20px;
+  font-size:18px;
   font-weight:500;
-  color:#000;
 }
 
-textarea::placeholder{
-  color:rgba(0,0,0,.4);
-}
-
-/* Buttons */
 .actions{
   display:flex;
   gap:14px;
@@ -148,7 +142,7 @@ textarea::placeholder{
   border:none;
   background:#243a5e;
   color:#fff;
-  font-size:18px;
+  font-size:17px;
   font-weight:700;
 }
 </style>
@@ -156,11 +150,11 @@ textarea::placeholder{
 
 <body>
 
-<div class="card">
+<div class="card" id="card">
 
   <div class="topbar"></div>
 
-  <h1>K017</h1>
+  <h1 id="boxId">---</h1>
   <div class="status">Gespeichert ✓</div>
 
   <div class="row">
@@ -189,22 +183,35 @@ textarea::placeholder{
 </div>
 
 <script>
-/* Icon Toggle */
-document.querySelectorAll('.icon').forEach(icon=>{
-  icon.addEventListener('click',()=>icon.classList.toggle('active'));
+/* -------- boxId aus URL -------- */
+const params = new URLSearchParams(location.search);
+const box = (params.get("box") || "K000").toUpperCase();
+document.getElementById("boxId").textContent = box;
+
+/* -------- Farbe je Typ -------- */
+const card = document.getElementById("card");
+
+if (box.startsWith("K")) card.style.background = "var(--karton)";
+if (box.startsWith("E")) card.style.background = "var(--euro)";
+if (box.startsWith("T")) card.style.background = "var(--tuete)";
+
+/* -------- Icon Toggle -------- */
+document.querySelectorAll(".icon").forEach(i=>{
+  i.addEventListener("click",()=>i.classList.toggle("active"));
 });
 
-/* Gewicht bearbeiten */
-const kgSpan=document.getElementById('kgValue');
-document.getElementById('weightField').addEventListener('click',()=>{
-  let v=prompt("Gewicht in kg (0–99):",kgSpan.textContent);
+/* -------- Gewicht -------- */
+const kgSpan = document.getElementById("kgValue");
+const heavyIcon = document.getElementById("heavy");
+
+document.getElementById("weightField").addEventListener("click",()=>{
+  let v = prompt("Gewicht in kg (0–99):",kgSpan.textContent);
   if(v===null) return;
   v=parseInt(v,10);
   if(isNaN(v)||v<0||v>99) return;
-  kgSpan.textContent=String(v).padStart(2,'0');
 
-  /* Heavy automatisch ab 16kg */
-  document.getElementById('heavy').classList.toggle('active',v>=16);
+  kgSpan.textContent = String(v).padStart(2,"0");
+  heavyIcon.classList.toggle("active", v >= 16);
 });
 </script>
 
