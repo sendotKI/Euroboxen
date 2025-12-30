@@ -151,6 +151,9 @@ body {
   font-size: 16px;
   color: var(--text);
 }
+.textarea.placeholder {
+  color: rgba(0,0,0,.45);
+}
 
 /* Buttons */
 .buttons {
@@ -213,96 +216,70 @@ button {
 </div>
 
 <script>
-const boxIdVal = new URLSearchParams(location.search).get("box") || "K017";
-document.getElementById("boxId").textContent = boxIdVal;
+const content = document.getElementById("content");
 
-const card = document.getElementById("card");
-const saved = document.getElementById("saved");
-const colors = document.getElementById("colors");
-
-function applyBoxType() {
-  if (boxIdVal.startsWith("K")) {
-    card.style.background = "#ADAC62";
-    card.style.color = "#000";
-    colors.style.display = "none";
-    saved.className = "saved green";
-  }
-  if (boxIdVal.startsWith("T")) {
-    card.style.background = "#9FFCFD";
-    card.style.color = "#000";
-    colors.style.display = "none";
-    saved.className = "saved green";
-  }
-  if (boxIdVal.startsWith("E")) {
-    card.style.background = "#6c707a";
-    card.style.color = "#000";
-    colors.style.display = "flex";
-    saved.className = "saved green";
-  }
+function isPlaceholder() {
+  return content.classList.contains("placeholder");
 }
-applyBoxType();
 
-/* Farben (nur E) */
-document.querySelectorAll(".color").forEach(c => {
-  c.onclick = () => {
-    document.querySelectorAll(".color").forEach(x=>x.classList.remove("active"));
-    c.classList.add("active");
-    card.style.background = c.dataset.color;
+function setPlaceholder() {
+  content.classList.add("placeholder");
+  content.innerText = "• Inhalt hier eintragen...";
+}
 
-    if (c.dataset.color === "#000") {
-      card.style.color = "#fff";
-      saved.className = "saved red";
-    } else {
-      card.style.color = "#000";
-      saved.className = "saved green";
-    }
-  };
+function clearPlaceholder() {
+  content.classList.remove("placeholder");
+  content.innerText = "• ";
+  placeCursorAtEnd();
+}
+
+function placeCursorAtEnd() {
+  const range = document.createRange();
+  const sel = window.getSelection();
+  range.selectNodeContents(content);
+  range.collapse(false);
+  sel.removeAllRanges();
+  sel.addRange(range);
+}
+
+/* Initial */
+setPlaceholder();
+
+/* Klick / Fokus */
+content.addEventListener("focus", () => {
+  if (isPlaceholder()) clearPlaceholder();
 });
 
-/* 🍷 Weinglas: anklickbar + rot leuchten */
-const fragile = document.getElementById("fragile");
-let fragileActive = false;
-
-fragile.onclick = () => {
-  fragileActive = !fragileActive;
-  fragile.classList.toggle("fragile-active", fragileActive);
-};
-
-/* Gewicht */
-let weight = 0;
-const kg = document.getElementById("kg");
-const heavy = document.getElementById("heavy");
-let heavyManual = false;
-
-function refreshHeavy(){
-  heavy.classList.remove("heavy-yellow","heavy-red");
-
-  // Manual an -> mindestens gelb (außer ab 26 rot)
-  const shouldShow = (weight >= 16) || heavyManual;
-
-  if (!shouldShow) return;
-
-  if (weight >= 26) {
-    heavy.classList.add("heavy-red");
-  } else {
-    heavy.classList.add("heavy-yellow");
+/* Enter → neue Bullet-Zeile */
+content.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    document.execCommand("insertText", false, "\n• ");
   }
-}
 
-kg.onclick = () => {
-  weight = (weight + 1) % 100;
-  kg.textContent = String(weight).padStart(2,"0") + " kg";
-  refreshHeavy();
-};
+  /* Backspace am Zeilenanfang → Bullet entfernen */
+  if (e.key === "Backspace") {
+    const sel = window.getSelection();
+    const range = sel.getRangeAt(0);
+    const text = content.innerText;
+    const pos = range.startOffset;
 
-heavy.onclick = () => {
-  heavyManual = !heavyManual;
-  refreshHeavy();
-};
+    if (text.slice(pos - 2, pos) === "• ") {
+      e.preventDefault();
+      document.execCommand("delete");
+      document.execCommand("delete");
+    }
+  }
+});
 
-/* initial */
-refreshHeavy();
+/* Wenn komplett leer → Placeholder zurück */
+content.addEventListener("input", () => {
+  if (content.innerText.trim() === "") {
+    setPlaceholder();
+  }
+});
 </script>
+
 
 </body>
 </html>
