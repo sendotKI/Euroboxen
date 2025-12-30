@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Box</title>
 
 <style>
@@ -12,10 +12,10 @@
   --eGrey:#C0C0C0;
   --eBlack:#000000;
   --kCard:#ADAC62;
-  --tCard:#E0E0E0;
+  --tCard:#9FFCFD;
 
   --stroke-dark:rgba(0,0,0,.25);
-  --stroke-light:rgba(255,255,255,.2);
+  --stroke-light:rgba(255,255,255,.22);
 
   --ok:#27d17e;
   --greenGlow:rgba(39,209,126,.35);
@@ -33,6 +33,7 @@ body{
   font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif;
 }
 
+/* Card */
 .card{
   width:min(720px,94vw);
   padding:18px;
@@ -40,6 +41,7 @@ body{
   background:#2b323f;
   color:#111;
   box-shadow:0 24px 60px rgba(0,0,0,.55);
+  overflow:hidden;
 }
 
 .topbar{
@@ -50,9 +52,10 @@ body{
   background:rgba(0,0,0,.15);
 }
 
+/* Überschrift kleiner machen */
 .boxId{
   text-align:center;
-  font-size:72px;
+  font-size:58px;   /* kleiner als vorher */
   font-weight:900;
   margin:0;
 }
@@ -71,7 +74,7 @@ body{
   gap:12px;
 }
 
-.input,.pill,.textareaWrap{
+.input,.pill,.textareaWrap,.kgPill{
   border:2px solid var(--stroke-dark);
   border-radius:18px;
   background:rgba(255,255,255,.35);
@@ -99,6 +102,8 @@ body{
   font-size:28px;
   cursor:pointer;
   user-select:none;
+  position:relative;
+  z-index:5; /* wichtig: klickbar bleiben */
 }
 
 .iconToggle.active{
@@ -109,29 +114,37 @@ body{
   box-shadow:0 0 0 5px var(--redGlow);
 }
 
-.kgWrap{
+/* kg wie ein richtiges Feld: ganzer Kasten ist klickbar */
+.kgPill{
   height:62px;
   display:flex;
   align-items:center;
   justify-content:center;
-  gap:10px;
+  gap:12px;
   padding:0 16px;
   font-weight:900;
-  cursor:text;
+  cursor:pointer;
+  user-select:none;
+  position:relative;
+  z-index:5;
 }
 
-.kgWrap input{
-  width:80px;
+.kgPill:active{ transform:scale(.995); }
+
+.kgPill input{
+  width:90px;
   text-align:center;
   border:none;
   background:transparent;
-  font-size:30px;
+  font-size:34px;   /* kg etwas größer */
   font-weight:900;
   outline:none;
+  caret-color:#111;
 }
 
 .kgUnit{
-  font-size:28px;
+  font-size:30px;   /* kg Einheit größer */
+  font-weight:900;
 }
 
 .colorRow{
@@ -164,8 +177,10 @@ body{
   box-shadow:0 0 0 4px var(--greenGlow);
 }
 
+/* Mehr Abstand zum Inhaltsfeld */
 .textareaWrap{
   padding:12px;
+  margin-top:16px;   /* <-- extra Abstand */
 }
 
 textarea{
@@ -196,19 +211,28 @@ button{
 }
 
 /* ===== Farbmodi ===== */
-
 .card.mode-egrey{ background:var(--eGrey); }
 .card.mode-eblack{ background:var(--eBlack); color:#fff; }
 .card.mode-k{ background:var(--kCard); }
 .card.mode-t{ background:var(--tCard); }
 
+/* Dark-Mode innerhalb Card nur bei eblack */
 .card.mode-eblack .input,
 .card.mode-eblack .pill,
-.card.mode-eblack .textareaWrap{
-  background:rgba(255,255,255,.1);
+.card.mode-eblack .textareaWrap,
+.card.mode-eblack .kgPill{
+  background:rgba(255,255,255,.10);
   border-color:var(--stroke-light);
   color:#fff;
 }
+
+.card.mode-eblack .kgPill input{
+  caret-color:#fff;
+  color:#fff;
+}
+
+.card.mode-eblack textarea{ color:#fff; }
+.card.mode-eblack ::placeholder{ color:rgba(255,255,255,.55); }
 </style>
 </head>
 
@@ -217,18 +241,20 @@ button{
   <div class="topbar"></div>
 
   <h1 class="boxId" id="boxId">E001</h1>
-  <div class="status">Gespeichert ✓</div>
+  <div class="status" id="status">Gespeichert ✓</div>
 
   <div class="grid">
-    <input class="input" placeholder="ORT" maxlength="6">
-    <input class="input" placeholder="Bezeichnung">
+    <input class="input" id="ort" placeholder="ORT" maxlength="6" />
+    <input class="input" id="bez" placeholder="Bezeichnung" />
   </div>
 
   <div class="pillRow">
-    <div class="pill iconToggle" id="fragile">🍷</div>
-    <div class="pill iconToggle heavy" id="heavy">🏋️</div>
-    <div class="pill kgWrap" id="kgTap">
-      <input id="kg" value="00" maxlength="2">
+    <div class="pill iconToggle" id="fragile" title="Zerbrechlich">🍷</div>
+    <div class="pill iconToggle heavy" id="heavy" title="Schwer">🏋️</div>
+
+    <!-- kg: kompletter Kasten klickbar -->
+    <div class="kgPill" id="kgTap" title="Gewicht">
+      <input id="kg" inputmode="numeric" autocomplete="off" value="00" maxlength="2" />
       <span class="kgUnit">kg</span>
     </div>
   </div>
@@ -243,12 +269,12 @@ button{
   </div>
 
   <div class="textareaWrap">
-    <textarea placeholder="• Inhalt hier eintragen..."></textarea>
+    <textarea id="content" placeholder="• Inhalt hier eintragen..."></textarea>
   </div>
 
   <div class="btnRow">
-    <button>Backup nach iCloud</button>
-    <button>Backup importieren</button>
+    <button id="backupBtn">Backup nach iCloud</button>
+    <button id="importBtn">Backup importieren</button>
   </div>
 </div>
 
@@ -260,38 +286,113 @@ document.getElementById("boxId").textContent = boxId;
 const card = document.getElementById("card");
 const colorRow = document.getElementById("colorRow");
 
-function setMode(m){
-  card.className = "card " + m;
+const fragile = document.getElementById("fragile");
+const heavy   = document.getElementById("heavy");
+const kgTap   = document.getElementById("kgTap");
+const kg      = document.getElementById("kg");
+const content = document.getElementById("content");
+
+/* ---------- Mode / Farben ---------- */
+function setMode(mode){
+  card.className = "card " + mode;
+  // aktive Markierung nur für E-Farben
+  document.getElementById("grey").classList.toggle("active", mode==="mode-egrey");
+  document.getElementById("black").classList.toggle("active", mode==="mode-eblack");
 }
 
-if(boxId.startsWith("K")){
+if (boxId.startsWith("K")) {
   setMode("mode-k");
-  colorRow.style.display="none";
-}
-else if(boxId.startsWith("T")){
+  colorRow.style.display = "none";
+} else if (boxId.startsWith("T")) {
   setMode("mode-t");
-  colorRow.style.display="none";
-}
-else{
+  colorRow.style.display = "none";
+} else {
   setMode("mode-egrey");
+  colorRow.style.display = "flex";
 }
 
-document.getElementById("grey").onclick=()=>setMode("mode-egrey");
-document.getElementById("black").onclick=()=>setMode("mode-eblack");
+document.getElementById("grey").addEventListener("click", ()=>setMode("mode-egrey"));
+document.getElementById("black").addEventListener("click", ()=>setMode("mode-eblack"));
 
-const heavy=document.getElementById("heavy");
-const kg=document.getElementById("kg");
-
-function updateHeavy(){
-  heavy.classList.toggle("active", parseInt(kg.value||0)>=16);
+/* ---------- Toggle Icons ---------- */
+function toggleActive(el){
+  el.classList.toggle("active");
 }
 
-kg.oninput=()=>{
-  kg.value=kg.value.replace(/\D/g,"").slice(0,2)||"00";
-  updateHeavy();
-};
+fragile.addEventListener("click", (e)=>{
+  e.preventDefault();
+  e.stopPropagation();
+  toggleActive(fragile);
+});
 
-updateHeavy();
+heavy.addEventListener("click", (e)=>{
+  e.preventDefault();
+  e.stopPropagation();
+  toggleActive(heavy);
+});
+
+/* ---------- kg Feld komfortabel ---------- */
+/* klick auf Kasten -> fokussiert IMMER kg, nie Inhalt */
+kgTap.addEventListener("click", (e)=>{
+  e.preventDefault();
+  e.stopPropagation();
+  kg.focus({ preventScroll:true });
+  kg.setSelectionRange(0, kg.value.length);
+});
+
+/* verhindert, dass iOS das "content" als nächstes fokussiert */
+kg.addEventListener("mousedown", (e)=>e.stopPropagation());
+kg.addEventListener("touchstart", (e)=>e.stopPropagation(), {passive:true});
+
+function normalizeKg(){
+  kg.value = (kg.value || "").replace(/\D/g,"").slice(0,2);
+  if (kg.value.length===0) kg.value="00";
+  if (kg.value.length===1) kg.value = "0"+kg.value;
+
+  const v = parseInt(kg.value,10) || 0;
+  heavy.classList.toggle("active", v >= 16);  // Schwer erst ab 16 kg
+}
+
+kg.addEventListener("input", normalizeKg);
+normalizeKg();
+
+/* ---------- Content: Bullet-Handling (minimal, stabil) ---------- */
+/* wenn leer und Nutzer tippt: Bullet bleibt */
+content.addEventListener("focus", ()=>{
+  if(content.value.trim()===""){
+    content.value="• ";
+    setTimeout(()=>content.setSelectionRange(content.value.length, content.value.length),0);
+  }
+});
+
+/* Backspace am Zeilenanfang: Bullet löschen */
+content.addEventListener("keydown", (e)=>{
+  if(e.key==="Backspace"){
+    const pos = content.selectionStart;
+    const before = content.value.slice(0,pos);
+    const lineStart = before.lastIndexOf("\n")+1;
+    const line = before.slice(lineStart);
+
+    // wenn Cursor direkt hinter "• " steht, lösche Bullet sauber
+    if(line === "• "){
+      e.preventDefault();
+      const after = content.value.slice(pos);
+      content.value = content.value.slice(0,lineStart) + after;
+      content.setSelectionRange(lineStart, lineStart);
+    }
+  }
+
+  // Enter erzeugt automatisch neuen Bullet
+  if(e.key==="Enter"){
+    e.preventDefault();
+    const pos = content.selectionStart;
+    const left = content.value.slice(0,pos);
+    const right = content.value.slice(pos);
+    content.value = left + "\n• " + right;
+    const np = pos + 3;
+    content.setSelectionRange(np,np);
+  }
+});
 </script>
 </body>
 </html>
