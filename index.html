@@ -56,7 +56,7 @@ body {
 .row-ort {
   display: grid;
   grid-template-columns: 0.65fr 46px;
-  gap: 22px;          /* 🍷 weiter nach rechts */
+  gap: 30px;          /* 🍷 weiter nach rechts */
   margin-top: 16px;
 }
 
@@ -271,9 +271,13 @@ const heavy = document.getElementById("heavy");
 let heavyManual = false;
 
 function refreshHeavy(){
-  const autoOn = weight >= 16;
-  const on = autoOn || heavyManual;
-  heavy.classList.toggle("heavy-active", on);
+  heavy.classList.remove("heavy-yellow","heavy-red");
+
+  if (weight >= 26) {
+    heavy.classList.add("heavy-red");
+  } else if (weight >= 16) {
+    heavy.classList.add("heavy-yellow");
+  }
 }
 
 kg.onclick = () => {
